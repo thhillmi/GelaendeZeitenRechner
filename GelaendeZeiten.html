@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berechnung Geländezeiten</title>
+    <style>
+    h1 {
+        font-family: Arial, sans-serif; /* Beispiel-Schriftart */
+    }
+     h2 {
+        font-family: Arial, sans-serif; /* Beispiel-Schriftart */
+    }
+</style>
+    <style>
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+
+        input {
+            width: 90%;
+            box-sizing: border-box;
+            text-align: center;
+            font-weight: bold; /* Fettschrift */
+            font-size: 16px;
+        }
+
+        /* Aufwärmstrecke Tabelle */
+        .aufwaermTable thead {
+            background-color: #8BC6A4; /* Dunkleres Grün */
+        }
+
+        .aufwaermTable tbody tr:nth-child(odd) {
+            background-color: #C6F4D6; /* Hellgrün */
+        }
+
+        .aufwaermTable tbody tr:nth-child(even) {
+            background-color: #E9F7ED; /* Etwas helleres Grün */
+        }
+
+        /* Hindernisstrecke Tabelle */
+        .hindernisTable thead {
+            background-color: #E89A9A; /* Dunkleres Rot */
+        }
+
+        .hindernisTable tbody tr:nth-child(odd) {
+            background-color: #FFC5C5; /* Hellrot */
+        }
+
+        .hindernisTable tbody tr:nth-child(even) {
+            background-color: #FDE6E6; /* Etwas helleres Rot */
+        }
+    </style>
+    <style>
+    /* Hintergrundfarbe für die "Länge"-Spalte (erste Spalte) */
+    .aufwaermTable th:nth-child(1),
+    .aufwaermTable th:nth-child(2),
+    .aufwaermTable th:nth-child(3),
+    .aufwaermTable th:nth-child(4) {
+        background-color: green; /*  */
+    }
+    .hindernisTable th:nth-child(1),
+    .hindernisTable th:nth-child(2),
+    .hindernisTable th:nth-child(3),
+    .hindernisTable th:nth-child(4) {
+        background-color: #4b1818; /*  */
+    }
+     /* Schriftfarbe für die Aufwärmstrecke */
+    .aufwaermTable thead th {
+        color: white; /* Weiß für besseren Kontrast */
+        font-family: Arial, sans-serif;
+        font-weight: bold; /* Fettschrift */
+    }
+
+    .aufwaermTable tbody td {
+        color: black; /* Schwarz für hellere Hintergründe */
+        font-family: Arial, sans-serif;
+        font-weight: bold; /* Fettschrift */
+    }
+
+    /* Schriftfarbe für die Hindernisstrecke */
+    .hindernisTable thead th {
+        color: white; /* Weiß für besseren Kontrast */
+        font-family: Arial, sans-serif;
+        font-weight: bold; /* Fettschrift */
+    }
+
+    .hindernisTable tbody td {
+        color: black; /* Schwarz für hellere Hintergründe */
+        font-family: Arial, sans-serif;
+        font-weight: bold; /* Fettschrift */
+    }
+</style>
+   <style>
+    button {
+        width: 90%; /* Button über die gesamte Breite */
+        padding: 15px; /* Abstand innerhalb des Buttons */
+        font-size: 18px; /* Schriftgröße */
+        font-weight: bold; /* Fettschrift */
+        color: white; /* Schriftfarbe */
+        background: linear-gradient(90deg, #006699, #2f0099); /* Farbverlauf */
+        border: none; /* Kein Rahmen */
+        border-radius: 8px; /* Abgerundete Ecken */
+        cursor: pointer; /* Zeiger ändern bei Hover */
+        transition: background 0.3s ease; /* Weicher Übergang bei Hover */
+    }
+
+    button:hover {
+        background: linear-gradient(90deg, #a6caf0, #006699); /* Hover-Effekt */
+    }
+</style>
+</head>
+<body>
+<h1 style="text-align:center; ;">Geländezeiten Berechnung</h1>
+<form id="timesForm">
+    <h2>Aufwärmstrecke</h2>
+    <table class="aufwaermTable">
+    <thead>
+    <tr>
+        <th>Länge<br>(m)</th>
+        <th>Best Zeit <br>(min:sec)</th>
+        <th>Erlaubte Zeit<br> (min:sec)</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><input type="number" id="A1" value="4500"></td>
+            <td><input type="text" id="A2" value="12:00"></td>
+            <td><input type="text" id="A3" value="14:00"></td>
+        </tr>
+    </tbody>
+</table>
+
+    <h2>Hindernisstrecke</h2>
+    <table class="hindernisTable">
+    <thead>
+    <tr>
+        <th>Länge<br>(m)</th>
+        <th>Best Zeit<br>(min:sec)</th>
+        <th>Erlaubte Zeit<br>(min:sec)</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><input type="number" id="B1" value="4200"></td>
+            <td><input type="text" id="B2" value="13:00"></td>
+            <td><input type="text" id="B3" value="15:00"></td>
+        </tr>
+    </tbody>
+</table>
+
+    <button type="button" onclick="calculate()">Berechnen</button>
+</form>
+
+<h2>Zeiten Aufwärmstrecke</h2>
+<table id="resultsTable" class="aufwaermTable">
+    <thead>
+    <tr>
+        <th>Länge (m)</th>
+        <th>Bestzeit (min:sec)</th>
+        <th>Erlaubte Zeit (min:sec)</th>
+        <th>Mittlere Zeit (min:sec)</th>
+    </tr>
+    </thead>
+    <tbody id="resultsBody">
+    <!-- Berechnete Ergebnisse werden hier eingefügt -->
+    </tbody>
+</table>
+<h2>Zeiten Hindernisstrecke</h2>
+<table id="hindernisResultsTable" class="hindernisTable">
+    <thead>
+    <tr>
+        <th>Länge (m)</th>
+        <th>Bestzeit (min:sec)</th>
+        <th>Erlaubte Zeit (min:sec)</th>
+        <th>Mittlere Zeit (min:sec)</th>
+    </tr>
+    </thead>
+    <tbody id="hindernisResultsBody">
+    <!-- Berechnete Ergebnisse werden hier eingefügt -->
+    </tbody>
+</table>
+<script>
+    function calculate() {
+        const A1 = document.getElementById("A1").value;
+        const A2 = convertTimeToSeconds(document.getElementById("A2").value);
+        const A3 = convertTimeToSeconds(document.getElementById("A3").value);
+
+        const B1 = document.getElementById("B1").value;
+        const B2 = convertTimeToSeconds(document.getElementById("B2").value);
+        const B3 = convertTimeToSeconds(document.getElementById("B3").value);
+
+        const aphase = calculateStepsAndRemainder("A1");
+        const bphase = calculateStepsAndRemainder("B1");
+
+        const resultsBody = document.getElementById("resultsBody");
+        const hindernisResultsBody = document.getElementById("hindernisResultsBody");
+
+        resultsBody.innerHTML = ""; // Tabelle für A-Werte leeren
+        hindernisResultsBody.innerHTML = ""; // Tabelle für B-Werte leeren
+
+        // Zeilen für 1000er-Schritte der Aufwärmstrecke hinzufügen
+        for (let i = 1; i <= aphase.steps; i++) {
+            const row = `
+                <tr>
+                    <td>${i * 1000}</td>
+                    <td>${formatTime(A2 / A1 * 1000 * i)}</td>
+                    <td>${formatTime(A3 / A1 * 1000 * i)}</td>
+                    <td>${formatTime(((A3 + A2) / 2) / A1 * 1000 * i)}</td>
+                </tr>
+            `;
+            resultsBody.innerHTML += row;
+        }
+        if (aphase.remainder > 0) {
+            const row = `
+                <tr>
+                    <td>${aphase.steps * 1000 + aphase.remainder}</td>
+                    <td>${formatTime(A2 / A1 * (1000 * aphase.steps + aphase.remainder))}</td>
+                    <td>${formatTime(A3 / A1 * (1000 * aphase.steps + aphase.remainder))}</td>
+                    <td>${formatTime(((A3 + A2) / 2) / A1 * (1000 * aphase.steps + aphase.remainder))}</td>
+                </tr>
+            `;
+            resultsBody.innerHTML += row;
+        }
+
+        // Zeilen für 1000er-Schritte der Hindernisstrecke hinzufügen
+        for (let i = 1; i <= bphase.steps; i++) {
+            const row = `
+                <tr>
+                    <td>${i * 1000}</td>
+                    <td>${formatTime(B2 / B1 * 1000 * i)}</td>
+                    <td>${formatTime(B3 / B1 * 1000 * i)}</td>
+                    <td>${formatTime(((B3 + B2) / 2) / B1 * 1000 * i)}</td>
+                </tr>
+            `;
+            hindernisResultsBody.innerHTML += row;
+        }
+        if (bphase.remainder > 0) {
+            const row = `
+                <tr>
+                    <td>${bphase.steps * 1000 + bphase.remainder}</td>
+                    <td>${formatTime(B2 / B1 * (1000 * bphase.steps + bphase.remainder))}</td>
+                    <td>${formatTime(B3 / B1 * (1000 * bphase.steps + bphase.remainder))}</td>
+                    <td>${formatTime(((B3 + B2) / 2) / B1 * (1000 * bphase.steps + bphase.remainder))}</td>
+                </tr>
+            `;
+            hindernisResultsBody.innerHTML += row;
+        }
+    }
+
+    function calculateStepsAndRemainder(lengthFieldId) {
+        const length = parseInt(document.getElementById(lengthFieldId).value, 10);
+        if (isNaN(length) || length <= 0) {
+            console.error("Ungültige Länge eingegeben.");
+            return null;
+        }
+
+        const steps = Math.floor(length / 1000); // Ganze 1000er-Schritte
+        const remainder = length % 1000; // Restwert
+
+        return {steps, remainder};
+    }
+
+    function convertTimeToSeconds(time) {
+        const parts = time.split(":").map(Number);
+        if (parts.length === 2) {
+            const [minutes, seconds] = parts;
+            return minutes * 60 + seconds;
+        } else if (parts.length === 3) {
+            const [hours, minutes, seconds] = parts;
+            return hours * 3600 + minutes * 60 + seconds;
+        }
+        return 0; // Fallback für ungültige Eingaben
+    }
+
+    function formatTime(seconds) {
+        const roundedSeconds = Math.round(seconds); // Sekunden runden
+        const hours = Math.floor(roundedSeconds / 3600);
+        const minutes = Math.floor((roundedSeconds % 3600) / 60);
+        const secondsRemaining = roundedSeconds % 60;
+        return `${padZero(minutes)}:${padZero(secondsRemaining)}`;
+    }
+
+    function calculate1000Steps(count) {
+        step = toString(Math.int(count * 1000))
+        return step;
+    }
+
+    function padZero(number) {
+        return (number < 10 ? "0" : "") + number;
+    }
+</script>
+</body>
+</html>
