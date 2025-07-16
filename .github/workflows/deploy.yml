@@ -3,7 +3,7 @@ name: Deploy static site to GitHub Pages
 on:
   push:
     branches:
-      - public  # Passe das ggf. an deinen Hauptbranch an
+      - main  # Passe das ggf. an deinen Hauptbranch an
 
 permissions:
   contents: read
