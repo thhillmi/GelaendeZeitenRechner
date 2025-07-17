@@ -5,41 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Berechnung Geländezeiten</title>
     <style>
-   body {
-    background-image: url('gelaendezeitenbackground1.jpeg'); /* Pfad zum Hintergrundbild */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.8; /* Reduzierte Transparenz des Hintergrundbildes */
-    z-index: -1; /* Hintergrund bleibt hinter allen anderen Elementen */
-}
-</style>
-    <style>
-       h1 {
-    font-family: Arial, sans-serif; /* Beispiel-Schriftart */
-    color: white; /* Weiß für besseren Kontrast */
-    text-align: center; /* Zentriert den Text */
-    background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
-    padding: 20px; /* Abstand innerhalb der Box */
-    border-radius: 10px; /* Abgerundete Ecken */
-    width: 80%; /* Breite der Box */
-    margin: 20px auto; /* Zentriert die Box */
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5); /* Schatten hinzufügen */
-}
+        html, body {
+            height: 100%; /* Stellt sicher, dass html und body die volle Höhe des Fensters einnehmen */
+            margin: 0; /* Entfernt Standardabstände */
+            padding: 0; /* Entfernt Standardabstände */
+            overflow: auto; /* Ermöglicht Scrollen, falls der Inhalt größer als das Fenster ist */
+        }
 
-        h2 {
+        body {
+            height: 100%; /* Stellt sicher, dass html und body die volle Höhe des Fensters einnehmen */
+            margin: 0; /* Entfernt Standardabstände */
+            padding: 0; /* Entfernt Standardabstände */
+            background-image: url('gelaendezeitenbackground1.jpeg'); /* Pfad zum Hintergrundbild */
+            background-size: cover; /* Bildgröße anpassen */
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.8; /* Reduzierte Transparenz des Hintergrundbildes */
+            z-index: -1; /* Hintergrund bleibt hinter allen anderen Elementen */
+        }
+
+        h1 {
             font-family: Arial, sans-serif; /* Beispiel-Schriftart */
             color: white; /* Weiß für besseren Kontrast */
-            text-align: left; /* Zentriert den Text */
-            width: 80%; /* Gleiche Breite wie die Tabellen und der Button */
-            margin: 0 auto 20px auto; /* Zentriert und fügt Abstand nach unten hinzu */
+            text-align: center; /* Zentriert den Text */
+            background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
+            padding: 20px; /* Abstand innerhalb der Box */
+            border-radius: 10px; /* Abgerundete Ecken */
+            width: 75%; /* Breite der Box */
+            margin: 20px auto; /* Zentriert die Box */
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5); /* Schatten hinzufügen */
         }
-    </style>
-    <style>
+
         table {
-            width: 80%;
+            width: 70%;
             margin: 20px auto;
-            border-collapse: collapse;
+            border-collapse: collapse; /* Wichtig, um abgerundete Ecken zu ermöglichen */
         }
 
         th, td {
@@ -50,8 +50,8 @@
         }
 
         input {
-            width: 90%;
-            box-sizing: border-box;
+            width: 70%;
+            box-sizing: border-box; /* Padding und Border in die Breite einbeziehen */
             text-align: center;
             font-weight: bold; /* Fettschrift */
             font-size: 16px;
@@ -82,8 +82,10 @@
         .hindernisTable tbody tr:nth-child(even) {
             background-color: #FDE6E6; /* Etwas helleres Rot */
         }
-    </style>
-    <style>
+        table thead tr:first-child th {
+        font-size: 20px; /* Größere Schriftgröße */
+        font-weight: bold; /* Fettschrift */
+        }
         /* Hintergrundfarbe für die "Länge"-Spalte (erste Spalte) */
         .aufwaermTable th:nth-child(1),
         .aufwaermTable th:nth-child(2),
@@ -104,6 +106,7 @@
             color: white; /* Weiß für besseren Kontrast */
             font-family: Arial, sans-serif;
             font-weight: bold; /* Fettschrift */
+            font-size: 14px;
         }
 
         .aufwaermTable tbody td {
@@ -117,6 +120,7 @@
             color: white; /* Weiß für besseren Kontrast */
             font-family: Arial, sans-serif;
             font-weight: bold; /* Fettschrift */
+             font-size: 14px;
         }
 
         .hindernisTable tbody td {
@@ -124,14 +128,13 @@
             font-family: Arial, sans-serif;
             font-weight: bold; /* Fettschrift */
         }
-    </style>
-    <style>
+
         button {
             display: block;
-            width: 80%; /* Button über die gesamte Breite */
+            width: 70%; /* Button über die gesamte Breite */
             padding: 15px; /* Abstand innerhalb des Buttons */
             margin: 20px auto;
-            font-size: 18px; /* Schriftgröße */
+            font-size: 20px; /* Schriftgröße */
             font-weight: bold; /* Fettschrift */
             color: white; /* Schriftfarbe */
             background: linear-gradient(90deg, #006699, #2f0099); /* Farbverlauf */
@@ -149,9 +152,9 @@
 </head>
 <body>
 
-<h1 style="text-align:center; ;">Geländezeiten Berechnung</h1>
+<h1 style="text-align:center; ;">Geländezeiten Rechner</h1>
 <form id="timesForm">
-<!--    <h2>Aufwärmstrecke</h2>-->
+    <!--    <h2>Aufwärmstrecke</h2>-->
     <table class="aufwaermTable">
         <thead>
         <tr>
@@ -159,8 +162,8 @@
         </tr>
         <tr>
             <th>Länge<br>(m)</th>
-            <th>Best Zeit <br>(min:sec)</th>
-            <th>Erlaubte Zeit<br> (min:sec)</th>
+            <th>Best Zeit<br>(min:sec)</th>
+            <th>Erlaubte Zeit<br>(min:sec)</th>
         </tr>
         </thead>
         <tbody>
@@ -172,7 +175,7 @@
         </tbody>
     </table>
 
-<!--    <h2>Hindernisstrecke</h2>-->
+    <!--    <h2>Hindernisstrecke</h2>-->
     <table class="hindernisTable">
         <thead>
         <tr>
@@ -200,13 +203,13 @@
 <table id="resultsTable" class="aufwaermTable">
     <thead>
     <tr>
-            <th colspan="4">Zeiten Aufwärmstrecke</th> <!-- Überschrift integriert -->
-        </tr>
+        <th colspan="4">Zeiten Aufwärmstrecke</th> <!-- Überschrift integriert -->
+    </tr>
     <tr>
-        <th>Länge (m)</th>
-        <th>Bestzeit (min:sec)</th>
-        <th>Erlaubte Zeit (min:sec)</th>
-        <th>Mittlere Zeit (min:sec)</th>
+        <th>Länge<br>(m)</th>
+        <th>Best Zeit<br>(min:sec)</th>
+        <th>Erlaubte Zeit<br>(min:sec)</th>
+        <th>Mittlere Zeit<br>(min:sec)</th>
     </tr>
     </thead>
     <tbody id="resultsBody">
@@ -217,13 +220,13 @@
 <table id="hindernisResultsTable" class="hindernisTable">
     <thead>
     <tr>
-            <th colspan="4">Zeiten Hindernisstrecke</th> <!-- Überschrift integriert -->
+        <th colspan="4">Zeiten Hindernisstrecke</th> <!-- Überschrift integriert -->
     </tr>
     <tr>
-        <th>Länge (m)</th>
-        <th>Bestzeit (min:sec)</th>
-        <th>Erlaubte Zeit (min:sec)</th>
-        <th>Mittlere Zeit (min:sec)</th>
+        <th>Länge<br>(m)</th>
+        <th>Best Zeit<br>(min:sec)</th>
+        <th>Erlaubte Zeit<br>(min:sec)</th>
+        <th>Mittlere Zeit<br>(min:sec)</th>
     </tr>
     </thead>
     <tbody id="hindernisResultsBody">
@@ -232,112 +235,90 @@
 </table>
 <script>
     function calculate() {
-        const A1 = document.getElementById("A1").value;
-        const A2 = convertTimeToSeconds(document.getElementById("A2").value);
-        const A3 = convertTimeToSeconds(document.getElementById("A3").value);
+        const inputs = [
+            {length: "A1", best: "A2", allowed: "A3", results: "resultsBody"},
+            {length: "B1", best: "B2", allowed: "B3", results: "hindernisResultsBody"}
+        ];
 
-        const B1 = document.getElementById("B1").value;
-        const B2 = convertTimeToSeconds(document.getElementById("B2").value);
-        const B3 = convertTimeToSeconds(document.getElementById("B3").value);
+        let isValid = true;
 
-        const aphase = calculateStepsAndRemainder("A1");
-        const bphase = calculateStepsAndRemainder("B1");
+        inputs.forEach(({length, best, allowed, results}) => {
+            const len = document.getElementById(length).value;
+            const bestTime = document.getElementById(best).value;
+            const allowedTime = document.getElementById(allowed).value;
 
-        const resultsBody = document.getElementById("resultsBody");
-        const hindernisResultsBody = document.getElementById("hindernisResultsBody");
+            // Validierung der Eingaben
+            if (!isPositiveNumber(len)) {
+                alert(`Fehler: Länge (${length}) muss eine positive Zahl sein.`);
+                isValid = false;
+            }
+            if (!isValidTimeFormat(bestTime)) {
+                alert(`Fehler: Best Zeit (${best}) muss im Format min:sec sein.`);
+                isValid = false;
+            }
+            if (!isValidTimeFormat(allowedTime)) {
+                alert(`Fehler: Erlaubte Zeit (${allowed}) muss im Format min:sec sein.`);
+                isValid = false;
+            }
+        });
 
-        resultsBody.innerHTML = ""; // Tabelle für A-Werte leeren
-        hindernisResultsBody.innerHTML = ""; // Tabelle für B-Werte leeren
+        if (!isValid) return;
 
-        // Zeilen für 1000er-Schritte der Aufwärmstrecke hinzufügen
-        for (let i = 1; i <= aphase.steps; i++) {
-            const row = `
-                <tr>
-                    <td>${i * 1000}</td>
-                    <td>${formatTime(A2 / A1 * 1000 * i)}</td>
-                    <td>${formatTime(A3 / A1 * 1000 * i)}</td>
-                    <td>${formatTime(((A3 + A2) / 2) / A1 * 1000 * i)}</td>
-                </tr>
-            `;
-            resultsBody.innerHTML += row;
-        }
-        if (aphase.remainder > 0) {
-            const row = `
-                <tr>
-                    <td>${aphase.steps * 1000 + aphase.remainder}</td>
-                    <td>${formatTime(A2 / A1 * (1000 * aphase.steps + aphase.remainder))}</td>
-                    <td>${formatTime(A3 / A1 * (1000 * aphase.steps + aphase.remainder))}</td>
-                    <td>${formatTime(((A3 + A2) / 2) / A1 * (1000 * aphase.steps + aphase.remainder))}</td>
-                </tr>
-            `;
-            resultsBody.innerHTML += row;
-        }
+        inputs.forEach(({length, best, allowed, results}) => {
+            const len = parseInt(document.getElementById(length).value, 10);
+            const bestTime = convertTimeToSeconds(document.getElementById(best).value);
+            const allowedTime = convertTimeToSeconds(document.getElementById(allowed).value);
 
-        // Zeilen für 1000er-Schritte der Hindernisstrecke hinzufügen
-        for (let i = 1; i <= bphase.steps; i++) {
-            const row = `
-                <tr>
-                    <td>${i * 1000}</td>
-                    <td>${formatTime(B2 / B1 * 1000 * i)}</td>
-                    <td>${formatTime(B3 / B1 * 1000 * i)}</td>
-                    <td>${formatTime(((B3 + B2) / 2) / B1 * 1000 * i)}</td>
-                </tr>
-            `;
-            hindernisResultsBody.innerHTML += row;
-        }
-        if (bphase.remainder > 0) {
-            const row = `
-                <tr>
-                    <td>${bphase.steps * 1000 + bphase.remainder}</td>
-                    <td>${formatTime(B2 / B1 * (1000 * bphase.steps + bphase.remainder))}</td>
-                    <td>${formatTime(B3 / B1 * (1000 * bphase.steps + bphase.remainder))}</td>
-                    <td>${formatTime(((B3 + B2) / 2) / B1 * (1000 * bphase.steps + bphase.remainder))}</td>
-                </tr>
-            `;
-            hindernisResultsBody.innerHTML += row;
-        }
+            const steps = Math.floor(len / 1000);
+            const remainder = len % 1000;
+
+            const resultsBody = document.getElementById(results);
+            resultsBody.innerHTML = "";
+
+            for (let i = 1; i <= steps; i++) {
+                resultsBody.innerHTML += createRow(i * 1000, bestTime, allowedTime, len);
+            }
+            if (remainder > 0) {
+                resultsBody.innerHTML += createRow(steps * 1000 + remainder, bestTime, allowedTime, len);
+            }
+        });
     }
 
-    function calculateStepsAndRemainder(lengthFieldId) {
-        const length = parseInt(document.getElementById(lengthFieldId).value, 10);
-        if (isNaN(length) || length <= 0) {
-            console.error("Ungültige Länge eingegeben.");
-            return null;
-        }
+    function isPositiveNumber(value) {
+        const number = parseFloat(value);
+        return !isNaN(number) && number > 0;
+    }
 
-        const steps = Math.floor(length / 1000); // Ganze 1000er-Schritte
-        const remainder = length % 1000; // Restwert
+    function isValidTimeFormat(value) {
+        const timeRegex = /^\d{1,2}:\d{2}$/; // Format: min:sec
+        return timeRegex.test(value);
+    }
 
-        return {steps, remainder};
+    function createRow(distance, bestTime, allowedTime, totalLength) {
+        const avgTime = (bestTime + allowedTime) / 2;
+        return `
+            <tr>
+                <td>${distance}</td>
+                <td>${formatTime(bestTime / totalLength * distance)}</td>
+                <td>${formatTime(allowedTime / totalLength * distance)}</td>
+                <td>${formatTime(avgTime / totalLength * distance)}</td>
+            </tr>
+        `;
     }
 
     function convertTimeToSeconds(time) {
         const parts = time.split(":").map(Number);
-        if (parts.length === 2) {
-            const [minutes, seconds] = parts;
-            return minutes * 60 + seconds;
-        } else if (parts.length === 3) {
-            const [hours, minutes, seconds] = parts;
-            return hours * 3600 + minutes * 60 + seconds;
-        }
-        return 0; // Fallback für ungültige Eingaben
+        return parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
     }
 
     function formatTime(seconds) {
-        const roundedSeconds = Math.round(seconds); // Sekunden runden
-        const hours = Math.floor(roundedSeconds / 3600);
-        const minutes = Math.floor((roundedSeconds % 3600) / 60);
-        const secondsRemaining = roundedSeconds % 60;
-        return `${padZero(minutes)}:${padZero(secondsRemaining)}`;
-    }
-
-    function calculate1000Steps(count) {
-        step = toString(Math.int(count * 1000))
-        return step;
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.round(seconds % 60);
+        return `${padZero(minutes)}:${padZero(remainingSeconds)}`;
     }
 
     function padZero(number) {
-        return (number < 10 ? "0" : "") + number;
+        return number < 10 ? "0" + number : number;
     }
 </script>
 </body>
