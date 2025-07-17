@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Berechnung Geländezeiten</title>
     <style>
-        html, body {
+        html,body {
             height: 100%; /* Stellt sicher, dass html und body die volle Höhe des Fensters einnehmen */
             margin: 0; /* Entfernt Standardabstände */
             padding: 0; /* Entfernt Standardabstände */
             overflow: auto; /* Ermöglicht Scrollen, falls der Inhalt größer als das Fenster ist */
         }
-
         body {
-            height: 100%; /* Stellt sicher, dass html und body die volle Höhe des Fensters einnehmen */
-            margin: 0; /* Entfernt Standardabstände */
-            padding: 0; /* Entfernt Standardabstände */
             background-image: url('gelaendezeitenbackground1.jpeg'); /* Pfad zum Hintergrundbild */
             background-size: cover; /* Bildgröße anpassen */
             background-position: center;
@@ -26,27 +22,29 @@
 
         h1 {
             font-family: Arial, sans-serif; /* Beispiel-Schriftart */
+            font-size: 18px;
             color: white; /* Weiß für besseren Kontrast */
             text-align: center; /* Zentriert den Text */
             background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
-            padding: 20px; /* Abstand innerhalb der Box */
-            border-radius: 10px; /* Abgerundete Ecken */
-            width: 75%; /* Breite der Box */
-            margin: 20px auto; /* Zentriert die Box */
+            padding: 5px; /* Abstand innerhalb der Box */
+            border-radius: 20px; /* Abgerundete Ecken */
+            width: 90%; /* Breite der Box */
+            margin: 10px auto; /* Zentriert die Box */
             box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5); /* Schatten hinzufügen */
         }
 
         table {
             width: 80%;
-            margin: 20px auto;
+            margin: 5px auto;
             border-collapse: collapse; /* Wichtig, um abgerundete Ecken zu ermöglichen */
         }
 
         th, td {
-            border: 3px solid #000;
+            border: 4px solid #373d29;
             box-shadow: 15px 15px 15px rgba(0, 0, 0, 0.3); /* Schatten hinzufügen */
             padding: 8px;
             text-align: center;
+            font-size: 12px;
         }
 
         input {
@@ -54,7 +52,7 @@
             box-sizing: border-box; /* Padding und Border in die Breite einbeziehen */
             text-align: center;
             font-weight: bold; /* Fettschrift */
-            font-size: 16px;
+            font-size: 14px;
         }
 
         /* Aufwärmstrecke Tabelle */
@@ -82,10 +80,12 @@
         .hindernisTable tbody tr:nth-child(even) {
             background-color: #FDE6E6; /* Etwas helleres Rot */
         }
+
         table thead tr:first-child th {
-        font-size: 20px; /* Größere Schriftgröße */
-        font-weight: bold; /* Fettschrift */
+            font-size: 16px; /* Größere Schriftgröße */
+            font-weight: bold; /* Fettschrift */
         }
+
         /* Hintergrundfarbe für die "Länge"-Spalte (erste Spalte) */
         .aufwaermTable th:nth-child(1),
         .aufwaermTable th:nth-child(2),
@@ -106,7 +106,7 @@
             color: white; /* Weiß für besseren Kontrast */
             font-family: Arial, sans-serif;
             font-weight: bold; /* Fettschrift */
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .aufwaermTable tbody td {
@@ -120,7 +120,7 @@
             color: white; /* Weiß für besseren Kontrast */
             font-family: Arial, sans-serif;
             font-weight: bold; /* Fettschrift */
-             font-size: 14px;
+            font-size: 12px;
         }
 
         .hindernisTable tbody td {
@@ -132,15 +132,15 @@
         button {
             display: block;
             width: 80%; /* Button über die gesamte Breite */
-            padding: 15px; /* Abstand innerhalb des Buttons */
-            margin: 20px auto;
-            font-size: 20px; /* Schriftgröße */
+            padding: 10px; /* Abstand innerhalb des Buttons */
+            margin: 10px auto;
+            font-size: 18px; /* Schriftgröße */
             font-weight: bold; /* Fettschrift */
             color: white; /* Schriftfarbe */
             background: linear-gradient(90deg, #006699, #2f0099); /* Farbverlauf */
             border: none; /* Kein Rahmen */
             box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); /* Schatten hinzufügen */
-            border-radius: 8px; /* Abgerundete Ecken */
+            border-radius: 10px; /* Abgerundete Ecken */
             cursor: pointer; /* Zeiger ändern bei Hover */
             transition: background 0.3s ease; /* Weicher Übergang bei Hover */
         }
@@ -151,9 +151,8 @@
     </style>
 </head>
 <body>
-
-<h1 style="text-align:center; ;">Geländezeiten Rechner</h1>
-<form id="timesForm">
+    <h1 style="text-align:center; ;">Geländezeiten Rechner</h1>
+    <form id="timesForm">
     <!--    <h2>Aufwärmstrecke</h2>-->
     <table class="aufwaermTable">
         <thead>
@@ -198,42 +197,42 @@
 
     <button type="button" onclick="calculate()">Berechnen</button>
 </form>
-
-<!--<h2>Zeiten Aufwärmstrecke</h2>-->
-<table id="resultsTable" class="aufwaermTable">
-    <thead>
-    <tr>
-        <th colspan="4">Zeiten Aufwärmstrecke</th> <!-- Überschrift integriert -->
-    </tr>
-    <tr>
-        <th>Länge<br>(m)</th>
-        <th>Best Zeit<br>(min:sec)</th>
-        <th>Erlaubte Zeit<br>(min:sec)</th>
-        <th>Mittlere Zeit<br>(min:sec)</th>
-    </tr>
-    </thead>
-    <tbody id="resultsBody">
-    <!-- Berechnete Ergebnisse werden hier eingefügt -->
-    </tbody>
-</table>
+    <!--<h2>Zeiten Aufwärmstrecke</h2>-->
+    <table id="resultsTable" class="aufwaermTable">
+        <thead>
+        <tr>
+            <th colspan="4">Zeiten Aufwärmstrecke</th> <!-- Überschrift integriert -->
+        </tr>
+        <tr>
+            <th>Länge<br>(m)</th>
+            <th>Best Zeit<br>(min:sec)</th>
+            <th>Erlaubte Zeit<br>(min:sec)</th>
+            <th>Mittlere Zeit<br>(min:sec)</th>
+        </tr>
+        </thead>
+        <tbody id="resultsBody">
+        <!-- Berechnete Ergebnisse werden hier eingefügt -->
+        </tbody>
+    </table>
 <!--<h2>Zeiten Hindernisstrecke</h2>-->
-<table id="hindernisResultsTable" class="hindernisTable">
-    <thead>
-    <tr>
-        <th colspan="4">Zeiten Hindernisstrecke</th> <!-- Überschrift integriert -->
-    </tr>
-    <tr>
-        <th>Länge<br>(m)</th>
-        <th>Best Zeit<br>(min:sec)</th>
-        <th>Erlaubte Zeit<br>(min:sec)</th>
-        <th>Mittlere Zeit<br>(min:sec)</th>
-    </tr>
-    </thead>
-    <tbody id="hindernisResultsBody">
-    <!-- Berechnete Ergebnisse werden hier eingefügt -->
-    </tbody>
-</table>
-<script>
+    <table id="hindernisResultsTable" class="hindernisTable">
+        <thead>
+        <tr>
+            <th colspan="4">Zeiten Hindernisstrecke</th> <!-- Überschrift integriert -->
+        </tr>
+        <tr>
+            <th>Länge<br>(m)</th>
+            <th>Best Zeit<br>(min:sec)</th>
+            <th>Erlaubte Zeit<br>(min:sec)</th>
+            <th>Mittlere Zeit<br>(min:sec)</th>
+        </tr>
+        </thead>
+        <tbody id="hindernisResultsBody">
+        <!-- Berechnete Ergebnisse werden hier eingefügt -->
+        </tbody>
+    </table>
+
+    <script>
     function calculate() {
         const inputs = [
             {length: "A1", best: "A2", allowed: "A3", results: "resultsBody"},
@@ -323,13 +322,13 @@
 
     document.querySelectorAll('input').forEach(input => {
         let oldValue = input.value; // Store the initial value
-        input.addEventListener('click', function() {
-        this.value = '';
+        input.addEventListener('click', function () {
+            this.value = '';
         });
-        input.addEventListener('focus', function() {
-        oldValue = this.value; // Save the current value on focus
+        input.addEventListener('focus', function () {
+            oldValue = this.value; // Save the current value on focus
         });
-        input.addEventListener('blur', function() {
+        input.addEventListener('blur', function () {
             if (this.value === '') {
                 this.value = oldValue; // Restore the old value if the input is empty
             }
