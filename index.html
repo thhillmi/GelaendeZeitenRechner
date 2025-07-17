@@ -320,6 +320,22 @@
     function padZero(number) {
         return number < 10 ? "0" + number : number;
     }
+
+    document.querySelectorAll('input').forEach(input => {
+        let oldValue = input.value; // Store the initial value
+        input.addEventListener('click', function() {
+        this.value = '';
+        });
+        input.addEventListener('focus', function() {
+        oldValue = this.value; // Save the current value on focus
+        });
+        input.addEventListener('blur', function() {
+            if (this.value === '') {
+                this.value = oldValue; // Restore the old value if the input is empty
+            }
+        });
+    });
+
 </script>
 </body>
 </html>
