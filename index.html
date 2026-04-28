@@ -2,237 +2,422 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berechnung Geländezeiten</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Geländezeiten Rechner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        html,body {
-            height: 100%; /* Stellt sicher, dass html und body die volle Höhe des Fensters einnehmen */
-            margin: 0; /* Entfernt Standardabstände */
-            padding: 0; /* Entfernt Standardabstände */
-            overflow: auto; /* Ermöglicht Scrollen, falls der Inhalt größer als das Fenster ist */
+        /* ── Design tokens ── */
+        :root {
+            --glass:        rgba(255, 255, 255, 0.09);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --shadow:       0 8px 32px rgba(0, 0, 0, 0.45);
+            --radius:       16px;
+            --font:         'Exo 2', Arial, sans-serif;
         }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* ── Background: CSS dawn-over-meadow landscape ── */
         body {
-            background-image: url('gelaendezeitenbackground1.jpeg'); /* Pfad zum Hintergrundbild */
-            background-size: cover; /* Bildgröße anpassen */
+            font-family: var(--font);
+            min-height: 100%;
+            overflow-x: hidden;
+            background-color: #0f2218;
+            background-image: url('Designer.png'); /* Pfad zum Hintergrundbild */
             background-position: center;
-            background-repeat: no-repeat;
+            background-size: cover;
+			background-repeat: no-repeat;
             opacity: 0.8; /* Reduzierte Transparenz des Hintergrundbildes */
             z-index: -1; /* Hintergrund bleibt hinter allen anderen Elementen */
         }
 
-        h1 {
-            font-family: Arial, sans-serif; /* Beispiel-Schriftart */
-            font-size: 18px;
-            color: white; /* Weiß für besseren Kontrast */
-            text-align: center; /* Zentriert den Text */
-            background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
-            padding: 5px; /* Abstand innerhalb der Box */
-            border-radius: 20px; /* Abgerundete Ecken */
-            width: 90%; /* Breite der Box */
-            margin: 10px auto; /* Zentriert die Box */
-            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5); /* Schatten hinzufügen */
+        /* Fixed background causes glitches on iOS/Android */
+        @media (max-width: 768px) {
+            body { background-attachment: scroll; }
         }
 
-        table {
-            width: 80%;
-            margin: 5px auto;
-            border-collapse: collapse; /* Wichtig, um abgerundete Ecken zu ermöglichen */
+        /* subtle vignette overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.38);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        th, td {
-            border: 4px solid #373d29;
-            box-shadow: 15px 15px 15px rgba(0, 0, 0, 0.3); /* Schatten hinzufügen */
-            padding: 8px;
+        /* ── Page wrapper ── */
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            /* respect iPhone notch / home indicator */
+            padding: 24px max(16px, env(safe-area-inset-right))
+                     max(60px, env(safe-area-inset-bottom))
+                     max(16px, env(safe-area-inset-left));
+        }
+
+        /* ── Header ── */
+        header {
             text-align: center;
-            font-size: 12px;
+            padding: 28px 0 32px;
         }
 
-        input {
-            width: 90%;
-            box-sizing: border-box; /* Padding und Border in die Breite einbeziehen */
-            text-align: center;
-            font-weight: bold; /* Fettschrift */
-            font-size: 14px;
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.50);
+            margin-bottom: 12px;
         }
 
-        /* Aufwärmstrecke Tabelle */
-        .aufwaermTable thead {
-            background-color: #8BC6A4; /* Dunkleres Grün */
+        header h1 {
+            font-size: clamp(30px, 7vw, 52px);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 28px rgba(0, 0, 0, 0.70);
+            line-height: 1.15;
         }
 
-        .aufwaermTable tbody tr:nth-child(odd) {
-            background-color: #C6F4D6; /* Hellgrün */
+        .highlight {
+            background: linear-gradient(120deg, #2ecc71 0%, #2ea0e0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .aufwaermTable tbody tr:nth-child(even) {
-            background-color: #E9F7ED; /* Etwas helleres Grün */
+        /* ── Glass card ── */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(16px) saturate(1.5);
+            -webkit-backdrop-filter: blur(16px) saturate(1.5);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
         }
 
-        /* Hindernisstrecke Tabelle */
-        .hindernisTable thead {
-            background-color: #E89A9A; /* Dunkleres Rot */
+        /* ── Input grid ── */
+        .inputs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
         }
 
-        .hindernisTable tbody tr:nth-child(odd) {
-            background-color: #FFC5C5; /* Hellrot */
+        @media (max-width: 560px) {
+            .inputs-grid { grid-template-columns: 1fr; }
         }
 
-        .hindernisTable tbody tr:nth-child(even) {
-            background-color: #FDE6E6; /* Etwas helleres Rot */
+        /* ── Card header ── */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #fff;
         }
 
-        table thead tr:first-child th {
-            font-size: 16px; /* Größere Schriftgröße */
-            font-weight: bold; /* Fettschrift */
+        .card-header.green { background: linear-gradient(135deg, rgba(39,174,96,0.80), rgba(46,204,113,0.35)); }
+        .card-header.red   { background: linear-gradient(135deg, rgba(192,57,43,0.80), rgba(231,76,60,0.35)); }
+
+        @media (max-width: 400px) {
+            .card-header { font-size: 13px; padding: 12px 14px; }
         }
 
-        /* Hintergrundfarbe für die "Länge"-Spalte (erste Spalte) */
-        .aufwaermTable th:nth-child(1),
-        .aufwaermTable th:nth-child(2),
-        .aufwaermTable th:nth-child(3),
-        .aufwaermTable th:nth-child(4) {
-            background-color: green; /*  */
-        }
+        /* ── Card body ── */
+        .card-body { padding: 16px 18px 18px; }
 
-        .hindernisTable th:nth-child(1),
-        .hindernisTable th:nth-child(2),
-        .hindernisTable th:nth-child(3),
-        .hindernisTable th:nth-child(4) {
-            background-color: #4b1818; /*  */
-        }
+        .field-group            { margin-bottom: 14px; }
+        .field-group:last-child { margin-bottom: 0; }
 
-        /* Schriftfarbe für die Aufwärmstrecke */
-        .aufwaermTable thead th {
-            color: white; /* Weiß für besseren Kontrast */
-            font-family: Arial, sans-serif;
-            font-weight: bold; /* Fettschrift */
-            font-size: 12px;
-        }
-
-        .aufwaermTable tbody td {
-            color: black; /* Schwarz für hellere Hintergründe */
-            font-family: Arial, sans-serif;
-            font-weight: bold; /* Fettschrift */
-        }
-
-        /* Schriftfarbe für die Hindernisstrecke */
-        .hindernisTable thead th {
-            color: white; /* Weiß für besseren Kontrast */
-            font-family: Arial, sans-serif;
-            font-weight: bold; /* Fettschrift */
-            font-size: 12px;
-        }
-
-        .hindernisTable tbody td {
-            color: black; /* Schwarz für hellere Hintergründe */
-            font-family: Arial, sans-serif;
-            font-weight: bold; /* Fettschrift */
-        }
-
-        button {
+        .field-group label {
             display: block;
-            width: 80%; /* Button über die gesamte Breite */
-            padding: 10px; /* Abstand innerhalb des Buttons */
-            margin: 10px auto;
-            font-size: 18px; /* Schriftgröße */
-            font-weight: bold; /* Fettschrift */
-            color: white; /* Schriftfarbe */
-            background: linear-gradient(90deg, #006699, #2f0099); /* Farbverlauf */
-            border: none; /* Kein Rahmen */
-            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); /* Schatten hinzufügen */
-            border-radius: 10px; /* Abgerundete Ecken */
-            cursor: pointer; /* Zeiger ändern bei Hover */
-            transition: background 0.3s ease; /* Weicher Übergang bei Hover */
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.52);
+            margin-bottom: 6px;
         }
 
-        button:hover {
-            background: linear-gradient(90deg, #a6caf0, #006699); /* Hover-Effekt */
+        .field-group input {
+            width: 100%;
+            /* ≥16px prevents iOS auto-zoom on focus */
+            font-size: 16px;
+            font-family: var(--font);
+            font-weight: 700;
+            text-align: center;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.11);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 10px;
+            /* ≥48px for accessible tap target */
+            padding: 14px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .field-group input:focus {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.55);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.10);
+        }
+
+        /* hide number spinners */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* ── Calculate button ── */
+        .calc-btn {
+            display: block;
+            width: 100%;
+            min-height: 52px;
+            padding: 16px;
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #fff;
+            background: linear-gradient(135deg, #005c8a 0%, #2f0099 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 22px rgba(0, 80, 180, 0.50);
+            transition: transform 0.18s, box-shadow 0.18s;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 28px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* shimmer sweep — desktop only */
+        .calc-btn::after {
+            content: '';
+            position: absolute;
+            top: -60%; left: -70%;
+            width: 45%; height: 220%;
+            background: rgba(255, 255, 255, 0.18);
+            transform: skewX(-22deg);
+            transition: left 0.55s ease;
+        }
+
+        @media (hover: hover) {
+            .calc-btn:hover::after { left: 125%; }
+            .calc-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 32px rgba(0, 80, 180, 0.65);
+            }
+        }
+
+        .calc-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(0, 80, 180, 0.40);
+        }
+
+        /* ── Results section ── */
+        .results-section { display: none; }
+
+        .results-section.visible {
+            display: block;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-divider {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.38);
+            margin-bottom: 14px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 640px) {
+            .results-grid { grid-template-columns: 1fr; }
+        }
+
+        .result-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ── Data table ── */
+        table.fancy {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table.fancy thead tr:first-child th {
+            padding: 13px 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        table.fancy thead tr:last-child th {
+            padding: 7px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.72);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        table.fancy tbody td {
+            padding: 9px 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        table.fancy tbody tr { transition: background 0.12s; }
+
+        @media (hover: hover) {
+            table.fancy tbody tr:hover { background: rgba(255, 255, 255, 0.09) !important; }
+        }
+
+        /* final row (full distance) standout */
+        table.fancy tbody tr:last-child td {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        /* green flavour */
+        .green-table thead tr:first-child th { background: rgba(39,174,96,0.65); }
+        .green-table thead tr:last-child  th { background: rgba(39,174,96,0.30); }
+        .green-table tbody tr:nth-child(odd) { background: rgba(39,174,96,0.07); }
+        .green-table tbody tr:last-child  td { background: rgba(39,174,96,0.22); }
+
+        /* red flavour */
+        .red-table thead tr:first-child th   { background: rgba(192,57,43,0.65); }
+        .red-table thead tr:last-child  th   { background: rgba(192,57,43,0.30); }
+        .red-table tbody tr:nth-child(odd)   { background: rgba(192,57,43,0.07); }
+        .red-table tbody tr:last-child  td   { background: rgba(192,57,43,0.22); }
+
+        @media (max-width: 400px) {
+            table.fancy                       { font-size: 12px; }
+            table.fancy thead tr:first-child th { font-size: 13px; }
+            table.fancy tbody tr:last-child td  { font-size: 13px; }
         }
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; ;">Geländezeiten Rechner</h1>
+<div class="page">
+
+    <header>
+        <div class="badge">🏇 Kutschsport</div>
+        <h1>Gelände<span class="highlight">Zeiten</span><br>Rechner</h1>
+    </header>
+
     <form id="timesForm">
-    <!--    <h2>Aufwärmstrecke</h2>-->
-    <table class="aufwaermTable">
-        <thead>
-        <tr>
-            <th colspan="3">Aufwärmstrecke</th> <!-- Überschrift integriert -->
-        </tr>
-        <tr>
-            <th>Länge<br>(m)</th>
-            <th>Best Zeit<br>(min:sec)</th>
-            <th>Erlaubte Zeit<br>(min:sec)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td><input type="number" id="A1" value="4500"></td>
-            <td><input type="text" id="A2" value="12:00"></td>
-            <td><input type="text" id="A3" value="14:00"></td>
-        </tr>
-        </tbody>
-    </table>
+        <div class="inputs-grid">
 
-    <!--    <h2>Hindernisstrecke</h2>-->
-    <table class="hindernisTable">
-        <thead>
-        <tr>
-            <th colspan="3">Hindernisstrecke</th> <!-- Überschrift integriert -->
-        </tr>
-        <tr>
-            <th>Länge<br>(m)</th>
-            <th>Best Zeit<br>(min:sec)</th>
-            <th>Erlaubte Zeit<br>(min:sec)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td><input type="number" id="B1" value="4200"></td>
-            <td><input type="text" id="B2" value="13:00"></td>
-            <td><input type="text" id="B3" value="15:00"></td>
-        </tr>
-        </tbody>
-    </table>
+            <!-- Aufwärmstrecke -->
+            <div class="glass-card">
+                <div class="card-header green">🟢 Aufwärmstrecke</div>
+                <div class="card-body">
+                    <div class="field-group">
+                        <label>Länge (m)</label>
+                        <input type="number" id="A1" value="4500" inputmode="numeric">
+                    </div>
+                    <div class="field-group">
+                        <label>Best Zeit (min:sec)</label>
+                        <input type="text" id="A2" value="12:00" inputmode="decimal">
+                    </div>
+                    <div class="field-group">
+                        <label>Erlaubte Zeit (min:sec)</label>
+                        <input type="text" id="A3" value="14:00" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
 
-    <button type="button" onclick="calculate()">Berechnen</button>
-</form>
-    <!--<h2>Zeiten Aufwärmstrecke</h2>-->
-    <table id="resultsTable" class="aufwaermTable">
-        <thead>
-        <tr>
-            <th colspan="4">Zeiten Aufwärmstrecke</th> <!-- Überschrift integriert -->
-        </tr>
-        <tr>
-            <th>Länge<br>(m)</th>
-            <th>Best Zeit<br>(min:sec)</th>
-            <th>Erlaubte Zeit<br>(min:sec)</th>
-            <th>Mittlere Zeit<br>(min:sec)</th>
-        </tr>
-        </thead>
-        <tbody id="resultsBody">
-        <!-- Berechnete Ergebnisse werden hier eingefügt -->
-        </tbody>
-    </table>
-<!--<h2>Zeiten Hindernisstrecke</h2>-->
-    <table id="hindernisResultsTable" class="hindernisTable">
-        <thead>
-        <tr>
-            <th colspan="4">Zeiten Hindernisstrecke</th> <!-- Überschrift integriert -->
-        </tr>
-        <tr>
-            <th>Länge<br>(m)</th>
-            <th>Best Zeit<br>(min:sec)</th>
-            <th>Erlaubte Zeit<br>(min:sec)</th>
-            <th>Mittlere Zeit<br>(min:sec)</th>
-        </tr>
-        </thead>
-        <tbody id="hindernisResultsBody">
-        <!-- Berechnete Ergebnisse werden hier eingefügt -->
-        </tbody>
-    </table>
+            <!-- Hindernisstrecke -->
+            <div class="glass-card">
+                <div class="card-header red">🔴 Hindernisstrecke</div>
+                <div class="card-body">
+                    <div class="field-group">
+                        <label>Länge (m)</label>
+                        <input type="number" id="B1" value="4200" inputmode="numeric">
+                    </div>
+                    <div class="field-group">
+                        <label>Best Zeit (min:sec)</label>
+                        <input type="text" id="B2" value="13:00" inputmode="decimal">
+                    </div>
+                    <div class="field-group">
+                        <label>Erlaubte Zeit (min:sec)</label>
+                        <input type="text" id="B3" value="15:00" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
 
-    <script>
+        </div>
+
+        <button type="button" class="calc-btn" onclick="calculate()">⚡ Berechnen</button>
+    </form>
+
+    <!-- Results (hidden until calculated) -->
+    <div class="results-section" id="resultsSection">
+        <div class="results-divider">▼ Ergebnisse</div>
+        <div class="results-grid">
+
+            <div class="glass-card result-table-wrap">
+                <table class="fancy green-table">
+                    <thead>
+                    <tr><th colspan="4">Zeiten Aufwärmstrecke</th></tr>
+                    <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+
+            <div class="glass-card result-table-wrap">
+                <table class="fancy red-table">
+                    <thead>
+                    <tr><th colspan="4">Zeiten Hindernisstrecke</th></tr>
+                    <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
+                    </thead>
+                    <tbody id="hindernisResultsBody"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
     function calculate() {
         const inputs = [
             {length: "A1", best: "A2", allowed: "A3", results: "resultsBody"},
@@ -241,21 +426,16 @@
 
         let isValid = true;
 
-        inputs.forEach(({length, best, allowed, results}) => {
-            const len = document.getElementById(length).value;
-            const bestTime = document.getElementById(best).value;
-            const allowedTime = document.getElementById(allowed).value;
-
-            // Validierung der Eingaben
-            if (!isPositiveNumber(len)) {
+        inputs.forEach(({length, best, allowed}) => {
+            if (!isPositiveNumber(document.getElementById(length).value)) {
                 alert(`Fehler: Länge (${length}) muss eine positive Zahl sein.`);
                 isValid = false;
             }
-            if (!isValidTimeFormat(bestTime)) {
+            if (!isValidTimeFormat(document.getElementById(best).value)) {
                 alert(`Fehler: Best Zeit (${best}) muss im Format min:sec sein.`);
                 isValid = false;
             }
-            if (!isValidTimeFormat(allowedTime)) {
+            if (!isValidTimeFormat(document.getElementById(allowed).value)) {
                 alert(`Fehler: Erlaubte Zeit (${allowed}) muss im Format min:sec sein.`);
                 isValid = false;
             }
@@ -264,77 +444,68 @@
         if (!isValid) return;
 
         inputs.forEach(({length, best, allowed, results}) => {
-            const len = parseInt(document.getElementById(length).value, 10);
-            const bestTime = convertTimeToSeconds(document.getElementById(best).value);
+            const len         = parseInt(document.getElementById(length).value, 10);
+            const bestTime    = convertTimeToSeconds(document.getElementById(best).value);
             const allowedTime = convertTimeToSeconds(document.getElementById(allowed).value);
 
-            const steps = Math.floor(len / 1000);
+            const steps     = Math.floor(len / 1000);
             const remainder = len % 1000;
-
-            const resultsBody = document.getElementById(results);
-            resultsBody.innerHTML = "";
+            const body      = document.getElementById(results);
+            body.innerHTML  = "";
 
             for (let i = 1; i <= steps; i++) {
-                resultsBody.innerHTML += createRow(i * 1000, bestTime, allowedTime, len);
+                body.innerHTML += createRow(i * 1000, bestTime, allowedTime, len);
             }
             if (remainder > 0) {
-                resultsBody.innerHTML += createRow(steps * 1000 + remainder, bestTime, allowedTime, len);
+                body.innerHTML += createRow(steps * 1000 + remainder, bestTime, allowedTime, len);
             }
         });
+
+        const section = document.getElementById('resultsSection');
+        section.classList.remove('visible');
+        void section.offsetWidth; // force reflow so animation replays
+        section.classList.add('visible');
+        section.scrollIntoView({behavior: 'smooth', block: 'nearest'});
     }
 
-    function isPositiveNumber(value) {
-        const number = parseFloat(value);
-        return !isNaN(number) && number > 0;
+    function isPositiveNumber(v) {
+        const n = parseFloat(v);
+        return !isNaN(n) && n > 0;
     }
 
-    function isValidTimeFormat(value) {
-        const timeRegex = /^\d{1,2}:\d{2}$/; // Format: min:sec
-        return timeRegex.test(value);
+    function isValidTimeFormat(v) {
+        return /^\d{1,2}:\d{2}$/.test(v);
     }
 
     function createRow(distance, bestTime, allowedTime, totalLength) {
         const avgTime = (bestTime + allowedTime) / 2;
-        return `
-            <tr>
-                <td>${distance}</td>
-                <td>${formatTime(bestTime / totalLength * distance)}</td>
-                <td>${formatTime(allowedTime / totalLength * distance)}</td>
-                <td>${formatTime(avgTime / totalLength * distance)}</td>
-            </tr>
-        `;
+        return `<tr>
+            <td>${distance}</td>
+            <td>${formatTime(bestTime    / totalLength * distance)}</td>
+            <td>${formatTime(allowedTime / totalLength * distance)}</td>
+            <td>${formatTime(avgTime     / totalLength * distance)}</td>
+        </tr>`;
     }
 
     function convertTimeToSeconds(time) {
-        const parts = time.split(":").map(Number);
-        return parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
+        const p = time.split(":").map(Number);
+        return p.length === 2 ? p[0] * 60 + p[1] : 0;
     }
 
     function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.round(seconds % 60);
-        return `${padZero(minutes)}:${padZero(remainingSeconds)}`;
+        const m = Math.floor(seconds / 60);
+        const s = Math.round(seconds % 60);
+        return `${padZero(m)}:${padZero(s)}`;
     }
 
-    function padZero(number) {
-        return number < 10 ? "0" + number : number;
-    }
+    function padZero(n) { return n < 10 ? "0" + n : n; }
 
     document.querySelectorAll('input').forEach(input => {
-        let oldValue = input.value; // Store the initial value
-        input.addEventListener('click', function () {
-            this.value = '';
-        });
-        input.addEventListener('focus', function () {
-            oldValue = this.value; // Save the current value on focus
-        });
-        input.addEventListener('blur', function () {
-            if (this.value === '') {
-                this.value = oldValue; // Restore the old value if the input is empty
-            }
-        });
+        let old = input.value;
+        input.addEventListener('click',  function () { this.value = ''; });
+        input.addEventListener('focus',  function () { old = this.value; });
+        input.addEventListener('blur',   function () { if (!this.value) this.value = old; });
     });
-
 </script>
 </body>
 </html>
