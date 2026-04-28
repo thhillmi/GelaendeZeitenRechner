@@ -6,67 +6,78 @@
     <title>Geländezeiten Rechner</title>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* ── Design tokens ── */
         :root {
-            --glass:        rgba(255, 255, 255, 0.09);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --shadow:       0 8px 32px rgba(0, 0, 0, 0.45);
-            --radius:       16px;
+            --green:        #2ecc71;
+            --green-dim:    rgba(46, 204, 113, 0.25);
+            --red:          #e74c3c;
+            --red-dim:      rgba(231, 76, 60, 0.25);
+            --glass:        rgba(10, 28, 16, 0.60);
+            --glass-border: rgba(255, 255, 255, 0.14);
+            --shadow:       0 8px 32px rgba(0, 0, 0, 0.55);
+            --radius:       18px;
             --font:         'Exo 2', Arial, sans-serif;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        html {
+        html, body {
             height: 100%;
             -webkit-text-size-adjust: 100%;
-        }
-
-        /* ── Background: CSS dawn-over-meadow landscape ── */
-        body {
-            font-family: var(--font);
-            min-height: 100%;
             overflow-x: hidden;
-            background-color: #0f2218;
-            background-image: url('Designer.png'); /* Pfad zum Hintergrundbild */
-            background-position: center;
-            background-size: cover;
-			background-repeat: no-repeat;
-            opacity: 0.8; /* Reduzierte Transparenz des Hintergrundbildes */
-            z-index: -1; /* Hintergrund bleibt hinter allen anderen Elementen */
         }
 
-        /* Fixed background causes glitches on iOS/Android */
-        @media (max-width: 768px) {
-            body { background-attachment: scroll; }
-        }
-
-        /* subtle vignette overlay */
+        /*
+         * FIX: position:fixed pseudo-elements keep the background visible
+         * everywhere while scrolling — on iOS, Android, and desktop.
+         * (background-attachment:fixed breaks on mobile WebKit.)
+         */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.38);
+            background-image: url('Designer.png');
+            background-size: cover;
+            background-position: center center;
+            z-index: -2;
             pointer-events: none;
-            z-index: 0;
+        }
+
+        /* Darkening gradient for readability */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(
+                170deg,
+                rgba(5, 20, 10, 0.35) 0%,
+                rgba(5, 20, 10, 0.62) 100%
+            );
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        body {
+            font-family: var(--font);
+            color: #fff;
+            background: #0a1a0e; /* fallback while image loads */
         }
 
         /* ── Page wrapper ── */
         .page {
             position: relative;
             z-index: 1;
-            max-width: 960px;
+            max-width: 620px;
             margin: 0 auto;
-            /* respect iPhone notch / home indicator */
-            padding: 24px max(16px, env(safe-area-inset-right))
-                     max(60px, env(safe-area-inset-bottom))
+            /* extra bottom padding for the sticky calc bar */
+            padding: 20px max(16px, env(safe-area-inset-right))
+                     calc(max(84px, env(safe-area-inset-bottom)) + 68px)
                      max(16px, env(safe-area-inset-left));
         }
 
         /* ── Header ── */
         header {
             text-align: center;
-            padding: 28px 0 32px;
+            padding: 22px 0 26px;
         }
 
         .badge {
@@ -77,20 +88,21 @@
             font-weight: 700;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.50);
-            margin-bottom: 12px;
+            color: var(--green);
+            margin-bottom: 10px;
+            opacity: 0.9;
         }
 
         header h1 {
-            font-size: clamp(30px, 7vw, 52px);
+            font-size: clamp(28px, 8vw, 50px);
             font-weight: 900;
             color: #fff;
-            text-shadow: 0 2px 28px rgba(0, 0, 0, 0.70);
-            line-height: 1.15;
+            text-shadow: 0 2px 24px rgba(0, 0, 0, 0.80);
+            line-height: 1.1;
         }
 
         .highlight {
-            background: linear-gradient(120deg, #2ecc71 0%, #2ea0e0 100%);
+            background: linear-gradient(120deg, #2ecc71 0%, #3fc5f0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -99,47 +111,34 @@
         /* ── Glass card ── */
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(16px) saturate(1.5);
-            -webkit-backdrop-filter: blur(16px) saturate(1.5);
+            backdrop-filter: blur(22px) saturate(1.4);
+            -webkit-backdrop-filter: blur(22px) saturate(1.4);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             overflow: hidden;
         }
 
-        /* ── Input grid ── */
-        .inputs-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-bottom: 14px;
-        }
-
-        @media (max-width: 560px) {
-            .inputs-grid { grid-template-columns: 1fr; }
-        }
+        .glass-card.green-card { border-top: 3px solid var(--green); }
+        .glass-card.red-card   { border-top: 3px solid var(--red); }
 
         /* ── Card header ── */
         .card-header {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 14px 18px;
+            padding: 13px 18px;
             font-size: 15px;
             font-weight: 700;
-            letter-spacing: 0.3px;
             color: #fff;
+            letter-spacing: 0.2px;
         }
 
-        .card-header.green { background: linear-gradient(135deg, rgba(39,174,96,0.80), rgba(46,204,113,0.35)); }
-        .card-header.red   { background: linear-gradient(135deg, rgba(192,57,43,0.80), rgba(231,76,60,0.35)); }
-
-        @media (max-width: 400px) {
-            .card-header { font-size: 13px; padding: 12px 14px; }
-        }
+        .card-header.green { background: linear-gradient(135deg, rgba(39,174,96,0.75), rgba(46,204,113,0.28)); }
+        .card-header.red   { background: linear-gradient(135deg, rgba(192,57,43,0.75), rgba(231,76,60,0.28)); }
 
         /* ── Card body ── */
-        .card-body { padding: 16px 18px 18px; }
+        .card-body { padding: 16px 18px 20px; }
 
         .field-group            { margin-bottom: 14px; }
         .field-group:last-child { margin-bottom: 0; }
@@ -156,80 +155,102 @@
 
         .field-group input {
             width: 100%;
-            /* ≥16px prevents iOS auto-zoom on focus */
-            font-size: 16px;
+            font-size: 18px; /* ≥16px prevents iOS auto-zoom; 18px feels bigger */
             font-family: var(--font);
             font-weight: 700;
             text-align: center;
             color: #fff;
-            background: rgba(255, 255, 255, 0.11);
-            border: 1px solid rgba(255, 255, 255, 0.22);
-            border-radius: 10px;
-            /* ≥48px for accessible tap target */
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            border-radius: 12px;
             padding: 14px;
+            min-height: 52px; /* accessible tap target */
             outline: none;
             -webkit-appearance: none;
             appearance: none;
             transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
 
-        .field-group input:focus {
-            background: rgba(255, 255, 255, 0.18);
-            border-color: rgba(255, 255, 255, 0.55);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.10);
+        .green-card .field-group input:focus {
+            background: rgba(46, 204, 113, 0.12);
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.18);
         }
 
-        /* hide number spinners */
+        .red-card .field-group input:focus {
+            background: rgba(231, 76, 60, 0.12);
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.18);
+        }
+
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         input[type=number] { -moz-appearance: textfield; }
 
-        /* ── Calculate button ── */
+        /* ── Input layout: stacked on mobile, side-by-side on wider screens ── */
+        .inputs-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        @media (min-width: 580px) {
+            .inputs-stack { flex-direction: row; }
+            .inputs-stack .glass-card { flex: 1; }
+        }
+
+        /* ── Sticky bottom bar with calculate button ── */
+        .calc-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+            background: rgba(8, 22, 12, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(255, 255, 255, 0.10);
+            z-index: 100;
+        }
+
         .calc-btn {
             display: block;
             width: 100%;
-            min-height: 52px;
-            padding: 16px;
+            max-width: 620px;
+            margin: 0 auto;
+            min-height: 54px;
+            padding: 14px 20px;
             font-family: var(--font);
             font-size: 16px;
             font-weight: 700;
             letter-spacing: 2.5px;
             text-transform: uppercase;
             color: #fff;
-            background: linear-gradient(135deg, #005c8a 0%, #2f0099 100%);
+            background: linear-gradient(135deg, #0d7a40 0%, #2ecc71 48%, #1a9fcc 100%);
+            background-size: 200% 100%;
+            background-position: 0% 0%;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
-            box-shadow: 0 4px 22px rgba(0, 80, 180, 0.50);
-            transition: transform 0.18s, box-shadow 0.18s;
+            box-shadow: 0 4px 24px rgba(46, 204, 113, 0.38);
+            transition: background-position 0.45s, transform 0.18s, box-shadow 0.18s;
             position: relative;
             overflow: hidden;
-            margin-bottom: 28px;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* shimmer sweep — desktop only */
-        .calc-btn::after {
-            content: '';
-            position: absolute;
-            top: -60%; left: -70%;
-            width: 45%; height: 220%;
-            background: rgba(255, 255, 255, 0.18);
-            transform: skewX(-22deg);
-            transition: left 0.55s ease;
+        .calc-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 12px rgba(46, 204, 113, 0.28);
         }
 
         @media (hover: hover) {
-            .calc-btn:hover::after { left: 125%; }
             .calc-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 32px rgba(0, 80, 180, 0.65);
+                background-position: 100% 0%;
+                box-shadow: 0 6px 30px rgba(46, 204, 113, 0.55);
+                transform: translateY(-1px);
             }
-        }
-
-        .calc-btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 10px rgba(0, 80, 180, 0.40);
         }
 
         /* ── Results section ── */
@@ -241,7 +262,7 @@
         }
 
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(18px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
@@ -251,26 +272,66 @@
             font-weight: 700;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.38);
+            color: rgba(255, 255, 255, 0.35);
             margin-bottom: 14px;
         }
 
-        .results-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
+        /* ── Mobile result tabs ── */
+        .tabs {
+            display: flex;
+            border-radius: 13px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            margin-bottom: 14px;
         }
 
-        @media (max-width: 640px) {
-            .results-grid { grid-template-columns: 1fr; }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 8px;
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.48);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.22s, color 0.22s;
+            -webkit-tap-highlight-color: transparent;
         }
 
+        .tab-btn.active.green-tab {
+            background: linear-gradient(135deg, rgba(39,174,96,0.65), rgba(46,204,113,0.28));
+            color: #fff;
+        }
+
+        .tab-btn.active.red-tab {
+            background: linear-gradient(135deg, rgba(192,57,43,0.65), rgba(231,76,60,0.28));
+            color: #fff;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* On wider screens: show both tables side by side, hide tabs */
+        @media (min-width: 680px) {
+            .tabs { display: none; }
+            .tab-panel { display: block; }
+            .results-panels {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+        }
+
+        /* ── Data table ── */
         .result-table-wrap {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
 
-        /* ── Data table ── */
         table.fancy {
             width: 100%;
             border-collapse: collapse;
@@ -290,44 +351,39 @@
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.72);
+            color: rgba(255, 255, 255, 0.70);
             border-bottom: 1px solid rgba(255, 255, 255, 0.10);
         }
 
         table.fancy tbody td {
-            padding: 9px 10px;
+            padding: 10px;
             text-align: center;
             font-weight: 600;
             color: #fff;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        table.fancy tbody tr { transition: background 0.12s; }
-
         @media (hover: hover) {
-            table.fancy tbody tr:hover { background: rgba(255, 255, 255, 0.09) !important; }
+            table.fancy tbody tr:hover { background: rgba(255, 255, 255, 0.07) !important; }
         }
 
-        /* final row (full distance) standout */
         table.fancy tbody tr:last-child td {
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 900;
         }
 
-        /* green flavour */
-        .green-table thead tr:first-child th { background: rgba(39,174,96,0.65); }
-        .green-table thead tr:last-child  th { background: rgba(39,174,96,0.30); }
-        .green-table tbody tr:nth-child(odd) { background: rgba(39,174,96,0.07); }
-        .green-table tbody tr:last-child  td { background: rgba(39,174,96,0.22); }
+        .green-table thead tr:first-child th { background: rgba(39, 174, 96, 0.65); }
+        .green-table thead tr:last-child  th { background: rgba(39, 174, 96, 0.30); }
+        .green-table tbody tr:nth-child(odd) { background: rgba(39, 174, 96, 0.06); }
+        .green-table tbody tr:last-child  td { background: rgba(39, 174, 96, 0.22); color: #7fffac; }
 
-        /* red flavour */
-        .red-table thead tr:first-child th   { background: rgba(192,57,43,0.65); }
-        .red-table thead tr:last-child  th   { background: rgba(192,57,43,0.30); }
-        .red-table tbody tr:nth-child(odd)   { background: rgba(192,57,43,0.07); }
-        .red-table tbody tr:last-child  td   { background: rgba(192,57,43,0.22); }
+        .red-table thead tr:first-child th   { background: rgba(192, 57, 43, 0.65); }
+        .red-table thead tr:last-child  th   { background: rgba(192, 57, 43, 0.30); }
+        .red-table tbody tr:nth-child(odd)   { background: rgba(192, 57, 43, 0.06); }
+        .red-table tbody tr:last-child  td   { background: rgba(192, 57, 43, 0.22); color: #ffaaaa; }
 
         @media (max-width: 400px) {
-            table.fancy                       { font-size: 12px; }
+            table.fancy                         { font-size: 12px; }
             table.fancy thead tr:first-child th { font-size: 13px; }
             table.fancy tbody tr:last-child td  { font-size: 13px; }
         }
@@ -342,10 +398,10 @@
     </header>
 
     <form id="timesForm">
-        <div class="inputs-grid">
+        <div class="inputs-stack">
 
             <!-- Aufwärmstrecke -->
-            <div class="glass-card">
+            <div class="glass-card green-card">
                 <div class="card-header green">🟢 Aufwärmstrecke</div>
                 <div class="card-body">
                     <div class="field-group">
@@ -364,7 +420,7 @@
             </div>
 
             <!-- Hindernisstrecke -->
-            <div class="glass-card">
+            <div class="glass-card red-card">
                 <div class="card-header red">🔴 Hindernisstrecke</div>
                 <div class="card-body">
                     <div class="field-group">
@@ -383,33 +439,42 @@
             </div>
 
         </div>
-
-        <button type="button" class="calc-btn" onclick="calculate()">⚡ Berechnen</button>
     </form>
 
     <!-- Results (hidden until calculated) -->
     <div class="results-section" id="resultsSection">
         <div class="results-divider">▼ Ergebnisse</div>
-        <div class="results-grid">
 
-            <div class="glass-card result-table-wrap">
-                <table class="fancy green-table">
-                    <thead>
-                    <tr><th colspan="4">Zeiten Aufwärmstrecke</th></tr>
-                    <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
-                    </thead>
-                    <tbody id="resultsBody"></tbody>
-                </table>
+        <!-- Mobile tabs to switch between the two result tables -->
+        <div class="tabs">
+            <button class="tab-btn active green-tab" onclick="switchTab('green')">🟢 Aufwärmstrecke</button>
+            <button class="tab-btn red-tab"          onclick="switchTab('red')">🔴 Hindernisstrecke</button>
+        </div>
+
+        <div class="results-panels">
+
+            <div class="tab-panel active" id="tab-green">
+                <div class="glass-card result-table-wrap">
+                    <table class="fancy green-table">
+                        <thead>
+                        <tr><th colspan="4">Zeiten Aufwärmstrecke</th></tr>
+                        <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
+                        </thead>
+                        <tbody id="resultsBody"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="glass-card result-table-wrap">
-                <table class="fancy red-table">
-                    <thead>
-                    <tr><th colspan="4">Zeiten Hindernisstrecke</th></tr>
-                    <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
-                    </thead>
-                    <tbody id="hindernisResultsBody"></tbody>
-                </table>
+            <div class="tab-panel" id="tab-red">
+                <div class="glass-card result-table-wrap">
+                    <table class="fancy red-table">
+                        <thead>
+                        <tr><th colspan="4">Zeiten Hindernisstrecke</th></tr>
+                        <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
+                        </thead>
+                        <tbody id="hindernisResultsBody"></tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
@@ -417,7 +482,24 @@
 
 </div>
 
+<!-- Sticky bottom bar -->
+<div class="calc-bar">
+    <button type="button" class="calc-btn" onclick="calculate()">⚡ Berechnen</button>
+</div>
+
 <script>
+    function switchTab(color) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        if (color === 'green') {
+            document.querySelector('.green-tab').classList.add('active');
+            document.getElementById('tab-green').classList.add('active');
+        } else {
+            document.querySelector('.red-tab').classList.add('active');
+            document.getElementById('tab-red').classList.add('active');
+        }
+    }
+
     function calculate() {
         const inputs = [
             {length: "A1", best: "A2", allowed: "A3", results: "resultsBody"},
@@ -448,7 +530,8 @@
             const bestTime    = convertTimeToSeconds(document.getElementById(best).value);
             const allowedTime = convertTimeToSeconds(document.getElementById(allowed).value);
 
-            const steps     = Math.floor(len / 1000);
+
+            const steps= Math.floor(len / 1000);
             const remainder = len % 1000;
             const body      = document.getElementById(results);
             body.innerHTML  = "";
@@ -463,8 +546,9 @@
 
         const section = document.getElementById('resultsSection');
         section.classList.remove('visible');
-        void section.offsetWidth; // force reflow so animation replays
+        void section.offsetWidth;
         section.classList.add('visible');
+        switchTab('green');
         section.scrollIntoView({behavior: 'smooth', block: 'nearest'});
     }
 
@@ -502,9 +586,9 @@
 
     document.querySelectorAll('input').forEach(input => {
         let old = input.value;
-        input.addEventListener('click',  function () { this.value = ''; });
-        input.addEventListener('focus',  function () { old = this.value; });
-        input.addEventListener('blur',   function () { if (!this.value) this.value = old; });
+        input.addEventListener('click', function () { this.value = ''; });
+        input.addEventListener('focus', function () { old = this.value; });
+        input.addEventListener('blur',  function () { if (!this.value) this.value = old; });
     });
 </script>
 </body>
