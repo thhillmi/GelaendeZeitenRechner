@@ -1,595 +1,353 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Geländezeiten Rechner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <title>Gel&auml;ndeZeiten &middot; Rechner</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --green:        #2ecc71;
-            --green-dim:    rgba(46, 204, 113, 0.25);
-            --red:          #e74c3c;
-            --red-dim:      rgba(231, 76, 60, 0.25);
-            --glass:        rgba(10, 28, 16, 0.60);
-            --glass-border: rgba(255, 255, 255, 0.14);
-            --shadow:       0 8px 32px rgba(0, 0, 0, 0.55);
-            --radius:       18px;
-            --font:         'Exo 2', Arial, sans-serif;
+            --bg: #07100a;
+            --surface: rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.09);
+            --border-hi: rgba(255,255,255,0.17);
+            --green: #22c55e;
+            --green-dim: rgba(34,197,94,0.12);
+            --green-ring: rgba(34,197,94,0.28);
+            --green-glow: rgba(34,197,94,0.30);
+            --red: #f87171;
+            --red-dim: rgba(248,113,113,0.10);
+            --red-ring: rgba(248,113,113,0.26);
+            --blue: #60a5fa;
+            --text: #f1f5f9;
+            --muted: rgba(241,245,249,0.46);
+            --faint: rgba(241,245,249,0.24);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --r: 14px;
+            --r-sm: 10px;
         }
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         html, body {
             height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
             -webkit-text-size-adjust: 100%;
             overflow-x: hidden;
         }
+        .hero { position: relative; height: clamp(200px, 42svh, 340px); overflow: hidden; }
+        .hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 28%; display: block; }
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(7,16,10,0.04) 0%, rgba(7,16,10,0.50) 55%, rgba(7,16,10,1.00) 100%);
+        }
+        .hero-copy { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 20px 26px; }
+        .eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--green); margin-bottom: 7px; }
+        .hero-title { font-size: clamp(28px, 8vw, 50px); font-weight: 900; line-height: 1.0; letter-spacing: -1.5px; color: #fff; text-shadow: 0 4px 40px rgba(0,0,0,0.85); }
+        .hero-title em { font-style: normal; background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .main { max-width: 640px; margin: 0 auto; padding: 24px 16px calc(max(80px, env(safe-area-inset-bottom)) + 64px); }
+        .caption { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--faint); margin-bottom: 12px; }
+        .track-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 12px; }
+        .track-card.green { border-top: 2px solid var(--green); }
+        .track-card.red   { border-top: 2px solid var(--red); }
+        .track-head { display: flex; align-items: center; gap: 9px; padding: 13px 16px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text); border-bottom: 1px solid var(--border); }
+        .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .green .dot { background: var(--green); box-shadow: 0 0 7px var(--green); }
+        .red   .dot { background: var(--red);   box-shadow: 0 0 7px var(--red); }
+        .track-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px 16px; }
+        .f-full { grid-column: 1 / -1; }
+        @media (min-width: 420px) { .track-body { grid-template-columns: 1.1fr 1fr 1fr; } .f-full { grid-column: auto; } }
+        .field label { display: block; font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+        .field input {
+            width: 100%; font-size: 17px; font-family: var(--font); font-weight: 700;
+            text-align: center; color: var(--text);
+            background: rgba(255,255,255,0.055); border: 1px solid var(--border-hi);
+            border-radius: var(--r-sm); padding: 12px 8px; min-height: 50px;
+            outline: none; -webkit-appearance: none; appearance: none;
+            transition: border-color .18s, background .18s, box-shadow .18s;
+        }
+        .green .field input:focus { border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 0 3px var(--green-ring); }
+        .red   .field input:focus { border-color: var(--red);   background: var(--red-dim);   box-shadow: 0 0 0 3px var(--red-ring); }
+        .field input.err { border-color: var(--red) !important; background: var(--red-dim) !important; animation: shake .35s ease; }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-5px); } 40%,80% { transform: translateX(5px); } }
+        input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        input[type=number] { -moz-appearance: textfield; }
+        .calc-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+            background: rgba(7,16,10,0.90);
+            backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border-top: 1px solid var(--border); z-index: 100;
+        }
+        .calc-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; max-width: 640px; margin: 0 auto; min-height: 52px;
+            font-family: var(--font); font-size: 15px; font-weight: 700; letter-spacing: .4px;
+            color: #000; background: var(--green); border: none; border-radius: var(--r-sm);
+            cursor: pointer; box-shadow: 0 0 28px var(--green-glow);
+            transition: opacity .18s, transform .14s, box-shadow .18s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .calc-btn:active { transform: scale(.97); opacity: .82; }
+        @media (hover: hover) { .calc-btn:hover { box-shadow: 0 0 44px var(--green-glow); opacity: .90; } }
+        .results { margin-top: 28px; }
+        .hr { height: 1px; background: linear-gradient(90deg, transparent, var(--border-hi), transparent); margin-bottom: 24px; }
 
-        /*
-         * FIX: position:fixed pseudo-elements keep the background visible
-         * everywhere while scrolling — on iOS, Android, and desktop.
-         * (background-attachment:fixed breaks on mobile WebKit.)
-         */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url('Designer.png');
-            background-size: cover;
-            background-position: center center;
-            z-index: -2;
-            pointer-events: none;
+        /* Results: side-by-side on wide screens, stacked on mobile */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        @media (min-width: 580px) {
+            .results-grid { grid-template-columns: 1fr 1fr; }
         }
 
-        /* Darkening gradient for readability */
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(
-                170deg,
-                rgba(5, 20, 10, 0.35) 0%,
-                rgba(5, 20, 10, 0.62) 100%
-            );
-            z-index: -1;
-            pointer-events: none;
+        /* Result table card */
+        .result-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            animation: fadeUp .45s cubic-bezier(.16,1,.3,1) both;
         }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
 
-        body {
-            font-family: var(--font);
-            color: #fff;
-            background: #0a1a0e; /* fallback while image loads */
-        }
+        .result-card.green { border-top: 2px solid var(--green); }
+        .result-card.red   { border-top: 2px solid var(--red); }
 
-        /* ── Page wrapper ── */
-        .page {
-            position: relative;
-            z-index: 1;
-            max-width: 620px;
-            margin: 0 auto;
-            /* extra bottom padding for the sticky calc bar */
-            padding: 20px max(16px, env(safe-area-inset-right))
-                     calc(max(84px, env(safe-area-inset-bottom)) + 68px)
-                     max(16px, env(safe-area-inset-left));
-        }
-
-        /* ── Header ── */
-        header {
-            text-align: center;
-            padding: 22px 0 26px;
-        }
-
-        .badge {
-            display: inline-flex;
+        .result-card-head {
+            display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            padding: 11px 14px;
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 3px;
+            letter-spacing: 1.2px;
             text-transform: uppercase;
-            color: var(--green);
-            margin-bottom: 10px;
-            opacity: 0.9;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
         }
+        .result-card.green .result-card-head { background: rgba(34,197,94,0.10); }
+        .result-card.red   .result-card-head { background: rgba(248,113,113,0.10); }
 
-        header h1 {
-            font-size: clamp(28px, 8vw, 50px);
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 2px 24px rgba(0, 0, 0, 0.80);
-            line-height: 1.1;
-        }
-
-        .highlight {
-            background: linear-gradient(120deg, #2ecc71 0%, #3fc5f0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* ── Glass card ── */
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(22px) saturate(1.4);
-            -webkit-backdrop-filter: blur(22px) saturate(1.4);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .glass-card.green-card { border-top: 3px solid var(--green); }
-        .glass-card.red-card   { border-top: 3px solid var(--red); }
-
-        /* ── Card header ── */
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 13px 18px;
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 0.2px;
-        }
-
-        .card-header.green { background: linear-gradient(135deg, rgba(39,174,96,0.75), rgba(46,204,113,0.28)); }
-        .card-header.red   { background: linear-gradient(135deg, rgba(192,57,43,0.75), rgba(231,76,60,0.28)); }
-
-        /* ── Card body ── */
-        .card-body { padding: 16px 18px 20px; }
-
-        .field-group            { margin-bottom: 14px; }
-        .field-group:last-child { margin-bottom: 0; }
-
-        .field-group label {
-            display: block;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.52);
-            margin-bottom: 6px;
-        }
-
-        .field-group input {
-            width: 100%;
-            font-size: 18px; /* ≥16px prevents iOS auto-zoom; 18px feels bigger */
-            font-family: var(--font);
-            font-weight: 700;
-            text-align: center;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.20);
-            border-radius: 12px;
-            padding: 14px;
-            min-height: 52px; /* accessible tap target */
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .green-card .field-group input:focus {
-            background: rgba(46, 204, 113, 0.12);
-            border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.18);
-        }
-
-        .red-card .field-group input:focus {
-            background: rgba(231, 76, 60, 0.12);
-            border-color: var(--red);
-            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.18);
-        }
-
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        /* ── Input layout: stacked on mobile, side-by-side on wider screens ── */
-        .inputs-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin-bottom: 14px;
-        }
-
-        @media (min-width: 580px) {
-            .inputs-stack { flex-direction: row; }
-            .inputs-stack .glass-card { flex: 1; }
-        }
-
-        /* ── Sticky bottom bar with calculate button ── */
-        .calc-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 10px 16px max(10px, env(safe-area-inset-bottom));
-            background: rgba(8, 22, 12, 0.88);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid rgba(255, 255, 255, 0.10);
-            z-index: 100;
-        }
-
-        .calc-btn {
-            display: block;
-            width: 100%;
-            max-width: 620px;
-            margin: 0 auto;
-            min-height: 54px;
-            padding: 14px 20px;
-            font-family: var(--font);
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
-            color: #fff;
-            background: linear-gradient(135deg, #0d7a40 0%, #2ecc71 48%, #1a9fcc 100%);
-            background-size: 200% 100%;
-            background-position: 0% 0%;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 24px rgba(46, 204, 113, 0.38);
-            transition: background-position 0.45s, transform 0.18s, box-shadow 0.18s;
-            position: relative;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .calc-btn:active {
-            transform: scale(0.97);
-            box-shadow: 0 2px 12px rgba(46, 204, 113, 0.28);
-        }
-
-        @media (hover: hover) {
-            .calc-btn:hover {
-                background-position: 100% 0%;
-                box-shadow: 0 6px 30px rgba(46, 204, 113, 0.55);
-                transform: translateY(-1px);
-            }
-        }
-
-        /* ── Results section ── */
-        .results-section { display: none; }
-
-        .results-section.visible {
-            display: block;
-            animation: fadeUp 0.4s ease both;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(18px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .results-divider {
-            text-align: center;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.35);
-            margin-bottom: 14px;
-        }
-
-        /* ── Mobile result tabs ── */
-        .tabs {
-            display: flex;
-            border-radius: 13px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            margin-bottom: 14px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px 8px;
-            font-family: var(--font);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.48);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            transition: background 0.22s, color 0.22s;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .tab-btn.active.green-tab {
-            background: linear-gradient(135deg, rgba(39,174,96,0.65), rgba(46,204,113,0.28));
-            color: #fff;
-        }
-
-        .tab-btn.active.red-tab {
-            background: linear-gradient(135deg, rgba(192,57,43,0.65), rgba(231,76,60,0.28));
-            color: #fff;
-        }
-
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-
-        /* On wider screens: show both tables side by side, hide tabs */
-        @media (min-width: 680px) {
-            .tabs { display: none; }
-            .tab-panel { display: block; }
-            .results-panels {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 14px;
-            }
-        }
-
-        /* ── Data table ── */
-        .result-table-wrap {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        table.fancy {
+        /* Table */
+        table.rt {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
 
-        table.fancy thead tr:first-child th {
-            padding: 13px 10px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        table.fancy thead tr:last-child th {
+        table.rt thead th {
             padding: 7px 10px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.70);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+            text-align: center;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
         }
 
-        table.fancy tbody td {
-            padding: 10px;
+        table.rt tbody td {
+            padding: 9px 10px;
             text-align: center;
             font-weight: 600;
-            color: #fff;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-variant-numeric: tabular-nums;
+            color: var(--text);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        @media (hover: hover) {
-            table.fancy tbody tr:hover { background: rgba(255, 255, 255, 0.07) !important; }
-        }
+        table.rt tbody tr:last-child td { border-bottom: none; }
 
-        table.fancy tbody tr:last-child td {
+        /* Alternating row tint */
+        table.rt tbody tr:nth-child(even) { background: rgba(255,255,255,0.025); }
+
+        /* Final (full distance) row */
+        table.rt tbody tr.final td {
+            font-weight: 800;
             font-size: 14px;
-            font-weight: 900;
         }
+        .result-card.green table.rt tbody tr.final { background: rgba(34,197,94,0.12); }
+        .result-card.red   table.rt tbody tr.final { background: rgba(248,113,113,0.10); }
 
-        .green-table thead tr:first-child th { background: rgba(39, 174, 96, 0.65); }
-        .green-table thead tr:last-child  th { background: rgba(39, 174, 96, 0.30); }
-        .green-table tbody tr:nth-child(odd) { background: rgba(39, 174, 96, 0.06); }
-        .green-table tbody tr:last-child  td { background: rgba(39, 174, 96, 0.22); color: #7fffac; }
+        /* Column colours */
+        .col-dist  { color: var(--muted) !important; font-size: 12px !important; }
+        .col-best  { color: var(--green); }
+        .col-allow { color: var(--red); }
+        .col-avg   { color: var(--blue); }
 
-        .red-table thead tr:first-child th   { background: rgba(192, 57, 43, 0.65); }
-        .red-table thead tr:last-child  th   { background: rgba(192, 57, 43, 0.30); }
-        .red-table tbody tr:nth-child(odd)   { background: rgba(192, 57, 43, 0.06); }
-        .red-table tbody tr:last-child  td   { background: rgba(192, 57, 43, 0.22); color: #ffaaaa; }
-
-        @media (max-width: 400px) {
-            table.fancy                         { font-size: 12px; }
-            table.fancy thead tr:first-child th { font-size: 13px; }
-            table.fancy tbody tr:last-child td  { font-size: 13px; }
-        }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body>
-<div class="page">
+<body x-data="app()">
 
-    <header>
-        <div class="badge">🏇 Kutschsport</div>
-        <h1>Gelände<span class="highlight">Zeiten</span><br>Rechner</h1>
-    </header>
+<div class="hero">
+    <img src="Designer.png" alt="Gelaendefahren">
+    <div class="hero-overlay"></div>
+    <div class="hero-copy">
+        <p class="eyebrow">🏇 Kutschsport</p>
+        <h1 class="hero-title">Gel&auml;nde<em>Zeiten</em><br>Rechner</h1>
+    </div>
+</div>
 
-    <form id="timesForm">
-        <div class="inputs-stack">
+<div class="main">
+    <p class="caption">Strecken eingeben</p>
 
-            <!-- Aufwärmstrecke -->
-            <div class="glass-card green-card">
-                <div class="card-header green">🟢 Aufwärmstrecke</div>
-                <div class="card-body">
-                    <div class="field-group">
-                        <label>Länge (m)</label>
-                        <input type="number" id="A1" value="4500" inputmode="numeric">
-                    </div>
-                    <div class="field-group">
-                        <label>Best Zeit (min:sec)</label>
-                        <input type="text" id="A2" value="12:00" inputmode="decimal">
-                    </div>
-                    <div class="field-group">
-                        <label>Erlaubte Zeit (min:sec)</label>
-                        <input type="text" id="A3" value="14:00" inputmode="decimal">
-                    </div>
-                </div>
+    <div class="track-card green">
+        <div class="track-head"><div class="dot"></div>Aufwärmstrecke</div>
+        <div class="track-body">
+            <div class="field f-full">
+                <label>Länge (m)</label>
+                <input type="number" x-model="A.len" inputmode="numeric" :class="e.Al && 'err'" @input="e.Al=false">
             </div>
-
-            <!-- Hindernisstrecke -->
-            <div class="glass-card red-card">
-                <div class="card-header red">🔴 Hindernisstrecke</div>
-                <div class="card-body">
-                    <div class="field-group">
-                        <label>Länge (m)</label>
-                        <input type="number" id="B1" value="4200" inputmode="numeric">
-                    </div>
-                    <div class="field-group">
-                        <label>Best Zeit (min:sec)</label>
-                        <input type="text" id="B2" value="13:00" inputmode="decimal">
-                    </div>
-                    <div class="field-group">
-                        <label>Erlaubte Zeit (min:sec)</label>
-                        <input type="text" id="B3" value="15:00" inputmode="decimal">
-                    </div>
-                </div>
+            <div class="field">
+                <label>Best (min:sec)</label>
+                <input type="text" x-model="A.best" inputmode="decimal" placeholder="12:00" :class="e.Ab && 'err'" @input="e.Ab=false" @focus="$el.select()">
             </div>
-
+            <div class="field">
+                <label>Erlaubt (min:sec)</label>
+                <input type="text" x-model="A.allow" inputmode="decimal" placeholder="14:00" :class="e.Aa && 'err'" @input="e.Aa=false" @focus="$el.select()">
+            </div>
         </div>
-    </form>
+    </div>
 
-    <!-- Results (hidden until calculated) -->
-    <div class="results-section" id="resultsSection">
-        <div class="results-divider">▼ Ergebnisse</div>
-
-        <!-- Mobile tabs to switch between the two result tables -->
-        <div class="tabs">
-            <button class="tab-btn active green-tab" onclick="switchTab('green')">🟢 Aufwärmstrecke</button>
-            <button class="tab-btn red-tab"          onclick="switchTab('red')">🔴 Hindernisstrecke</button>
+    <div class="track-card red">
+        <div class="track-head"><div class="dot"></div>Hindernisstrecke</div>
+        <div class="track-body">
+            <div class="field f-full">
+                <label>Länge (m)</label>
+                <input type="number" x-model="B.len" inputmode="numeric" :class="e.Bl && 'err'" @input="e.Bl=false">
+            </div>
+            <div class="field">
+                <label>Best (min:sec)</label>
+                <input type="text" x-model="B.best" inputmode="decimal" placeholder="13:00" :class="e.Bb && 'err'" @input="e.Bb=false" @focus="$el.select()">
+            </div>
+            <div class="field">
+                <label>Erlaubt (min:sec)</label>
+                <input type="text" x-model="B.allow" inputmode="decimal" placeholder="15:00" :class="e.Ba && 'err'" @input="e.Ba=false" @focus="$el.select()">
+            </div>
         </div>
+    </div>
 
-        <div class="results-panels">
+    <div class="results" x-show="done" x-cloak x-ref="results">
+        <div class="hr"></div>
+        <div class="results-grid">
 
-            <div class="tab-panel active" id="tab-green">
-                <div class="glass-card result-table-wrap">
-                    <table class="fancy green-table">
-                        <thead>
-                        <tr><th colspan="4">Zeiten Aufwärmstrecke</th></tr>
-                        <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
-                        </thead>
-                        <tbody id="resultsBody"></tbody>
-                    </table>
+            <!-- Aufwärmstrecke table -->
+            <div class="result-card green">
+                <div class="result-card-head">
+                    <div class="dot"></div>Aufwärmstrecke
                 </div>
+                <table class="rt">
+                    <thead>
+                        <tr>
+                            <th>Distanz</th>
+                            <th style="color:var(--green)">Best</th>
+                            <th style="color:var(--red)">Erlaubt</th>
+                            <th style="color:var(--blue)">Mittel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(m, i) in rA" :key="run + '_a_' + i">
+                            <tr :class="m.fin ? 'final' : ''">
+                                <td class="col-dist" x-text="m.dist + ' m'"></td>
+                                <td class="col-best"  x-text="m.best"></td>
+                                <td class="col-allow" x-text="m.allow"></td>
+                                <td class="col-avg"   x-text="m.avg"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
             </div>
 
-            <div class="tab-panel" id="tab-red">
-                <div class="glass-card result-table-wrap">
-                    <table class="fancy red-table">
-                        <thead>
-                        <tr><th colspan="4">Zeiten Hindernisstrecke</th></tr>
-                        <tr><th>Länge (m)</th><th>Best</th><th>Erlaubt</th><th>Mittel</th></tr>
-                        </thead>
-                        <tbody id="hindernisResultsBody"></tbody>
-                    </table>
+            <!-- Hindernisstrecke table -->
+            <div class="result-card red">
+                <div class="result-card-head">
+                    <div class="dot"></div>Hindernisstrecke
                 </div>
+                <table class="rt">
+                    <thead>
+                        <tr>
+                            <th>Distanz</th>
+                            <th style="color:var(--green)">Best</th>
+                            <th style="color:var(--red)">Erlaubt</th>
+                            <th style="color:var(--blue)">Mittel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(m, i) in rB" :key="run + '_b_' + i">
+                            <tr :class="m.fin ? 'final' : ''">
+                                <td class="col-dist" x-text="m.dist + ' m'"></td>
+                                <td class="col-best"  x-text="m.best"></td>
+                                <td class="col-allow" x-text="m.allow"></td>
+                                <td class="col-avg"   x-text="m.avg"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
             </div>
 
         </div>
     </div>
-
 </div>
 
-<!-- Sticky bottom bar -->
 <div class="calc-bar">
-    <button type="button" class="calc-btn" onclick="calculate()">⚡ Berechnen</button>
+    <button class="calc-btn" @click="calc()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        <span x-text="done ? 'Neu berechnen' : 'Berechnen'"></span>
+    </button>
 </div>
 
 <script>
-    function switchTab(color) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        if (color === 'green') {
-            document.querySelector('.green-tab').classList.add('active');
-            document.getElementById('tab-green').classList.add('active');
-        } else {
-            document.querySelector('.red-tab').classList.add('active');
-            document.getElementById('tab-red').classList.add('active');
-        }
-    }
+function app() {
+    return {
+        A: { len: 4500, best: '12:00', allow: '14:00' },
+        B: { len: 4200, best: '13:00', allow: '15:00' },
+        e: {}, done: false, run: 0, rA: [], rB: [],
 
-    function calculate() {
-        const inputs = [
-            {length: "A1", best: "A2", allowed: "A3", results: "resultsBody"},
-            {length: "B1", best: "B2", allowed: "B3", results: "hindernisResultsBody"}
-        ];
+        calc() {
+            if (!this.validate()) return;
+            this.rA = this.milestones(this.A);
+            this.rB = this.milestones(this.B);
+            this.run += 1;
+            this.done = true;
+            this.$nextTick(() => { this.$refs.results.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
+        },
 
-        let isValid = true;
+        validate() {
+            this.e = {};
+            const t = v => /^\d{1,2}:\d{2}$/.test(v);
+            const n = v => +v > 0;
+            if (!n(this.A.len))   this.e.Al = true;
+            if (!t(this.A.best))  this.e.Ab = true;
+            if (!t(this.A.allow)) this.e.Aa = true;
+            if (!n(this.B.len))   this.e.Bl = true;
+            if (!t(this.B.best))  this.e.Bb = true;
+            if (!t(this.B.allow)) this.e.Ba = true;
+            return Object.keys(this.e).length === 0;
+        },
 
-        inputs.forEach(({length, best, allowed}) => {
-            if (!isPositiveNumber(document.getElementById(length).value)) {
-                alert(`Fehler: Länge (${length}) muss eine positive Zahl sein.`);
-                isValid = false;
-            }
-            if (!isValidTimeFormat(document.getElementById(best).value)) {
-                alert(`Fehler: Best Zeit (${best}) muss im Format min:sec sein.`);
-                isValid = false;
-            }
-            if (!isValidTimeFormat(document.getElementById(allowed).value)) {
-                alert(`Fehler: Erlaubte Zeit (${allowed}) muss im Format min:sec sein.`);
-                isValid = false;
-            }
-        });
+        milestones(tr) {
+            const len = +tr.len, bSec = this.s(tr.best), aSec = this.s(tr.allow), mSec = (bSec+aSec)/2;
+            const rows = [], steps = Math.floor(len/1000), rem = len%1000;
+            for (let i = 1; i <= steps; i++) rows.push(this.row(i*1000, bSec, aSec, mSec, len, i===steps && rem===0));
+            if (rem > 0) rows.push(this.row(len, bSec, aSec, mSec, len, true));
+            return rows;
+        },
 
-        if (!isValid) return;
+        row(d, bSec, aSec, mSec, len, fin) {
+            return { dist: d, best: this.f(bSec/len*d), allow: this.f(aSec/len*d), avg: this.f(mSec/len*d), fin };
+        },
 
-        inputs.forEach(({length, best, allowed, results}) => {
-            const len         = parseInt(document.getElementById(length).value, 10);
-            const bestTime    = convertTimeToSeconds(document.getElementById(best).value);
-            const allowedTime = convertTimeToSeconds(document.getElementById(allowed).value);
-
-
-            const steps= Math.floor(len / 1000);
-            const remainder = len % 1000;
-            const body      = document.getElementById(results);
-            body.innerHTML  = "";
-
-            for (let i = 1; i <= steps; i++) {
-                body.innerHTML += createRow(i * 1000, bestTime, allowedTime, len);
-            }
-            if (remainder > 0) {
-                body.innerHTML += createRow(steps * 1000 + remainder, bestTime, allowedTime, len);
-            }
-        });
-
-        const section = document.getElementById('resultsSection');
-        section.classList.remove('visible');
-        void section.offsetWidth;
-        section.classList.add('visible');
-        switchTab('green');
-        section.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-    }
-
-    function isPositiveNumber(v) {
-        const n = parseFloat(v);
-        return !isNaN(n) && n > 0;
-    }
-
-    function isValidTimeFormat(v) {
-        return /^\d{1,2}:\d{2}$/.test(v);
-    }
-
-    function createRow(distance, bestTime, allowedTime, totalLength) {
-        const avgTime = (bestTime + allowedTime) / 2;
-        return `<tr>
-            <td>${distance}</td>
-            <td>${formatTime(bestTime    / totalLength * distance)}</td>
-            <td>${formatTime(allowedTime / totalLength * distance)}</td>
-            <td>${formatTime(avgTime     / totalLength * distance)}</td>
-        </tr>`;
-    }
-
-    function convertTimeToSeconds(time) {
-        const p = time.split(":").map(Number);
-        return p.length === 2 ? p[0] * 60 + p[1] : 0;
-    }
-
-    function formatTime(seconds) {
-        const m = Math.floor(seconds / 60);
-        const s = Math.round(seconds % 60);
-        return `${padZero(m)}:${padZero(s)}`;
-    }
-
-    function padZero(n) { return n < 10 ? "0" + n : n; }
-
-    document.querySelectorAll('input').forEach(input => {
-        let old = input.value;
-        input.addEventListener('click', function () { this.value = ''; });
-        input.addEventListener('focus', function () { old = this.value; });
-        input.addEventListener('blur',  function () { if (!this.value) this.value = old; });
-    });
+        s(t) { const [m,s] = t.split(':').map(Number); return m*60+s; },
+        f(v)  { const m=Math.floor(v/60), s=Math.round(v%60); return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+    };
+}
 </script>
 </body>
 </html>
