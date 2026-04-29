@@ -181,6 +181,34 @@
 
         [x-cloak] { display: none !important; }
 
+        /* Method segmented toggle */
+        .method-toggle {
+            display: flex;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 3px;
+            margin-bottom: 16px;
+            gap: 2px;
+        }
+        .method-btn {
+            flex: 1;
+            font-family: var(--font);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            border-radius: 99px;
+            padding: 9px 12px;
+            cursor: pointer;
+            transition: background .18s, color .18s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .method-btn.active { background: var(--green); color: #000; }
+
         /* Language toggle button */
         .lang-btn {
             position: fixed;
@@ -221,6 +249,12 @@
 <div class="main">
     <p class="caption" x-text="t('caption')"></p>
 
+    <!-- Method toggle -->
+    <div class="method-toggle">
+        <button class="method-btn" :class="method==='standard' && 'active'" @click="method='standard'; done=false" x-text="t('methodStd')"></button>
+        <button class="method-btn" :class="method==='speed'    && 'active'" @click="method='speed';    done=false" x-text="t('methodSpeed')"></button>
+    </div>
+
     <div class="track-card green">
         <div class="track-head"><div class="dot"></div><span x-text="t('trackA')"></span></div>
         <div class="track-body">
@@ -228,13 +262,23 @@
                 <label x-text="t('length')"></label>
                 <input type="number" x-model="A.len" inputmode="numeric" :class="e.Al && 'err'" @input="e.Al=false">
             </div>
-            <div class="field">
+            <!-- Standard inputs -->
+            <div class="field" x-show="method==='standard'">
                 <label>Best (min:sec)</label>
                 <input type="text" x-model="A.best" inputmode="decimal" placeholder="12:00" :class="e.Ab && 'err'" @input="e.Ab=false" @focus="$el.select()">
             </div>
-            <div class="field">
+            <div class="field" x-show="method==='standard'">
                 <label x-text="t('allowed')"></label>
                 <input type="text" x-model="A.allow" inputmode="decimal" placeholder="14:00" :class="e.Aa && 'err'" @input="e.Aa=false" @focus="$el.select()">
+            </div>
+            <!-- Speed inputs -->
+            <div class="field" x-show="method==='speed'">
+                <label x-text="t('speed')"></label>
+                <input type="number" x-model="A.speed" inputmode="decimal" placeholder="15" :class="e.As && 'err'" @input="e.As=false">
+            </div>
+            <div class="field" x-show="method==='speed'">
+                <label x-text="t('timeDiff')"></label>
+                <input type="text" x-model="A.diff" inputmode="decimal" placeholder="02:00" :class="e.Ad && 'err'" @input="e.Ad=false" @focus="$el.select()">
             </div>
         </div>
     </div>
@@ -246,13 +290,23 @@
                 <label x-text="t('length')"></label>
                 <input type="number" x-model="B.len" inputmode="numeric" :class="e.Bl && 'err'" @input="e.Bl=false">
             </div>
-            <div class="field">
+            <!-- Standard inputs -->
+            <div class="field" x-show="method==='standard'">
                 <label>Best (min:sec)</label>
                 <input type="text" x-model="B.best" inputmode="decimal" placeholder="13:00" :class="e.Bb && 'err'" @input="e.Bb=false" @focus="$el.select()">
             </div>
-            <div class="field">
+            <div class="field" x-show="method==='standard'">
                 <label x-text="t('allowed')"></label>
                 <input type="text" x-model="B.allow" inputmode="decimal" placeholder="15:00" :class="e.Ba && 'err'" @input="e.Ba=false" @focus="$el.select()">
+            </div>
+            <!-- Speed inputs -->
+            <div class="field" x-show="method==='speed'">
+                <label x-text="t('speed')"></label>
+                <input type="number" x-model="B.speed" inputmode="decimal" placeholder="15" :class="e.Bs && 'err'" @input="e.Bs=false">
+            </div>
+            <div class="field" x-show="method==='speed'">
+                <label x-text="t('timeDiff')"></label>
+                <input type="text" x-model="B.diff" inputmode="decimal" placeholder="02:00" :class="e.Bd && 'err'" @input="e.Bd=false" @focus="$el.select()">
             </div>
         </div>
     </div>
@@ -334,38 +388,47 @@ function app() {
         lang: 'de',
         i18n: {
             de: {
-                eyebrow:  '🏇 Kutschsport',
-                title:    'Gel&auml;nde<em>Zeiten</em><br>Rechner',
-                caption:  'Strecken eingeben',
-                trackA:   'Aufw\u00e4rmstrecke',
-                trackB:   'Hindernisstrecke',
-                length:   'L\u00e4nge (m)',
-                allowed:  'Erlaubt (min:sec)',
-                calc:     'Berechnen',
-                recalc:   'Neu berechnen',
-                dist:     'Distanz',
-                colAllow: 'Erlaubt',
-                avg:      'Mittel'
+                eyebrow:    '🏇 Kutschsport',
+                title:      'Gel&auml;nde<em>Zeiten</em><br>Rechner',
+                caption:    'Strecken eingeben',
+                trackA:     'Aufw\u00e4rmstrecke',
+                trackB:     'Hindernisstrecke',
+                length:     'L\u00e4nge (m)',
+                allowed:    'Erlaubt (min:sec)',
+                calc:       'Berechnen',
+                recalc:     'Neu berechnen',
+                dist:       'Distanz',
+                colAllow:   'Erlaubt',
+                avg:        'Mittel',
+                methodStd:  'Zeiten',
+                methodSpeed:'Geschwindigkeit',
+                speed:      'Geschw. (km/h)',
+                timeDiff:   'Zeitfenster (min:sec)'
             },
             en: {
-                eyebrow:  '🏇 Carriage Sport',
-                title:    'Marathon<br><em>Time</em> Calculator',
-                caption:  'Enter Tracks',
-                trackA:   'Warm-up Track',
-                trackB:   'Obstacle Track',
-                length:   'Length (m)',
-                allowed:  'Allowed (min:sec)',
-                calc:     'Calculate',
-                recalc:   'Recalculate',
-                dist:     'Distance',
-                colAllow: 'Allowed',
-                avg:      'Average'
+                eyebrow:    '🏇 Carriage Sport',
+                title:      'Marathon<br><em>Time</em> Calculator',
+                caption:    'Enter Tracks',
+                trackA:     'Warm-up Track',
+                trackB:     'Obstacle Track',
+                length:     'Length (m)',
+                allowed:    'Allowed (min:sec)',
+                calc:       'Calculate',
+                recalc:     'Recalculate',
+                dist:       'Distance',
+                colAllow:   'Allowed',
+                avg:        'Average',
+                methodStd:  'Times',
+                methodSpeed:'Speed',
+                speed:      'Speed (km/h)',
+                timeDiff:   'Time window (min:sec)'
             }
         },
         t(key) { return this.i18n[this.lang][key]; },
 
-        A: { len: 4500, best: '12:00', allow: '14:00' },
-        B: { len: 4200, best: '13:00', allow: '15:00' },
+        method: 'standard',
+        A: { len: 4500, best: '12:00', allow: '14:00', speed: 15, diff: '02:00' },
+        B: { len: 4200, best: '13:00', allow: '15:00', speed: 15, diff: '02:00' },
         e: {}, done: false, run: 0, rA: [], rB: [],
 
         calc() {
@@ -381,17 +444,34 @@ function app() {
             this.e = {};
             const isTime = v => /^\d{1,2}:\d{2}$/.test(v);
             const isPos  = v => +v > 0;
-            if (!isPos(this.A.len))    this.e.Al = true;
-            if (!isTime(this.A.best))  this.e.Ab = true;
-            if (!isTime(this.A.allow)) this.e.Aa = true;
-            if (!isPos(this.B.len))    this.e.Bl = true;
-            if (!isTime(this.B.best))  this.e.Bb = true;
-            if (!isTime(this.B.allow)) this.e.Ba = true;
+            if (!isPos(this.A.len))   this.e.Al = true;
+            if (!isPos(this.B.len))   this.e.Bl = true;
+            if (this.method === 'standard') {
+                if (!isTime(this.A.best))  this.e.Ab = true;
+                if (!isTime(this.A.allow)) this.e.Aa = true;
+                if (!isTime(this.B.best))  this.e.Bb = true;
+                if (!isTime(this.B.allow)) this.e.Ba = true;
+            } else {
+                if (!isPos(this.A.speed))  this.e.As = true;
+                if (!isTime(this.A.diff))  this.e.Ad = true;
+                if (!isPos(this.B.speed))  this.e.Bs = true;
+                if (!isTime(this.B.diff))  this.e.Bd = true;
+            }
             return Object.keys(this.e).length === 0;
         },
 
         milestones(tr) {
-            const len = +tr.len, bSec = this.s(tr.best), aSec = this.s(tr.allow), mSec = (bSec+aSec)/2;
+            const len = +tr.len;
+            let bSec, aSec;
+            if (this.method === 'speed') {
+                // Best = distance ÷ speed; Allowed = Best + time difference
+                bSec = len * 3.6 / +tr.speed;
+                aSec = bSec + this.s(tr.diff);
+            } else {
+                bSec = this.s(tr.best);
+                aSec = this.s(tr.allow);
+            }
+            const mSec = (bSec + aSec) / 2;
             const rows = [], steps = Math.floor(len/1000), rem = len%1000;
             for (let i = 1; i <= steps; i++) rows.push(this.row(i*1000, bSec, aSec, mSec, len, i===steps && rem===0));
             if (rem > 0) rows.push(this.row(len, bSec, aSec, mSec, len, true));
