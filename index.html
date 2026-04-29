@@ -59,7 +59,20 @@
         .track-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px 16px; }
         .f-full { grid-column: 1 / -1; }
         @media (min-width: 420px) { .track-body { grid-template-columns: 1.1fr 1fr 1fr; } .f-full { grid-column: auto; } }
-        .field label { display: block; font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+        .field label { display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+        .tip-ico {
+            flex-shrink: 0; display: inline-flex; align-items: center;
+            background: none; border: none; padding: 0; color: var(--faint);
+            cursor: pointer; transition: color .15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tip-ico:hover, .tip-ico:focus-visible { color: var(--green); outline: none; }
+        .tip-text {
+            font-size: 11px; font-weight: 400; letter-spacing: 0; text-transform: none;
+            line-height: 1.45; color: var(--muted);
+            background: rgba(255,255,255,0.055); border: 1px solid var(--border);
+            border-radius: 8px; padding: 7px 10px; margin-bottom: 6px;
+        }
         .field input {
             width: 100%; font-size: 17px; font-family: var(--font); font-weight: 700;
             text-align: center; color: var(--text);
@@ -263,21 +276,25 @@
                 <input type="number" x-model="A.len" inputmode="numeric" :class="e.Al && 'err'" @input="e.Al=false">
             </div>
             <!-- Standard inputs -->
-            <div class="field" x-show="method==='standard'">
-                <label>Best (min:sec)</label>
+            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                <label><span>Best (min:sec)</span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
                 <input type="text" x-model="A.best" inputmode="decimal" placeholder="12:00" :class="e.Ab && 'err'" @input="e.Ab=false" @focus="$el.select()">
             </div>
-            <div class="field" x-show="method==='standard'">
-                <label x-text="t('allowed')"></label>
+            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                <label><span x-text="t('allowed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
                 <input type="text" x-model="A.allow" inputmode="decimal" placeholder="14:00" :class="e.Aa && 'err'" @input="e.Aa=false" @focus="$el.select()">
             </div>
             <!-- Speed inputs -->
-            <div class="field" x-show="method==='speed'">
-                <label x-text="t('speed')"></label>
+            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                <label><span x-text="t('speed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
                 <input type="number" x-model="A.speed" inputmode="decimal" placeholder="15" :class="e.As && 'err'" @input="e.As=false">
             </div>
-            <div class="field" x-show="method==='speed'">
-                <label x-text="t('timeDiff')"></label>
+            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                <label><span x-text="t('timeDiff')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
                 <input type="text" x-model="A.diff" inputmode="decimal" placeholder="02:00" :class="e.Ad && 'err'" @input="e.Ad=false" @focus="$el.select()">
             </div>
         </div>
@@ -291,21 +308,25 @@
                 <input type="number" x-model="B.len" inputmode="numeric" :class="e.Bl && 'err'" @input="e.Bl=false">
             </div>
             <!-- Standard inputs -->
-            <div class="field" x-show="method==='standard'">
-                <label>Best (min:sec)</label>
+            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                <label><span>Best (min:sec)</span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
                 <input type="text" x-model="B.best" inputmode="decimal" placeholder="13:00" :class="e.Bb && 'err'" @input="e.Bb=false" @focus="$el.select()">
             </div>
-            <div class="field" x-show="method==='standard'">
-                <label x-text="t('allowed')"></label>
+            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                <label><span x-text="t('allowed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
                 <input type="text" x-model="B.allow" inputmode="decimal" placeholder="15:00" :class="e.Ba && 'err'" @input="e.Ba=false" @focus="$el.select()">
             </div>
             <!-- Speed inputs -->
-            <div class="field" x-show="method==='speed'">
-                <label x-text="t('speed')"></label>
+            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                <label><span x-text="t('speed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
                 <input type="number" x-model="B.speed" inputmode="decimal" placeholder="15" :class="e.Bs && 'err'" @input="e.Bs=false">
             </div>
-            <div class="field" x-show="method==='speed'">
-                <label x-text="t('timeDiff')"></label>
+            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                <label><span x-text="t('timeDiff')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
+                <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
                 <input type="text" x-model="B.diff" inputmode="decimal" placeholder="02:00" :class="e.Bd && 'err'" @input="e.Bd=false" @focus="$el.select()">
             </div>
         </div>
@@ -403,7 +424,11 @@ function app() {
                 methodStd:  'Zeiten',
                 methodSpeed:'Geschwindigkeit',
                 speed:      'Geschw. (km/h)',
-                timeDiff:   'Zeitfenster (min:sec)'
+                timeDiff:   'Zeitfenster (min:sec)',
+                tipBest:    'Die Bestzeit \u2013 die schnellste erlaubte Zeit f\u00fcr diese Strecke.',
+                tipAllowed: 'Die erlaubte Zeit \u2013 wird sie \u00fcberschritten, gibt es Strafpunkte.',
+                tipSpeed:   'Vorgeschriebene Durchschnittsgeschwindigkeit f\u00fcr diese Strecke.',
+                tipDiff:    'Zeitunterschied zwischen Best- und erlaubter Zeit (z.\u202fB. 02:00).'
             },
             en: {
                 eyebrow:    '🏇 Carriage Sport',
@@ -421,7 +446,11 @@ function app() {
                 methodStd:  'Times',
                 methodSpeed:'Speed',
                 speed:      'Speed (km/h)',
-                timeDiff:   'Time window (min:sec)'
+                timeDiff:   'Time window (min:sec)',
+                tipBest:    'The best time \u2013 the fastest allowed time for this track.',
+                tipAllowed: 'The allowed time \u2013 exceeding it incurs time penalties.',
+                tipSpeed:   'The prescribed average speed for this track.',
+                tipDiff:    'The time difference between best and allowed time (e.\u202fg. 02:00).'
             }
         },
         t(key) { return this.i18n[this.lang][key]; },
