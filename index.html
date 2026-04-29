@@ -180,27 +180,52 @@
         .col-avg   { color: var(--blue); }
 
         [x-cloak] { display: none !important; }
+
+        /* Language toggle button */
+        .lang-btn {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            right: 16px;
+            z-index: 200;
+            font-family: var(--font);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.80);
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.20);
+            border-radius: 99px;
+            padding: 6px 14px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background .2s, color .2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .lang-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
     </style>
 </head>
 <body x-data="app()">
+
+<button class="lang-btn" @click="lang = lang === 'de' ? 'en' : 'de'" x-text="lang === 'de' ? 'EN' : 'DE'"></button>
 
 <div class="hero">
     <img src="Designer.png" alt="Gelaendefahren">
     <div class="hero-overlay"></div>
     <div class="hero-copy">
-        <p class="eyebrow">🏇 Kutschsport</p>
-        <h1 class="hero-title">Gel&auml;nde<em>Zeiten</em><br>Rechner</h1>
+        <p class="eyebrow" x-text="t('eyebrow')"></p>
+        <h1 class="hero-title" x-html="t('title')"></h1>
     </div>
 </div>
 
 <div class="main">
-    <p class="caption">Strecken eingeben</p>
+    <p class="caption" x-text="t('caption')"></p>
 
     <div class="track-card green">
-        <div class="track-head"><div class="dot"></div>Aufwärmstrecke</div>
+        <div class="track-head"><div class="dot"></div><span x-text="t('trackA')"></span></div>
         <div class="track-body">
             <div class="field f-full">
-                <label>Länge (m)</label>
+                <label x-text="t('length')"></label>
                 <input type="number" x-model="A.len" inputmode="numeric" :class="e.Al && 'err'" @input="e.Al=false">
             </div>
             <div class="field">
@@ -208,17 +233,17 @@
                 <input type="text" x-model="A.best" inputmode="decimal" placeholder="12:00" :class="e.Ab && 'err'" @input="e.Ab=false" @focus="$el.select()">
             </div>
             <div class="field">
-                <label>Erlaubt (min:sec)</label>
+                <label x-text="t('allowed')"></label>
                 <input type="text" x-model="A.allow" inputmode="decimal" placeholder="14:00" :class="e.Aa && 'err'" @input="e.Aa=false" @focus="$el.select()">
             </div>
         </div>
     </div>
 
     <div class="track-card red">
-        <div class="track-head"><div class="dot"></div>Hindernisstrecke</div>
+        <div class="track-head"><div class="dot"></div><span x-text="t('trackB')"></span></div>
         <div class="track-body">
             <div class="field f-full">
-                <label>Länge (m)</label>
+                <label x-text="t('length')"></label>
                 <input type="number" x-model="B.len" inputmode="numeric" :class="e.Bl && 'err'" @input="e.Bl=false">
             </div>
             <div class="field">
@@ -226,7 +251,7 @@
                 <input type="text" x-model="B.best" inputmode="decimal" placeholder="13:00" :class="e.Bb && 'err'" @input="e.Bb=false" @focus="$el.select()">
             </div>
             <div class="field">
-                <label>Erlaubt (min:sec)</label>
+                <label x-text="t('allowed')"></label>
                 <input type="text" x-model="B.allow" inputmode="decimal" placeholder="15:00" :class="e.Ba && 'err'" @input="e.Ba=false" @focus="$el.select()">
             </div>
         </div>
@@ -236,18 +261,18 @@
         <div class="hr"></div>
         <div class="results-grid">
 
-            <!-- Aufwärmstrecke table -->
+            <!-- Track A result table -->
             <div class="result-card green">
                 <div class="result-card-head">
-                    <div class="dot"></div>Aufwärmstrecke
+                    <div class="dot"></div><span x-text="t('trackA')"></span>
                 </div>
                 <table class="rt">
                     <thead>
                         <tr>
-                            <th>Distanz</th>
+                            <th x-text="t('dist')"></th>
                             <th style="color:var(--green)">Best</th>
-                            <th style="color:var(--red)">Erlaubt</th>
-                            <th style="color:var(--blue)">Mittel</th>
+                            <th style="color:var(--red)" x-text="t('colAllow')"></th>
+                            <th style="color:var(--blue)" x-text="t('avg')"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -263,18 +288,18 @@
                 </table>
             </div>
 
-            <!-- Hindernisstrecke table -->
+            <!-- Track B result table -->
             <div class="result-card red">
                 <div class="result-card-head">
-                    <div class="dot"></div>Hindernisstrecke
+                    <div class="dot"></div><span x-text="t('trackB')"></span>
                 </div>
                 <table class="rt">
                     <thead>
                         <tr>
-                            <th>Distanz</th>
+                            <th x-text="t('dist')"></th>
                             <th style="color:var(--green)">Best</th>
-                            <th style="color:var(--red)">Erlaubt</th>
-                            <th style="color:var(--blue)">Mittel</th>
+                            <th style="color:var(--red)" x-text="t('colAllow')"></th>
+                            <th style="color:var(--blue)" x-text="t('avg')"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -299,13 +324,46 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
         </svg>
-        <span x-text="done ? 'Neu berechnen' : 'Berechnen'"></span>
+        <span x-text="done ? t('recalc') : t('calc')"></span>
     </button>
 </div>
 
 <script>
 function app() {
     return {
+        lang: 'de',
+        i18n: {
+            de: {
+                eyebrow:  '🏇 Kutschsport',
+                title:    'Gel&auml;nde<em>Zeiten</em><br>Rechner',
+                caption:  'Strecken eingeben',
+                trackA:   'Aufw\u00e4rmstrecke',
+                trackB:   'Hindernisstrecke',
+                length:   'L\u00e4nge (m)',
+                allowed:  'Erlaubt (min:sec)',
+                calc:     'Berechnen',
+                recalc:   'Neu berechnen',
+                dist:     'Distanz',
+                colAllow: 'Erlaubt',
+                avg:      'Mittel'
+            },
+            en: {
+                eyebrow:  '🏇 Carriage Sport',
+                title:    'Cross-Country<br><em>Time</em> Calculator',
+                caption:  'Enter Tracks',
+                trackA:   'Warm-up Track',
+                trackB:   'Obstacle Track',
+                length:   'Length (m)',
+                allowed:  'Allowed (min:sec)',
+                calc:     'Calculate',
+                recalc:   'Recalculate',
+                dist:     'Distance',
+                colAllow: 'Allowed',
+                avg:      'Average'
+            }
+        },
+        t(key) { return this.i18n[this.lang][key]; },
+
         A: { len: 4500, best: '12:00', allow: '14:00' },
         B: { len: 4200, best: '13:00', allow: '15:00' },
         e: {}, done: false, run: 0, rA: [], rB: [],
@@ -321,14 +379,14 @@ function app() {
 
         validate() {
             this.e = {};
-            const t = v => /^\d{1,2}:\d{2}$/.test(v);
-            const n = v => +v > 0;
-            if (!n(this.A.len))   this.e.Al = true;
-            if (!t(this.A.best))  this.e.Ab = true;
-            if (!t(this.A.allow)) this.e.Aa = true;
-            if (!n(this.B.len))   this.e.Bl = true;
-            if (!t(this.B.best))  this.e.Bb = true;
-            if (!t(this.B.allow)) this.e.Ba = true;
+            const isTime = v => /^\d{1,2}:\d{2}$/.test(v);
+            const isPos  = v => +v > 0;
+            if (!isPos(this.A.len))    this.e.Al = true;
+            if (!isTime(this.A.best))  this.e.Ab = true;
+            if (!isTime(this.A.allow)) this.e.Aa = true;
+            if (!isPos(this.B.len))    this.e.Bl = true;
+            if (!isTime(this.B.best))  this.e.Bb = true;
+            if (!isTime(this.B.allow)) this.e.Ba = true;
             return Object.keys(this.e).length === 0;
         },
 
@@ -344,7 +402,7 @@ function app() {
             return { dist: d, best: this.f(bSec/len*d), allow: this.f(aSec/len*d), avg: this.f(mSec/len*d), fin };
         },
 
-        s(t) { const [m,s] = t.split(':').map(Number); return m*60+s; },
+        s(ts) { const [m,sec] = ts.split(':').map(Number); return m*60+sec; },
         f(v)  { const m=Math.floor(v/60), s=Math.round(v%60); return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
     };
 }
