@@ -437,11 +437,23 @@
         .ms-btn.ms-late  { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.40); color: var(--red); }
         .ms-btn.ms-ok    { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.35); color: var(--green); }
         .ms-btn:disabled { cursor: default; opacity: .45; }
+
+        /* Keyboard dismiss button (swaps with lang-btn when input focused) */
+        .kbd-done {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            right: 16px; z-index: 201;
+            font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+            color: #000; background: var(--green); border: none; border-radius: 99px;
+            padding: 6px 14px; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
     </style>
 </head>
-<body x-data="app()">
+<body x-data="app()" @focusin.window="onFocusIn($event)" @focusout.window="onFocusOut($event)">
 
-<button class="lang-btn" @click="lang = lang === 'de' ? 'en' : 'de'" x-text="lang === 'de' ? 'EN' : 'DE'"></button>
+<button class="kbd-done" x-show="kbdVisible" x-cloak @click="document.activeElement.blur()">✓ Fertig</button>
+<button class="lang-btn" x-show="!kbdVisible" @click="lang = lang === 'de' ? 'en' : 'de'" x-text="lang === 'de' ? 'EN' : 'DE'"></button>
 
 <div class="hero">
     <img src="Designer.png" alt="Gelaendefahren">
@@ -474,29 +486,29 @@
         <div class="track-body">
             <div class="field f-full">
                 <label x-text="t('length')"></label>
-                <input type="number" x-model="A.len" inputmode="numeric" :class="e.Al && 'err'" @input="e.Al=false">
+                <input type="number" x-model="A.len" inputmode="numeric" enterkeyhint="done" :class="e.Al && 'err'" @input="e.Al=false" @keydown.enter.prevent="$el.blur()">
             </div>
             <!-- Standard inputs -->
             <div class="field" x-show="method==='standard'" x-data="{tip:false}">
                 <label><span>Best (min:sec)</span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
-                <input type="text" x-model="A.best" inputmode="text" placeholder="12:00" :class="e.Ab && 'err'" @input="e.Ab=false" @focus="$el.select()">
+                <input type="text" x-model="A.best" inputmode="text" placeholder="12:00" enterkeyhint="done" :class="e.Ab && 'err'" @keydown="timeKey($event)" @input="e.Ab=false; A.best = $el.value = timeClean($el.value)" @focus="$el.select()">
             </div>
             <div class="field" x-show="method==='standard'" x-data="{tip:false}">
                 <label><span x-text="t('allowed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
-                <input type="text" x-model="A.allow" inputmode="text" placeholder="14:00" :class="e.Aa && 'err'" @input="e.Aa=false" @focus="$el.select()">
+                <input type="text" x-model="A.allow" inputmode="text" placeholder="14:00" enterkeyhint="done" :class="e.Aa && 'err'" @keydown="timeKey($event)" @input="e.Aa=false; A.allow = $el.value = timeClean($el.value)" @focus="$el.select()">
             </div>
             <!-- Speed inputs -->
             <div class="field" x-show="method==='speed'" x-data="{tip:false}">
                 <label><span x-text="t('speed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
-                <input type="number" x-model="A.speed" inputmode="decimal" placeholder="15" :class="e.As && 'err'" @input="e.As=false">
+                <input type="number" x-model="A.speed" inputmode="decimal" placeholder="15" enterkeyhint="done" :class="e.As && 'err'" @input="e.As=false" @keydown.enter.prevent="$el.blur()">
             </div>
             <div class="field" x-show="method==='speed'" x-data="{tip:false}">
                 <label><span x-text="t('timeDiff')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
-                <input type="text" x-model="A.diff" inputmode="text" placeholder="02:00" :class="e.Ad && 'err'" @input="e.Ad=false" @focus="$el.select()">
+                <input type="text" x-model="A.diff" inputmode="text" placeholder="02:00" enterkeyhint="done" :class="e.Ad && 'err'" @keydown="timeKey($event)" @input="e.Ad=false; A.diff = $el.value = timeClean($el.value)" @focus="$el.select()">
             </div>
         </div>
     </div>
@@ -506,29 +518,29 @@
         <div class="track-body">
             <div class="field f-full">
                 <label x-text="t('length')"></label>
-                <input type="number" x-model="B.len" inputmode="numeric" :class="e.Bl && 'err'" @input="e.Bl=false">
+                <input type="number" x-model="B.len" inputmode="numeric" enterkeyhint="done" :class="e.Bl && 'err'" @input="e.Bl=false" @keydown.enter.prevent="$el.blur()">
             </div>
             <!-- Standard inputs -->
             <div class="field" x-show="method==='standard'" x-data="{tip:false}">
                 <label><span>Best (min:sec)</span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
-                <input type="text" x-model="B.best" inputmode="text" placeholder="13:00" :class="e.Bb && 'err'" @input="e.Bb=false" @focus="$el.select()">
+                <input type="text" x-model="B.best" inputmode="text" placeholder="13:00" enterkeyhint="done" :class="e.Bb && 'err'" @keydown="timeKey($event)" @input="e.Bb=false; B.best = $el.value = timeClean($el.value)" @focus="$el.select()">
             </div>
             <div class="field" x-show="method==='standard'" x-data="{tip:false}">
                 <label><span x-text="t('allowed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
-                <input type="text" x-model="B.allow" inputmode="text" placeholder="15:00" :class="e.Ba && 'err'" @input="e.Ba=false" @focus="$el.select()">
+                <input type="text" x-model="B.allow" inputmode="text" placeholder="15:00" enterkeyhint="done" :class="e.Ba && 'err'" @keydown="timeKey($event)" @input="e.Ba=false; B.allow = $el.value = timeClean($el.value)" @focus="$el.select()">
             </div>
             <!-- Speed inputs -->
             <div class="field" x-show="method==='speed'" x-data="{tip:false}">
                 <label><span x-text="t('speed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
-                <input type="number" x-model="B.speed" inputmode="decimal" placeholder="15" :class="e.Bs && 'err'" @input="e.Bs=false">
+                <input type="number" x-model="B.speed" inputmode="decimal" placeholder="15" enterkeyhint="done" :class="e.Bs && 'err'" @input="e.Bs=false" @keydown.enter.prevent="$el.blur()">
             </div>
             <div class="field" x-show="method==='speed'" x-data="{tip:false}">
                 <label><span x-text="t('timeDiff')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
                 <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
-                <input type="text" x-model="B.diff" inputmode="text" placeholder="02:00" :class="e.Bd && 'err'" @input="e.Bd=false" @focus="$el.select()">
+                <input type="text" x-model="B.diff" inputmode="text" placeholder="02:00" enterkeyhint="done" :class="e.Bd && 'err'" @keydown="timeKey($event)" @input="e.Bd=false; B.diff = $el.value = timeClean($el.value)" @focus="$el.select()">
             </div>
         </div>
     </div>
@@ -782,6 +794,31 @@ function app() {
             }
         },
         t(key) { return this.i18n[this.lang][key]; },
+
+        kbdVisible: false,
+        onFocusIn(e)  { if (e.target.tagName === 'INPUT') this.kbdVisible = true; },
+        onFocusOut(e) {
+            setTimeout(() => {
+                if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
+                    this.kbdVisible = false;
+                }
+            }, 100);
+        },
+        timeClean(v) {
+            let s = String(v).replace(/[^0-9:]/g, '');
+            const ci = s.indexOf(':');
+            if (ci !== -1) s = s.slice(0, ci + 1) + s.slice(ci + 1).replace(/:/g, '');
+            return s.slice(0, 5);
+        },
+        timeKey(e) {
+            if (e.ctrlKey || e.metaKey) return;
+            if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); return; }
+            const nav = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+            if (nav.includes(e.key)) return;
+            if (/^\d$/.test(e.key)) return;
+            if (e.key === ':' && !e.target.value.includes(':')) return;
+            e.preventDefault();
+        },
 
         method: 'standard',
         A: { len: 4500, best: '12:00', allow: '14:00', speed: 15, diff: '02:00' },
