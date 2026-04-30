@@ -306,6 +306,21 @@
             letter-spacing: .5px; color: var(--text);
             background: transparent; border: none; outline: none;
         }
+
+        /* Compact read-only config summary strip */
+        .phase-summary {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+            padding: 7px 16px; border-bottom: 1px solid var(--border);
+            font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums;
+        }
+        .ps-chip {
+            font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+            background: rgba(255,255,255,0.08); border: 1px solid var(--border-hi);
+            border-radius: 99px; padding: 2px 8px; color: var(--text); flex-shrink: 0;
+        }
+        .ps-val { font-weight: 600; }
+        .ps-val b { color: var(--text); font-weight: 800; }
+        .ps-sep { color: var(--faint); }
         .phase-cfg {
             padding: 12px 16px; border-bottom: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
@@ -351,13 +366,13 @@
 
         /* Progress bar */
         .progress-track {
-            position: relative; height: 6px;
+            position: relative; height: 14px;
             background: rgba(255,255,255,0.08);
-            border-radius: 99px; overflow: visible; margin: 4px 0 5px;
+            border-radius: 8px; overflow: visible; margin: 4px 0 5px;
         }
         .pb-fill {
             position: absolute; left: 0; top: 0; height: 100%;
-            border-radius: 99px; transition: width .1s linear, background .3s;
+            border-radius: 8px; transition: width .1s linear, background .3s;
             background: var(--faint);
         }
         .pb-fill.running { background: var(--green); }
@@ -365,8 +380,8 @@
         .pb-fill.over    { background: var(--red); }
         .pb-fill.done-ok { background: var(--blue); }
         .pb-best {
-            position: absolute; top: -3px; width: 2px; height: 12px;
-            background: rgba(255,255,255,0.30); border-radius: 1px;
+            position: absolute; top: -3px; width: 3px; height: calc(100% + 6px);
+            background: rgba(255,255,255,0.45); border-radius: 2px;
             transform: translateX(-50%);
         }
         .pb-labels {
@@ -585,94 +600,68 @@
     <div x-show="tab==='timer'" x-cloak>
         <p class="caption" x-text="t('timerCaption')"></p>
 
-        <template x-for="ph in phases" :key="ph.id">
-            <div class="phase-card" :class="ph.color">
+        <template x-for="tm in timers" :key="tm.id">
+            <div class="phase-card" :class="tm.color">
 
-                <!-- Head -->
+                <!-- Head: track name from i18n -->
                 <div class="phase-head">
                     <div class="dot"></div>
-                    <input class="phase-name-inp" type="text" x-model="ph.name">
+                    <span style="font-size:13px;font-weight:700;letter-spacing:.5px"
+                          x-text="tm.id==='a' ? t('trackA') : t('trackB')"></span>
                 </div>
 
-                <!-- Config: method toggle + inputs -->
-                <div class="phase-cfg">
-                    <div class="seg" style="align-self:flex-start">
-                        <button class="seg-btn" :class="ph.method==='standard' && 'active'"
-                                @click="ph.method='standard'; ph.marks={}; resetPhase(ph)"
-                                x-text="t('methodStd')"></button>
-                        <button class="seg-btn" :class="ph.method==='speed' && 'active'"
-                                @click="ph.method='speed'; ph.marks={}; resetPhase(ph)"
-                                x-text="t('methodSpeed')"></button>
-                    </div>
-                    <div class="cfg-row" x-show="ph.method==='standard'">
-                        <div class="cfg-field">
-                            <label x-text="t('cfgLength')"></label>
-                            <input class="cfg-inp" type="number" x-model.number="ph.len"
-                                   inputmode="numeric" :disabled="ph.running">
-                        </div>
-                        <div class="cfg-field">
-                            <label>Best</label>
-                            <input class="cfg-inp" type="text" x-model="ph.best"
-                                   placeholder="12:00" :disabled="ph.running">
-                        </div>
-                        <div class="cfg-field">
-                            <label x-text="t('cfgAllowed')"></label>
-                            <input class="cfg-inp" type="text" x-model="ph.allow"
-                                   placeholder="14:00" :disabled="ph.running">
-                        </div>
-                    </div>
-                    <div class="cfg-row" x-show="ph.method==='speed'">
-                        <div class="cfg-field">
-                            <label x-text="t('cfgLength')"></label>
-                            <input class="cfg-inp" type="number" x-model.number="ph.len"
-                                   inputmode="numeric" :disabled="ph.running">
-                        </div>
-                        <div class="cfg-field">
-                            <label x-text="t('cfgSpeed')"></label>
-                            <input class="cfg-inp" type="number" x-model.number="ph.speed"
-                                   inputmode="decimal" placeholder="15" :disabled="ph.running">
-                        </div>
-                        <div class="cfg-field">
-                            <label x-text="t('cfgDiff')"></label>
-                            <input class="cfg-inp" type="text" x-model="ph.diff"
-                                   placeholder="02:00" :disabled="ph.running">
-                        </div>
-                    </div>
+                <!-- Compact read-only config from calculator tab -->
+                <div class="phase-summary">
+                    <span class="ps-chip" x-text="t(method==='standard' ? 'methodStd' : 'methodSpeed')"></span>
+                    <span class="ps-val"><b x-text="phData(tm).len"></b> m</span>
+                    <span class="ps-sep">·</span>
+                    <span class="ps-val" x-show="method==='standard'">
+                        Best <b x-text="phData(tm).best"></b>
+                    </span>
+                    <span class="ps-val" x-show="method==='standard'" style="color:var(--red)">
+                        <b x-text="phData(tm).allow"></b>
+                    </span>
+                    <span class="ps-val" x-show="method==='speed'">
+                        <b x-text="phData(tm).speed"></b> km/h
+                    </span>
+                    <span class="ps-val" x-show="method==='speed'">
+                        Δ <b x-text="phData(tm).diff"></b>
+                    </span>
                 </div>
 
                 <!-- Timer body -->
                 <div class="phase-body">
 
                     <!-- Big timer -->
-                    <div class="timer-big" :class="timerClass(ph)"
-                         x-text="fmtTimer(elapsedSec(ph))"></div>
+                    <div class="timer-big" :class="timerClass(tm)"
+                         x-text="fmtTimer(elapsedSec(tm))"></div>
 
                     <!-- Wall-clock start / last pause -->
-                    <div class="clock-row" x-show="ph.startClock">
-                        <span>▶ <b x-text="ph.startClock"></b></span>
-                        <span x-show="ph.pauseClock">⏸ <b x-text="ph.pauseClock"></b></span>
+                    <div class="clock-row" x-show="tm.startClock">
+                        <span>▶ <b x-text="tm.startClock"></b></span>
+                        <span x-show="tm.pauseClock">⏸ <b x-text="tm.pauseClock"></b></span>
                     </div>
 
                     <!-- Progress bar -->
                     <div class="progress-track">
-                        <div class="pb-fill" :class="timerClass(ph)"
-                             :style="`width: ${Math.min(105, progressPct(ph))}%`"></div>
-                        <div class="pb-best" :style="`left: ${bestPct(ph)}%`"></div>
+                        <div class="pb-fill" :class="timerClass(tm)"
+                             :style="`width: ${Math.min(105, progressPct(tm))}%`"></div>
+                        <div class="pb-best" :style="`left: ${bestPct(tm)}%`"></div>
                     </div>
                     <div class="pb-labels">
-                        <span>Best: <span x-text="fmtSec(getBestSec(ph))"></span></span>
-                        <span><span x-text="t('cfgAllowed')"></span>: <span x-text="fmtSec(getAllowSec(ph))"></span></span>
+                        <span>Best: <span x-text="fmtSec(getBestSec(tm))"></span></span>
+                        <span><span x-text="t('cfgAllowed')"></span>: <span x-text="fmtSec(getAllowSec(tm))"></span></span>
                     </div>
 
                     <!-- Controls: large start/pause toggle + small reset -->
                     <div class="timer-controls">
-                        <button class="t-main-btn" :class="ph.running && 'pausing'"
-                                @click="togglePhase(ph)"
-                                x-text="ph.running ? t('pause') : (ph.paused || ph.pausedMs > 0 ? t('resume') : t('start'))">
+                        <button class="t-main-btn" :class="tm.running && 'pausing'"
+                                @click="togglePhase(tm)"
+                                x-text="tm.running ? t('pause') : (tm.paused || tm.pausedMs > 0 ? t('resume') : t('start'))">
                         </button>
                         <button class="t-reset-btn"
-                                x-show="ph.pausedMs > 0 || ph.running"
-                                @click="resetPhase(ph)"
+                                x-show="tm.pausedMs > 0 || tm.running"
+                                @click="resetPhase(tm)"
                                 x-text="t('reset')">
                         </button>
                     </div>
@@ -680,16 +669,16 @@
                     <!-- km Milestones -->
                     <div class="ms-caption" x-text="t('milestones')"></div>
                     <div class="ms-grid">
-                        <template x-for="ms in getMilestones(ph)" :key="ms.dist">
-                            <button class="ms-btn" :class="msBtnClass(ph, ms)"
-                                    :disabled="!ph.running && !ph.paused"
-                                    @click="markMs(ph, ms)">
+                        <template x-for="ms in getMilestones(tm)" :key="ms.dist">
+                            <button class="ms-btn" :class="msBtnClass(tm, ms)"
+                                    :disabled="!tm.running && !tm.paused"
+                                    @click="markMs(tm, ms)">
                                 <span class="ms-dist"
                                       x-text="ms.fin ? ms.dist+'m ✓' : (ms.dist/1000)+'km'"></span>
                                 <span class="ms-allow" x-text="fmtSec(ms.allowSec)"></span>
                                 <span class="ms-delta"
-                                      x-show="ph.marks[ms.dist] !== undefined"
-                                      x-text="msDelta(ph, ms)"></span>
+                                      x-show="tm.marks[ms.dist] !== undefined"
+                                      x-text="msDelta(tm, ms)"></span>
                             </button>
                         </template>
                     </div>
@@ -854,12 +843,14 @@ function app() {
         f(v)  { const m=Math.floor(v/60), s=Math.round(v%60); return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); },
 
         // ── MARATHON TIMER ────────────────────────────────────────────
-        phases: [
-            { id:'a', color:'green', name:'Aufw\u00e4rmstrecke',   method:'standard', len:4500, best:'12:00', allow:'14:00', speed:15, diff:'02:00', startMs:null, pausedMs:0, running:false, paused:false, startClock:'', pauseClock:'', marks:{} },
-            { id:'b', color:'red',   name:'Hindernisstrecke', method:'standard', len:4200, best:'13:00', allow:'15:00', speed:15, diff:'02:00', startMs:null, pausedMs:0, running:false, paused:false, startClock:'', pauseClock:'', marks:{} },
+        timers: [
+            { id:'a', color:'green', startMs:null, pausedMs:0, running:false, paused:false, startClock:'', pauseClock:'', marks:{} },
+            { id:'b', color:'red',   startMs:null, pausedMs:0, running:false, paused:false, startClock:'', pauseClock:'', marks:{} },
         ],
         tick: 0,
         _ticker: null,
+
+        phData(tm) { return tm.id === 'a' ? this.A : this.B; },
 
         parseMmSs(v) {
             const str = String(v || '');
@@ -868,117 +859,120 @@ function app() {
             return (m || 0) * 60 + (s || 0);
         },
 
-        getBestSec(ph) {
-            return ph.method === 'speed'
-                ? +ph.len * 3.6 / +ph.speed
-                : this.parseMmSs(ph.best);
+        getBestSec(tm) {
+            const d = this.phData(tm);
+            return this.method === 'speed'
+                ? +d.len * 3.6 / +d.speed
+                : this.parseMmSs(d.best);
         },
 
-        getAllowSec(ph) {
-            return ph.method === 'speed'
-                ? this.getBestSec(ph) + this.parseMmSs(ph.diff)
-                : this.parseMmSs(ph.allow);
+        getAllowSec(tm) {
+            const d = this.phData(tm);
+            return this.method === 'speed'
+                ? this.getBestSec(tm) + this.parseMmSs(d.diff)
+                : this.parseMmSs(d.allow);
         },
 
-        getMilestones(ph) {
-            const len  = +ph.len;
-            const bSec = this.getBestSec(ph);
-            const aSec = this.getAllowSec(ph);
+        getMilestones(tm) {
+            const d    = this.phData(tm);
+            const len  = +d.len;
+            const bSec = this.getBestSec(tm);
+            const aSec = this.getAllowSec(tm);
             if (!len || !aSec) return [];
             const rows  = [];
             const steps = Math.floor(len / 1000);
             const rem   = len % 1000;
             for (let i = 1; i <= steps; i++) {
-                const d = i * 1000;
-                rows.push({ dist: d, bestSec: bSec * d / len, allowSec: aSec * d / len, fin: i === steps && rem === 0 });
+                const dist = i * 1000;
+                rows.push({ dist, bestSec: bSec * dist / len, allowSec: aSec * dist / len, fin: i === steps && rem === 0 });
             }
             if (rem > 0) rows.push({ dist: len, bestSec: bSec, allowSec: aSec, fin: true });
             return rows;
         },
 
-        timerClass(ph) {
-            const el   = this.elapsedSec(ph);
-            const aSec = this.getAllowSec(ph);
-            const bSec = this.getBestSec(ph);
-            if (ph.pausedMs === 0 && !ph.running) return '';
+        timerClass(tm) {
+            const el   = this.elapsedSec(tm);
+            const aSec = this.getAllowSec(tm);
+            const bSec = this.getBestSec(tm);
+            if (tm.pausedMs === 0 && !tm.running) return '';
             if (el >= aSec)                return 'over';
-            if (ph.running && el >= bSec)  return 'warn';
-            if (ph.running)                return 'running';
+            if (tm.running && el >= bSec)  return 'warn';
+            if (tm.running)                return 'running';
             return 'done-ok';
         },
 
-        progressPct(ph) {
-            const aSec = this.getAllowSec(ph);
-            return aSec > 0 ? this.elapsedSec(ph) / aSec * 100 : 0;
+        progressPct(tm) {
+            const aSec = this.getAllowSec(tm);
+            return aSec > 0 ? this.elapsedSec(tm) / aSec * 100 : 0;
         },
 
-        bestPct(ph) {
-            const bSec = this.getBestSec(ph);
-            const aSec = this.getAllowSec(ph);
+        bestPct(tm) {
+            const bSec = this.getBestSec(tm);
+            const aSec = this.getAllowSec(tm);
             return aSec > 0 ? Math.min(99, bSec / aSec * 100) : 0;
         },
 
-        msBtnClass(ph, ms) {
-            const el     = this.elapsedSec(ph);
-            const marked = ph.marks[ms.dist] !== undefined;
+        msBtnClass(tm, ms) {
+            const el     = this.elapsedSec(tm);
+            const marked = tm.marks[ms.dist] !== undefined;
             if (marked) {
-                return (ph.marks[ms.dist] - ms.allowSec) <= 0 ? 'ms-ok' : 'ms-late';
+                return (tm.marks[ms.dist] - ms.allowSec) <= 0 ? 'ms-ok' : 'ms-late';
             }
             if (el >= ms.allowSec) return 'ms-over';
             if (el >= ms.bestSec)  return 'ms-warn';
             return '';
         },
 
-        markMs(ph, ms) {
-            ph.marks = { ...ph.marks, [ms.dist]: this.elapsedSec(ph) };
+        markMs(tm, ms) {
+            tm.marks = { ...tm.marks, [ms.dist]: this.elapsedSec(tm) };
         },
 
-        msDelta(ph, ms) {
-            const mark = ph.marks[ms.dist];
+        msDelta(tm, ms) {
+            const mark = tm.marks[ms.dist];
             if (mark === undefined) return '';
             const delta = mark - ms.allowSec;
             const sign  = delta < 0 ? '-' : '+';
             return sign + this.fmtSec(Math.abs(delta));
         },
 
-        togglePhase(ph) {
-            if (ph.running) {
-                ph.pausedMs  += Date.now() - ph.startMs;
-                ph.startMs    = null;
-                ph.running    = false;
-                ph.paused     = true;
-                ph.pauseClock = this._clockNow();
-                if (!this.phases.some(p => p.running)) this._stopTicker();
+        togglePhase(tm) {
+            if (tm.running) {
+                tm.pausedMs  += Date.now() - tm.startMs;
+                tm.startMs    = null;
+                tm.running    = false;
+                tm.paused     = true;
+                tm.pauseClock = this._clockNow();
+                if (!this.timers.some(t => t.running)) this._stopTicker();
             } else {
-                if (!ph.paused && ph.pausedMs === 0) {
-                    ph.marks      = {};
-                    ph.startClock = this._clockNow();
-                    ph.pauseClock = '';
+                if (!tm.paused && tm.pausedMs === 0) {
+                    tm.marks      = {};
+                    tm.startClock = this._clockNow();
+                    tm.pauseClock = '';
                 }
-                ph.startMs = Date.now();
-                ph.running = true;
-                ph.paused  = false;
+                tm.startMs = Date.now();
+                tm.running = true;
+                tm.paused  = false;
                 this._startTicker();
             }
         },
 
-        resetPhase(ph) {
-            ph.startMs    = null;
-            ph.pausedMs   = 0;
-            ph.running    = false;
-            ph.paused     = false;
-            ph.startClock = '';
-            ph.pauseClock = '';
-            ph.marks      = {};
-            if (!this.phases.some(p => p.running)) this._stopTicker();
+        resetPhase(tm) {
+            tm.startMs    = null;
+            tm.pausedMs   = 0;
+            tm.running    = false;
+            tm.paused     = false;
+            tm.startClock = '';
+            tm.pauseClock = '';
+            tm.marks      = {};
+            if (!this.timers.some(t => t.running)) this._stopTicker();
         },
 
-        elapsedSec(ph) {
-            if (ph.running) {
+        elapsedSec(tm) {
+            if (tm.running) {
                 const now = this.tick > 0 ? this.tick : Date.now();
-                return Math.max(0, (ph.pausedMs + (now - ph.startMs)) / 1000);
+                return Math.max(0, (tm.pausedMs + (now - tm.startMs)) / 1000);
             }
-            return ph.pausedMs / 1000;
+            return tm.pausedMs / 1000;
         },
 
         _clockNow() {
