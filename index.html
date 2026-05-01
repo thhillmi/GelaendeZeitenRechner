@@ -1726,6 +1726,7 @@
 
             markMs(tm, ms) {
                 tm.marks = {...tm.marks, [ms.dist]: this.elapsedSec(tm)};
+                if (ms.fin && tm.running) this.togglePhase(tm);
             },
 
             msDelta(tm, ms) {
