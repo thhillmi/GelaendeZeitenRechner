@@ -1378,10 +1378,10 @@
                     <div class="timer-controls">
                         <button class="t-main-btn" :class="tm.running && 'pausing'"
                                 @click="togglePhase(tm)"
-                                x-text="tm.running ? t('pause') : (tm.paused || tm.pausedMs > 0 ? t('resume') : t('start'))">
+                                x-text="tm.running ? t('pause') : (tm.paused || tm.frozenSec > 0 ? t('resume') : t('start'))">
                         </button>
                         <button class="t-reset-btn"
-                                x-show="tm.pausedMs > 0 || tm.running"
+                                x-show="tm.wallStartMs !== null"
                                 @click="resetPhase(tm)"
                                 x-text="t('reset')">
                         </button>
@@ -1621,8 +1621,8 @@
                 {
                     id: 'a',
                     color: 'green',
-                    startMs: null,
-                    pausedMs: 0,
+                    wallStartMs: null,
+                    frozenSec: 0,
                     running: false,
                     paused: false,
                     startClock: '',
@@ -1632,8 +1632,8 @@
                 {
                     id: 'b',
                     color: 'red',
-                    startMs: null,
-                    pausedMs: 0,
+                    wallStartMs: null,
+                    frozenSec: 0,
                     running: false,
                     paused: false,
                     startClock: '',
@@ -1695,7 +1695,7 @@
                 const el = this.elapsedSec(tm);
                 const aSec = this.getAllowSec(tm);
                 const bSec = this.getBestSec(tm);
-                if (tm.pausedMs === 0 && !tm.running) return '';
+                if (!tm.wallStartMs && !tm.running) return '';
                 if (el >= aSec) return 'over';
                 if (tm.running && el >= bSec) return 'warn';
                 if (tm.running) return 'running';
@@ -1738,19 +1738,22 @@
 
             togglePhase(tm) {
                 if (tm.running) {
-                    tm.pausedMs += Date.now() - tm.startMs;
-                    tm.startMs = null;
+                    // Pause: freeze the current wall-clock elapsed
+                    tm.frozenSec = (Date.now() - tm.wallStartMs) / 1000;
                     tm.running = false;
                     tm.paused = true;
                     tm.pauseClock = this._clockNow();
                     if (!this.timers.some(t => t.running)) this._stopTicker();
                 } else {
-                    if (!tm.paused && tm.pausedMs === 0) {
+                    if (!tm.paused && !tm.wallStartMs) {
+                        // Fresh start
+                        tm.wallStartMs = Date.now();
+                        tm.frozenSec = 0;
                         tm.marks = {};
                         tm.startClock = this._clockNow();
                         tm.pauseClock = '';
                     }
-                    tm.startMs = Date.now();
+                    // Resume: wallStartMs unchanged — elapsed will auto-jump to real wall time
                     tm.running = true;
                     tm.paused = false;
                     this._startTicker();
@@ -1758,8 +1761,8 @@
             },
 
             resetPhase(tm) {
-                tm.startMs = null;
-                tm.pausedMs = 0;
+                tm.wallStartMs = null;
+                tm.frozenSec = 0;
                 tm.running = false;
                 tm.paused = false;
                 tm.startClock = '';
@@ -1771,9 +1774,9 @@
             elapsedSec(tm) {
                 if (tm.running) {
                     const now = this.tick > 0 ? this.tick : Date.now();
-                    return Math.max(0, (tm.pausedMs + (now - tm.startMs)) / 1000);
+                    return Math.max(0, (now - tm.wallStartMs) / 1000);
                 }
-                return tm.pausedMs / 1000;
+                return tm.frozenSec;
             },
 
             _clockNow() {
