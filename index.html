@@ -3,33 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Gel&auml;ndeZeiten &middot; Rechner</title>
+    <title>Marathon Zeiten &middot; Rechner</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet">
     <style>
         :root {
             --bg: #07100a;
-            --surface: rgba(255,255,255,0.05);
-            --border: rgba(255,255,255,0.09);
-            --border-hi: rgba(255,255,255,0.17);
+            --surface: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.09);
+            --border-hi: rgba(255, 255, 255, 0.17);
             --green: #22c55e;
-            --green-dim: rgba(34,197,94,0.12);
-            --green-ring: rgba(34,197,94,0.28);
-            --green-glow: rgba(34,197,94,0.30);
+            --green-dim: rgba(34, 197, 94, 0.12);
+            --green-ring: rgba(34, 197, 94, 0.28);
+            --green-glow: rgba(34, 197, 94, 0.30);
             --red: #f87171;
-            --red-dim: rgba(248,113,113,0.10);
-            --red-ring: rgba(248,113,113,0.26);
+            --red-dim: rgba(248, 113, 113, 0.10);
+            --red-ring: rgba(248, 113, 113, 0.26);
             --blue: #60a5fa;
             --yellow: #fbbf24;
             --text: #f1f5f9;
-            --muted: rgba(241,245,249,0.46);
-            --faint: rgba(241,245,249,0.24);
+            --muted: rgba(241, 245, 249, 0.46);
+            --faint: rgba(241, 245, 249, 0.24);
             --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --r: 14px;
             --r-sm: 10px;
         }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         html, body {
             height: 100%;
             background: var(--bg);
@@ -38,76 +45,300 @@
             -webkit-text-size-adjust: 100%;
             overflow-x: hidden;
         }
-        .hero { position: relative; height: clamp(200px, 42svh, 340px); overflow: hidden; }
-        .hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 28%; display: block; }
-        .hero-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to bottom, rgba(7,16,10,0.04) 0%, rgba(7,16,10,0.50) 55%, rgba(7,16,10,1.00) 100%);
+
+        .hero {
+            position: relative;
+            height: clamp(200px, 42svh, 340px);
+            overflow: hidden;
         }
-        .hero-copy { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 20px 26px; }
-        .eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--green); margin-bottom: 7px; }
-        .hero-title { font-size: clamp(28px, 8vw, 50px); font-weight: 900; line-height: 1.0; letter-spacing: -1.5px; color: #fff; text-shadow: 0 4px 40px rgba(0,0,0,0.85); }
-        .hero-title em { font-style: normal; background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .main { max-width: 640px; margin: 0 auto; padding: 24px 16px calc(max(80px, env(safe-area-inset-bottom)) + 64px); }
-        .caption { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--faint); margin-bottom: 12px; }
-        .track-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 12px; }
-        .track-card.green { border-top: 2px solid var(--green); }
-        .track-card.red   { border-top: 2px solid var(--red); }
-        .track-head { display: flex; align-items: center; gap: 9px; padding: 13px 16px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text); border-bottom: 1px solid var(--border); }
-        .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-        .green .dot { background: var(--green); box-shadow: 0 0 7px var(--green); }
-        .red   .dot { background: var(--red);   box-shadow: 0 0 7px var(--red); }
-        .track-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px 16px; }
-        .f-full { grid-column: 1 / -1; }
-        @media (min-width: 420px) { .track-body { grid-template-columns: 1.1fr 1fr 1fr; } .f-full { grid-column: auto; } }
-        .field label { display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+
+        .hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 28%;
+            display: block;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(7, 16, 10, 0.04) 0%, rgba(7, 16, 10, 0.50) 55%, rgba(7, 16, 10, 1.00) 100%);
+        }
+
+        .hero-copy {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0 20px 26px;
+        }
+
+        .eyebrow {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--green);
+            margin-bottom: 7px;
+        }
+
+        .hero-title {
+            font-size: clamp(28px, 8vw, 50px);
+            font-weight: 900;
+            line-height: 1.0;
+            letter-spacing: -1.5px;
+            color: #fff;
+            text-shadow: 0 4px 40px rgba(0, 0, 0, 0.85);
+        }
+
+        .hero-title em {
+            font-style: normal;
+            background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 24px 16px calc(max(80px, env(safe-area-inset-bottom)) + 64px);
+        }
+
+        .caption {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-bottom: 12px;
+        }
+
+        .track-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .track-card.green {
+            border-top: 2px solid var(--green);
+        }
+
+        .track-card.red {
+            border-top: 2px solid var(--red);
+        }
+
+        .track-head {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 13px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .green .dot {
+            background: var(--green);
+            box-shadow: 0 0 7px var(--green);
+        }
+
+        .red .dot {
+            background: var(--red);
+            box-shadow: 0 0 7px var(--red);
+        }
+
+        .track-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 14px 16px 16px;
+        }
+
+        .f-full {
+            grid-column: 1 / -1;
+        }
+
+        @media (min-width: 420px) {
+            .track-body {
+                grid-template-columns: 1.1fr 1fr 1fr;
+            }
+
+            .f-full {
+                grid-column: auto;
+            }
+        }
+
+        .field label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
         .tip-ico {
-            flex-shrink: 0; display: inline-flex; align-items: center;
-            background: none; border: none; padding: 0; color: var(--faint);
-            cursor: pointer; transition: color .15s;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--faint);
+            cursor: pointer;
+            transition: color .15s;
             -webkit-tap-highlight-color: transparent;
         }
-        .tip-ico:hover, .tip-ico:focus-visible { color: var(--green); outline: none; }
-        .tip-text {
-            font-size: 11px; font-weight: 400; letter-spacing: 0; text-transform: none;
-            line-height: 1.45; color: var(--muted);
-            background: rgba(255,255,255,0.055); border: 1px solid var(--border);
-            border-radius: 8px; padding: 7px 10px; margin-bottom: 6px;
+
+        .tip-ico:hover, .tip-ico:focus-visible {
+            color: var(--green);
+            outline: none;
         }
+
+        .tip-text {
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0;
+            text-transform: none;
+            line-height: 1.45;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 10px;
+            margin-bottom: 6px;
+        }
+
         .field input {
-            width: 100%; font-size: 17px; font-family: var(--font); font-weight: 700;
-            text-align: center; color: var(--text);
-            background: rgba(255,255,255,0.055); border: 1px solid var(--border-hi);
-            border-radius: var(--r-sm); padding: 12px 8px; min-height: 50px;
-            outline: none; -webkit-appearance: none; appearance: none;
+            width: 100%;
+            font-size: 17px;
+            font-family: var(--font);
+            font-weight: 700;
+            text-align: center;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid var(--border-hi);
+            border-radius: var(--r-sm);
+            padding: 12px 8px;
+            min-height: 50px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
             transition: border-color .18s, background .18s, box-shadow .18s;
         }
-        .green .field input:focus { border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 0 3px var(--green-ring); }
-        .red   .field input:focus { border-color: var(--red);   background: var(--red-dim);   box-shadow: 0 0 0 3px var(--red-ring); }
-        .field input.err { border-color: var(--red) !important; background: var(--red-dim) !important; animation: shake .35s ease; }
-        @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-5px); } 40%,80% { transform: translateX(5px); } }
-        input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-        input[type=number] { -moz-appearance: textfield; }
-        .calc-bar {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            padding: 10px 16px max(10px, env(safe-area-inset-bottom));
-            background: rgba(7,16,10,0.90);
-            backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6);
-            border-top: 1px solid var(--border); z-index: 100;
+
+        .green .field input:focus {
+            border-color: var(--green);
+            background: var(--green-dim);
+            box-shadow: 0 0 0 3px var(--green-ring);
         }
+
+        .red .field input:focus {
+            border-color: var(--red);
+            background: var(--red-dim);
+            box-shadow: 0 0 0 3px var(--red-ring);
+        }
+
+        .field input.err {
+            border-color: var(--red) !important;
+            background: var(--red-dim) !important;
+            animation: shake .35s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            20%, 60% {
+                transform: translateX(-5px);
+            }
+            40%, 80% {
+                transform: translateX(5px);
+            }
+        }
+
+        input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .calc-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+            background: rgba(7, 16, 10, 0.90);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+
         .calc-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; max-width: 640px; margin: 0 auto; min-height: 52px;
-            font-family: var(--font); font-size: 15px; font-weight: 700; letter-spacing: .4px;
-            color: #000; background: var(--green); border: none; border-radius: var(--r-sm);
-            cursor: pointer; box-shadow: 0 0 28px var(--green-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            min-height: 52px;
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            color: #000;
+            background: var(--green);
+            border: none;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            box-shadow: 0 0 28px var(--green-glow);
             transition: opacity .18s, transform .14s, box-shadow .18s;
             -webkit-tap-highlight-color: transparent;
         }
-        .calc-btn:active { transform: scale(.97); opacity: .82; }
-        @media (hover: hover) { .calc-btn:hover { box-shadow: 0 0 44px var(--green-glow); opacity: .90; } }
-        .results { margin-top: 28px; }
-        .hr { height: 1px; background: linear-gradient(90deg, transparent, var(--border-hi), transparent); margin-bottom: 24px; }
+
+        .calc-btn:active {
+            transform: scale(.97);
+            opacity: .82;
+        }
+
+        @media (hover: hover) {
+            .calc-btn:hover {
+                box-shadow: 0 0 44px var(--green-glow);
+                opacity: .90;
+            }
+        }
+
+        .results {
+            margin-top: 28px;
+        }
+
+        .hr {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-hi), transparent);
+            margin-bottom: 24px;
+        }
 
         /* Results: side-by-side on wide screens, stacked on mobile */
         .results-grid {
@@ -115,8 +346,11 @@
             grid-template-columns: 1fr;
             gap: 16px;
         }
+
         @media (min-width: 580px) {
-            .results-grid { grid-template-columns: 1fr 1fr; }
+            .results-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         /* Result table card */
@@ -125,12 +359,27 @@
             border: 1px solid var(--border);
             border-radius: var(--r);
             overflow: hidden;
-            animation: fadeUp .45s cubic-bezier(.16,1,.3,1) both;
+            animation: fadeUp .45s cubic-bezier(.16, 1, .3, 1) both;
         }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
 
-        .result-card.green { border-top: 2px solid var(--green); }
-        .result-card.red   { border-top: 2px solid var(--red); }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card.green {
+            border-top: 2px solid var(--green);
+        }
+
+        .result-card.red {
+            border-top: 2px solid var(--red);
+        }
 
         .result-card-head {
             display: flex;
@@ -144,8 +393,14 @@
             color: var(--text);
             border-bottom: 1px solid var(--border);
         }
-        .result-card.green .result-card-head { background: rgba(34,197,94,0.10); }
-        .result-card.red   .result-card-head { background: rgba(248,113,113,0.10); }
+
+        .result-card.green .result-card-head {
+            background: rgba(34, 197, 94, 0.10);
+        }
+
+        .result-card.red .result-card-head {
+            background: rgba(248, 113, 113, 0.10);
+        }
 
         /* Table */
         table.rt {
@@ -171,40 +426,65 @@
             font-weight: 600;
             font-variant-numeric: tabular-nums;
             color: var(--text);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        table.rt tbody tr:last-child td { border-bottom: none; }
+        table.rt tbody tr:last-child td {
+            border-bottom: none;
+        }
 
         /* Alternating row tint */
-        table.rt tbody tr:nth-child(even) { background: rgba(255,255,255,0.025); }
+        table.rt tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.025);
+        }
 
         /* Final (full distance) row */
         table.rt tbody tr.final td {
             font-weight: 800;
             font-size: 14px;
         }
-        .result-card.green table.rt tbody tr.final { background: rgba(34,197,94,0.12); }
-        .result-card.red   table.rt tbody tr.final { background: rgba(248,113,113,0.10); }
+
+        .result-card.green table.rt tbody tr.final {
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .result-card.red table.rt tbody tr.final {
+            background: rgba(248, 113, 113, 0.10);
+        }
 
         /* Column colours */
-        .col-dist  { color: var(--muted) !important; font-size: 12px !important; }
-        .col-best  { color: var(--green); }
-        .col-allow { color: var(--red); }
-        .col-avg   { color: var(--blue); }
+        .col-dist {
+            color: var(--muted) !important;
+            font-size: 12px !important;
+        }
 
-        [x-cloak] { display: none !important; }
+        .col-best {
+            color: var(--green);
+        }
+
+        .col-allow {
+            color: var(--red);
+        }
+
+        .col-avg {
+            color: var(--blue);
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
 
         /* Method segmented toggle */
         .method-toggle {
             display: flex;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border);
             border-radius: 99px;
             padding: 3px;
             margin-bottom: 16px;
             gap: 2px;
         }
+
         .method-btn {
             flex: 1;
             font-family: var(--font);
@@ -221,7 +501,11 @@
             transition: background .18s, color .18s;
             -webkit-tap-highlight-color: transparent;
         }
-        .method-btn.active { background: var(--green); color: #000; }
+
+        .method-btn.active {
+            background: var(--green);
+            color: #000;
+        }
 
         /* Footer */
         .page-footer {
@@ -232,13 +516,18 @@
             color: var(--faint);
             line-height: 1.8;
         }
+
         .page-footer a {
             color: var(--faint);
             text-decoration: none;
-            border-bottom: 1px solid rgba(241,245,249,0.15);
+            border-bottom: 1px solid rgba(241, 245, 249, 0.15);
             transition: color .15s, border-color .15s;
         }
-        .page-footer a:hover { color: var(--green); border-color: var(--green); }
+
+        .page-footer a:hover {
+            color: var(--green);
+            border-color: var(--green);
+        }
 
         /* Language toggle button */
         .lang-btn {
@@ -250,9 +539,9 @@
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 1px;
-            color: rgba(255,255,255,0.80);
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.20);
+            color: rgba(255, 255, 255, 0.80);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.20);
             border-radius: 99px;
             padding: 6px 14px;
             cursor: pointer;
@@ -261,191 +550,515 @@
             transition: background .2s, color .2s;
             -webkit-tap-highlight-color: transparent;
         }
-        .lang-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.22);
+            color: #fff;
+        }
 
         /* ── Page tabs ── */
         .page-tabs {
-            display: flex; gap: 2px; margin-bottom: 20px;
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--border);
         }
+
         .page-tab-btn {
-            flex: 1; font-family: var(--font); font-size: 11px; font-weight: 700;
-            letter-spacing: .5px; text-transform: uppercase; color: var(--muted);
-            background: transparent; border: none; border-bottom: 2px solid transparent;
-            padding: 10px 6px; cursor: pointer; margin-bottom: -1px;
-            transition: color .18s, border-color .18s; -webkit-tap-highlight-color: transparent;
+            flex: 1;
+            font-family: var(--font);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 10px 6px;
+            cursor: pointer;
+            margin-bottom: -1px;
+            transition: color .18s, border-color .18s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .page-tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+
+        .page-tab-btn.active {
+            color: var(--green);
+            border-bottom-color: var(--green);
+        }
 
         /* ── Segmented control (used in timer) ── */
         .seg {
-            display: inline-flex; background: rgba(255,255,255,0.06);
-            border: 1px solid var(--border); border-radius: 99px; padding: 2px; gap: 1px;
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: 2px;
+            gap: 1px;
         }
+
         .seg-btn {
-            font-family: var(--font); font-size: 11px; font-weight: 700;
-            color: var(--muted); background: transparent; border: none;
-            border-radius: 99px; padding: 4px 10px; cursor: pointer;
-            transition: background .15s, color .15s; -webkit-tap-highlight-color: transparent;
+            font-family: var(--font);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            border-radius: 99px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: background .15s, color .15s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .seg-btn.active { background: var(--green); color: #000; }
+
+        .seg-btn.active {
+            background: var(--green);
+            color: #000;
+        }
 
         /* ── Phase card ── */
         .phase-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--r); margin-bottom: 16px; overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            margin-bottom: 16px;
+            overflow: hidden;
         }
-        .phase-card.green { border-top: 2px solid var(--green); }
-        .phase-card.red   { border-top: 2px solid var(--red); }
+
+        .phase-card.green {
+            border-top: 2px solid var(--green);
+        }
+
+        .phase-card.red {
+            border-top: 2px solid var(--red);
+        }
+
         .phase-head {
-            display: flex; align-items: center; gap: 9px;
-            padding: 12px 16px; border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
         }
+
         .phase-name-inp {
-            flex: 1; font-size: 13px; font-family: var(--font); font-weight: 700;
-            letter-spacing: .5px; color: var(--text);
-            background: transparent; border: none; outline: none;
+            flex: 1;
+            font-size: 13px;
+            font-family: var(--font);
+            font-weight: 700;
+            letter-spacing: .5px;
+            color: var(--text);
+            background: transparent;
+            border: none;
+            outline: none;
         }
 
         /* Compact read-only config summary strip */
         .phase-summary {
-            display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-            padding: 7px 16px; border-bottom: 1px solid var(--border);
-            font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
         }
+
         .ps-chip {
-            font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-            background: rgba(255,255,255,0.08); border: 1px solid var(--border-hi);
-            border-radius: 99px; padding: 2px 8px; color: var(--text); flex-shrink: 0;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-hi);
+            border-radius: 99px;
+            padding: 2px 8px;
+            color: var(--text);
+            flex-shrink: 0;
         }
-        .ps-val { font-weight: 600; }
-        .ps-val b { color: var(--text); font-weight: 800; }
-        .ps-sep { color: var(--faint); }
+
+        .ps-val {
+            font-weight: 600;
+        }
+
+        .ps-val b {
+            color: var(--text);
+            font-weight: 800;
+        }
+
+        .ps-sep {
+            color: var(--faint);
+        }
+
         .phase-cfg {
-            padding: 12px 16px; border-bottom: 1px solid var(--border);
-            display: flex; flex-direction: column; gap: 10px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .cfg-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
-        .cfg-field { display: flex; flex-direction: column; flex: 1; min-width: 72px; }
+
+        .cfg-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .cfg-field {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 72px;
+        }
+
         .cfg-field label {
-            font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-            text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 4px;
         }
+
         .cfg-inp {
-            width: 100%; font-size: 14px; font-family: var(--font); font-weight: 700;
-            text-align: center; color: var(--text);
-            background: rgba(255,255,255,0.055); border: 1px solid var(--border-hi);
-            border-radius: var(--r-sm); padding: 8px 6px; min-height: 38px;
-            outline: none; -webkit-appearance: none; appearance: none;
+            width: 100%;
+            font-size: 14px;
+            font-family: var(--font);
+            font-weight: 700;
+            text-align: center;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid var(--border-hi);
+            border-radius: var(--r-sm);
+            padding: 8px 6px;
+            min-height: 38px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
             transition: border-color .18s, background .18s;
         }
-        .cfg-inp:focus { border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 0 3px var(--green-ring); }
-        .cfg-inp:disabled { opacity: .5; pointer-events: none; }
-        .phase-body { padding: 14px 16px 16px; }
+
+        .cfg-inp:focus {
+            border-color: var(--green);
+            background: var(--green-dim);
+            box-shadow: 0 0 0 3px var(--green-ring);
+        }
+
+        .cfg-inp:disabled {
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        .phase-body {
+            padding: 14px 16px 16px;
+        }
 
         /* Big timer display */
         .timer-big {
-            text-align: center; font-size: 58px; font-weight: 900;
-            letter-spacing: -2px; font-variant-numeric: tabular-nums;
-            margin: 4px 0 4px; color: var(--faint);
-            transition: color .25s; line-height: 1;
+            text-align: center;
+            font-size: 58px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            font-variant-numeric: tabular-nums;
+            margin: 4px 0 4px;
+            color: var(--faint);
+            transition: color .25s;
+            line-height: 1;
         }
-        .timer-big.running { color: var(--green); }
-        .timer-big.warn    { color: var(--yellow); }
-        .timer-big.over    { color: var(--red); animation: timerPulse 1s ease-in-out infinite; }
-        .timer-big.done-ok { color: var(--blue); }
-        @keyframes timerPulse { 0%,100% { opacity:1; } 50% { opacity:.55; } }
 
-        /* Clock row: wall-clock start / pause times */
-        .clock-row {
-            display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;
-            font-size: 11px; font-weight: 600; color: var(--muted);
+        .timer-big.running {
+            color: var(--green);
+        }
+
+        .timer-big.warn {
+            color: var(--yellow);
+        }
+
+        .timer-big.over {
+            color: var(--red);
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        .timer-big.done-ok {
+            color: var(--blue);
+        }
+
+        @keyframes timerPulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .55;
+            }
+        }
+
+        /* Clock labels anchored to progress bar ends */
+        .pb-wrapper {
+            margin: 4px 0 5px;
+        }
+
+        .pb-clock-above {
+            font-size: 13px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--blue);
+            margin-bottom: 4px;
+        }
+
+        .pb-clocks {
+            position: relative;
+            height: 22px;
+            margin-top: 5px;
+            font-size: 13px;
+            font-weight: 700;
             font-variant-numeric: tabular-nums;
         }
-        .clock-row span { display: flex; align-items: center; gap: 5px; }
+
+        .pb-clock-end {
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            color: var(--blue);
+            white-space: nowrap;
+        }
 
         /* Progress bar */
         .progress-track {
-            position: relative; height: 14px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 8px; overflow: visible; margin: 4px 0 5px;
+            position: relative;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            overflow: visible;
         }
+
         .pb-fill {
-            position: absolute; left: 0; top: 0; height: 100%;
-            border-radius: 8px; transition: width .1s linear, background .3s;
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 8px;
+            transition: width .1s linear, background .3s;
             background: var(--faint);
         }
-        .pb-fill.running { background: var(--green); }
-        .pb-fill.warn    { background: var(--yellow); }
-        .pb-fill.over    { background: var(--red); }
-        .pb-fill.done-ok { background: var(--blue); }
+
+        .pb-fill.running {
+            background: var(--green);
+        }
+
+        .pb-fill.warn {
+            background: var(--yellow);
+        }
+
+        .pb-fill.over {
+            background: var(--red);
+        }
+
+        .pb-fill.done-ok {
+            background: var(--blue);
+        }
+
         .pb-best {
-            position: absolute; top: -3px; width: 3px; height: calc(100% + 6px);
-            background: rgba(255,255,255,0.45); border-radius: 2px;
+            position: absolute;
+            top: -3px;
+            width: 3px;
+            height: calc(100% + 6px);
+            background: rgba(255, 255, 255, 0.45);
+            border-radius: 2px;
             transform: translateX(-50%);
         }
+
         .pb-labels {
-            display: flex; justify-content: space-between; margin-bottom: 14px;
-            font-size: 9px; font-weight: 600; letter-spacing: 1px;
-            text-transform: uppercase; color: var(--faint);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--faint);
         }
 
         /* Timer controls */
-        .timer-controls { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; }
+        .timer-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+
         .t-main-btn {
-            flex: 1; padding: 14px; font-family: var(--font);
-            font-size: 15px; font-weight: 700; border: none;
-            border-radius: var(--r-sm); cursor: pointer;
-            background: var(--green); color: #000;
+            flex: 1;
+            padding: 14px;
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            background: var(--green);
+            color: #000;
             box-shadow: 0 0 20px var(--green-glow);
             transition: opacity .18s, transform .14s, background .2s, box-shadow .2s;
             -webkit-tap-highlight-color: transparent;
         }
-        .t-main-btn.pausing { background: var(--yellow); color: #000; box-shadow: none; }
-        .t-main-btn:active { transform: scale(.97); opacity: .82; }
-        .t-reset-btn {
-            padding: 10px 14px; font-family: var(--font);
-            font-size: 12px; font-weight: 700; border: none;
-            border-radius: var(--r-sm); cursor: pointer;
-            background: rgba(255,255,255,0.09); color: var(--muted);
-            transition: opacity .18s, transform .14s, background .2s;
-            -webkit-tap-highlight-color: transparent; white-space: nowrap;
+
+        .t-main-btn.pausing {
+            background: var(--yellow);
+            color: #000;
+            box-shadow: none;
         }
-        .t-reset-btn:hover { background: rgba(248,113,113,0.20); color: var(--red); }
-        .t-reset-btn:active { transform: scale(.97); opacity: .82; }
+
+        .t-main-btn:active {
+            transform: scale(.97);
+            opacity: .82;
+        }
+
+        .t-reset-btn {
+            padding: 10px 14px;
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.09);
+            color: var(--muted);
+            transition: opacity .18s, transform .14s, background .2s;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+
+        .t-reset-btn:hover {
+            background: rgba(248, 113, 113, 0.20);
+            color: var(--red);
+        }
+
+        .t-reset-btn:active {
+            transform: scale(.97);
+            opacity: .82;
+        }
 
         /* km Milestone grid */
         .ms-caption {
-            font-size: 9px; font-weight: 700; letter-spacing: 2px;
-            text-transform: uppercase; color: var(--faint); margin-bottom: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-bottom: 8px;
         }
-        .ms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        @media (min-width: 380px) { .ms-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .ms-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        @media (min-width: 380px) {
+            .ms-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
         .ms-btn {
-            padding: 9px 4px; font-family: var(--font);
-            background: rgba(255,255,255,0.04); color: var(--muted);
-            border: 1px solid var(--border); border-radius: var(--r-sm);
-            cursor: pointer; text-align: center;
+            padding: 9px 4px;
+            font-family: var(--font);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            text-align: center;
             transition: background .2s, border-color .2s, color .2s;
             -webkit-tap-highlight-color: transparent;
         }
-        .ms-btn .ms-dist  { display: block; font-size: 10px; font-weight: 800; }
-        .ms-btn .ms-allow { display: block; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
-        .ms-btn .ms-delta { display: block; font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
-        .ms-btn.ms-warn  { background: rgba(251,191,36,0.10); border-color: rgba(251,191,36,0.35); color: var(--yellow); }
-        .ms-btn.ms-over  { background: rgba(248,113,113,0.16); border-color: rgba(248,113,113,0.45); color: var(--red); }
-        .ms-btn.ms-late  { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.40); color: var(--red); }
-        .ms-btn.ms-ok    { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.35); color: var(--green); }
-        .ms-btn:disabled { cursor: default; opacity: .45; }
+
+        .ms-btn .ms-dist {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .ms-btn .ms-times {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 3px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ms-btn .ms-best {
+            font-size: 10px;
+            font-weight: 700;
+            opacity: .7;
+        }
+
+        .ms-btn .ms-sep {
+            font-size: 10px;
+            opacity: .4;
+        }
+
+        .ms-btn .ms-allow {
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .ms-btn .ms-delta {
+            display: block;
+            font-size: 9px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-top: 2px;
+        }
+
+        .ms-btn.ms-warn {
+            background: rgba(251, 191, 36, 0.10);
+            border-color: rgba(251, 191, 36, 0.35);
+            color: var(--yellow);
+        }
+
+        .ms-btn.ms-over {
+            background: rgba(248, 113, 113, 0.16);
+            border-color: rgba(248, 113, 113, 0.45);
+            color: var(--red);
+        }
+
+        .ms-btn.ms-late {
+            background: rgba(248, 113, 113, 0.12);
+            border-color: rgba(248, 113, 113, 0.40);
+            color: var(--red);
+        }
+
+        .ms-btn.ms-ok {
+            background: rgba(34, 197, 94, 0.12);
+            border-color: rgba(34, 197, 94, 0.35);
+            color: var(--green);
+        }
+
+        .ms-btn:disabled {
+            cursor: default;
+            opacity: .45;
+        }
 
         /* Keyboard dismiss button (swaps with lang-btn when input focused) */
         .kbd-done {
             position: fixed;
             top: max(12px, env(safe-area-inset-top));
-            right: 16px; z-index: 201;
-            font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 1px;
-            color: #000; background: var(--green); border: none; border-radius: 99px;
-            padding: 6px 14px; cursor: pointer;
+            right: 16px;
+            z-index: 201;
+            font-family: var(--font);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #000;
+            background: var(--green);
+            border: none;
+            border-radius: 99px;
+            padding: 6px 14px;
+            cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
     </style>
@@ -453,7 +1066,8 @@
 <body x-data="app()" @focusin.window="onFocusIn($event)" @focusout.window="onFocusOut($event)">
 
 <button class="kbd-done" x-show="kbdVisible" x-cloak @click="document.activeElement.blur()">✓ Fertig</button>
-<button class="lang-btn" x-show="!kbdVisible" @click="lang = lang === 'de' ? 'en' : 'de'" x-text="lang === 'de' ? 'EN' : 'DE'"></button>
+<button class="lang-btn" x-show="!kbdVisible" @click="lang = lang === 'de' ? 'en' : 'de'"
+        x-text="lang === 'de' ? 'EN' : 'DE'"></button>
 
 <div class="hero">
     <img src="Designer.png" alt="Gelaendefahren">
@@ -467,144 +1081,234 @@
 <div class="main">
     <!-- Page tabs -->
     <div class="page-tabs">
-        <button class="page-tab-btn" :class="tab==='calc' && 'active'" @click="tab='calc'" x-text="t('tabCalc')"></button>
-        <button class="page-tab-btn" :class="tab==='timer' && 'active'" @click="tab='timer'" x-text="t('tabTimer')"></button>
+        <button class="page-tab-btn" :class="tab==='calc' && 'active'" @click="tab='calc'"
+                x-text="t('tabCalc')"></button>
+        <button class="page-tab-btn" :class="tab==='timer' && 'active'" @click="tab='timer'"
+                x-text="t('tabTimer')"></button>
     </div>
 
     <!-- ══ TAB 1 · RECHNER ══ -->
     <div x-show="tab==='calc'" x-cloak>
-    <p class="caption" x-text="t('caption')"></p>
+        <p class="caption" x-text="t('caption')"></p>
 
-    <!-- Method toggle -->
-    <div class="method-toggle">
-        <button class="method-btn" :class="method==='standard' && 'active'" @click="method='standard'; done=false" x-text="t('methodStd')"></button>
-        <button class="method-btn" :class="method==='speed'    && 'active'" @click="method='speed';    done=false" x-text="t('methodSpeed')"></button>
-    </div>
-
-    <div class="track-card green">
-        <div class="track-head"><div class="dot"></div><span x-text="t('trackA')"></span></div>
-        <div class="track-body">
-            <div class="field f-full">
-                <label x-text="t('length')"></label>
-                <input type="number" x-model="A.len" inputmode="numeric" enterkeyhint="done" :class="e.Al && 'err'" @input="e.Al=false" @keydown.enter.prevent="$el.blur()">
-            </div>
-            <!-- Standard inputs -->
-            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
-                <label><span>Best (min:sec)</span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
-                <input type="text" x-model="A.best" inputmode="text" placeholder="12:00" enterkeyhint="done" :class="e.Ab && 'err'" @keydown="timeKey($event)" @input="e.Ab=false; A.best = $el.value = timeClean($el.value)" @focus="$el.select()">
-            </div>
-            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
-                <label><span x-text="t('allowed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
-                <input type="text" x-model="A.allow" inputmode="text" placeholder="14:00" enterkeyhint="done" :class="e.Aa && 'err'" @keydown="timeKey($event)" @input="e.Aa=false; A.allow = $el.value = timeClean($el.value)" @focus="$el.select()">
-            </div>
-            <!-- Speed inputs -->
-            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
-                <label><span x-text="t('speed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
-                <input type="number" x-model="A.speed" inputmode="decimal" placeholder="15" enterkeyhint="done" :class="e.As && 'err'" @input="e.As=false" @keydown.enter.prevent="$el.blur()">
-            </div>
-            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
-                <label><span x-text="t('timeDiff')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
-                <input type="text" x-model="A.diff" inputmode="text" placeholder="02:00" enterkeyhint="done" :class="e.Ad && 'err'" @keydown="timeKey($event)" @input="e.Ad=false; A.diff = $el.value = timeClean($el.value)" @focus="$el.select()">
-            </div>
+        <!-- Method toggle -->
+        <div class="method-toggle">
+            <button class="method-btn" :class="method==='standard' && 'active'" @click="method='standard'; done=false"
+                    x-text="t('methodStd')"></button>
+            <button class="method-btn" :class="method==='speed'    && 'active'" @click="method='speed';    done=false"
+                    x-text="t('methodSpeed')"></button>
         </div>
-    </div>
 
-    <div class="track-card red">
-        <div class="track-head"><div class="dot"></div><span x-text="t('trackB')"></span></div>
-        <div class="track-body">
-            <div class="field f-full">
-                <label x-text="t('length')"></label>
-                <input type="number" x-model="B.len" inputmode="numeric" enterkeyhint="done" :class="e.Bl && 'err'" @input="e.Bl=false" @keydown.enter.prevent="$el.blur()">
-            </div>
-            <!-- Standard inputs -->
-            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
-                <label><span>Best (min:sec)</span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
-                <input type="text" x-model="B.best" inputmode="text" placeholder="13:00" enterkeyhint="done" :class="e.Bb && 'err'" @keydown="timeKey($event)" @input="e.Bb=false; B.best = $el.value = timeClean($el.value)" @focus="$el.select()">
-            </div>
-            <div class="field" x-show="method==='standard'" x-data="{tip:false}">
-                <label><span x-text="t('allowed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
-                <input type="text" x-model="B.allow" inputmode="text" placeholder="15:00" enterkeyhint="done" :class="e.Ba && 'err'" @keydown="timeKey($event)" @input="e.Ba=false; B.allow = $el.value = timeClean($el.value)" @focus="$el.select()">
-            </div>
-            <!-- Speed inputs -->
-            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
-                <label><span x-text="t('speed')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
-                <input type="number" x-model="B.speed" inputmode="decimal" placeholder="15" enterkeyhint="done" :class="e.Bs && 'err'" @input="e.Bs=false" @keydown.enter.prevent="$el.blur()">
-            </div>
-            <div class="field" x-show="method==='speed'" x-data="{tip:false}">
-                <label><span x-text="t('timeDiff')"></span><button class="tip-ico" @click.stop="tip=!tip" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button></label>
-                <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
-                <input type="text" x-model="B.diff" inputmode="text" placeholder="02:00" enterkeyhint="done" :class="e.Bd && 'err'" @keydown="timeKey($event)" @input="e.Bd=false; B.diff = $el.value = timeClean($el.value)" @focus="$el.select()">
-            </div>
-        </div>
-    </div>
-
-    <div class="results" x-show="done" x-cloak x-ref="results">
-        <div class="hr"></div>
-        <div class="results-grid">
-
-            <!-- Track A result table -->
-            <div class="result-card green">
-                <div class="result-card-head">
-                    <div class="dot"></div><span x-text="t('trackA')"></span>
+        <div class="track-card green">
+            <div class="track-head">
+                <div class="dot"></div>
+                <span x-text="t('trackA')"></span></div>
+            <div class="track-body">
+                <div class="field f-full">
+                    <label x-text="t('length')"></label>
+                    <input type="number" x-model="A.len" inputmode="numeric" enterkeyhint="done" :class="e.Al && 'err'"
+                           @input="e.Al=false" @keydown.enter.prevent="$el.blur()">
                 </div>
-                <table class="rt">
-                    <thead>
+                <!-- Standard inputs -->
+                <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                    <label><span>Best (min:sec)</span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
+                    <input type="text" x-model="A.best" inputmode="text" placeholder="12:00" enterkeyhint="done"
+                           :class="e.Ab && 'err'" @keydown="timeKey($event)"
+                           @input="e.Ab=false; A.best = $el.value = timeClean($el.value)" @focus="$el.select()">
+                </div>
+                <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                    <label><span x-text="t('allowed')"></span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
+                    <input type="text" x-model="A.allow" inputmode="text" placeholder="14:00" enterkeyhint="done"
+                           :class="e.Aa && 'err'" @keydown="timeKey($event)"
+                           @input="e.Aa=false; A.allow = $el.value = timeClean($el.value)" @focus="$el.select()">
+                </div>
+                <!-- Speed inputs -->
+                <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                    <label><span x-text="t('speed')"></span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
+                    <input type="number" x-model="A.speed" inputmode="decimal" placeholder="15" enterkeyhint="done"
+                           :class="e.As && 'err'" @input="e.As=false" @keydown.enter.prevent="$el.blur()">
+                </div>
+                <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                    <label><span x-text="t('timeDiff')"></span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
+                    <input type="text" x-model="A.diff" inputmode="text" placeholder="02:00" enterkeyhint="done"
+                           :class="e.Ad && 'err'" @keydown="timeKey($event)"
+                           @input="e.Ad=false; A.diff = $el.value = timeClean($el.value)" @focus="$el.select()">
+                </div>
+            </div>
+        </div>
+
+        <div class="track-card red">
+            <div class="track-head">
+                <div class="dot"></div>
+                <span x-text="t('trackB')"></span></div>
+            <div class="track-body">
+                <div class="field f-full">
+                    <label x-text="t('length')"></label>
+                    <input type="number" x-model="B.len" inputmode="numeric" enterkeyhint="done" :class="e.Bl && 'err'"
+                           @input="e.Bl=false" @keydown.enter.prevent="$el.blur()">
+                </div>
+                <!-- Standard inputs -->
+                <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                    <label><span>Best (min:sec)</span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipBest')"></p>
+                    <input type="text" x-model="B.best" inputmode="text" placeholder="13:00" enterkeyhint="done"
+                           :class="e.Bb && 'err'" @keydown="timeKey($event)"
+                           @input="e.Bb=false; B.best = $el.value = timeClean($el.value)" @focus="$el.select()">
+                </div>
+                <div class="field" x-show="method==='standard'" x-data="{tip:false}">
+                    <label><span x-text="t('allowed')"></span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipAllowed')"></p>
+                    <input type="text" x-model="B.allow" inputmode="text" placeholder="15:00" enterkeyhint="done"
+                           :class="e.Ba && 'err'" @keydown="timeKey($event)"
+                           @input="e.Ba=false; B.allow = $el.value = timeClean($el.value)" @focus="$el.select()">
+                </div>
+                <!-- Speed inputs -->
+                <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                    <label><span x-text="t('speed')"></span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipSpeed')"></p>
+                    <input type="number" x-model="B.speed" inputmode="decimal" placeholder="15" enterkeyhint="done"
+                           :class="e.Bs && 'err'" @input="e.Bs=false" @keydown.enter.prevent="$el.blur()">
+                </div>
+                <div class="field" x-show="method==='speed'" x-data="{tip:false}">
+                    <label><span x-text="t('timeDiff')"></span>
+                        <button class="tip-ico" @click.stop="tip=!tip" type="button">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </button>
+                    </label>
+                    <p class="tip-text" x-show="tip" x-transition x-text="t('tipDiff')"></p>
+                    <input type="text" x-model="B.diff" inputmode="text" placeholder="02:00" enterkeyhint="done"
+                           :class="e.Bd && 'err'" @keydown="timeKey($event)"
+                           @input="e.Bd=false; B.diff = $el.value = timeClean($el.value)" @focus="$el.select()">
+                </div>
+            </div>
+        </div>
+
+        <div class="results" x-show="done" x-cloak x-ref="results">
+            <div class="hr"></div>
+            <div class="results-grid">
+
+                <!-- Track A result table -->
+                <div class="result-card green">
+                    <div class="result-card-head">
+                        <div class="dot"></div>
+                        <span x-text="t('trackA')"></span>
+                    </div>
+                    <table class="rt">
+                        <thead>
                         <tr>
                             <th x-text="t('dist')"></th>
                             <th style="color:var(--green)">Best</th>
                             <th style="color:var(--red)" x-text="t('colAllow')"></th>
                             <th style="color:var(--blue)" x-text="t('avg')"></th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         <template x-for="(m, i) in rA" :key="run + '_a_' + i">
                             <tr :class="m.fin ? 'final' : ''">
                                 <td class="col-dist" x-text="m.dist + ' m'"></td>
-                                <td class="col-best"  x-text="m.best"></td>
+                                <td class="col-best" x-text="m.best"></td>
                                 <td class="col-allow" x-text="m.allow"></td>
-                                <td class="col-avg"   x-text="m.avg"></td>
+                                <td class="col-avg" x-text="m.avg"></td>
                             </tr>
                         </template>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Track B result table -->
-            <div class="result-card red">
-                <div class="result-card-head">
-                    <div class="dot"></div><span x-text="t('trackB')"></span>
+                        </tbody>
+                    </table>
                 </div>
-                <table class="rt">
-                    <thead>
+
+                <!-- Track B result table -->
+                <div class="result-card red">
+                    <div class="result-card-head">
+                        <div class="dot"></div>
+                        <span x-text="t('trackB')"></span>
+                    </div>
+                    <table class="rt">
+                        <thead>
                         <tr>
                             <th x-text="t('dist')"></th>
                             <th style="color:var(--green)">Best</th>
                             <th style="color:var(--red)" x-text="t('colAllow')"></th>
                             <th style="color:var(--blue)" x-text="t('avg')"></th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         <template x-for="(m, i) in rB" :key="run + '_b_' + i">
                             <tr :class="m.fin ? 'final' : ''">
                                 <td class="col-dist" x-text="m.dist + ' m'"></td>
-                                <td class="col-best"  x-text="m.best"></td>
+                                <td class="col-best" x-text="m.best"></td>
                                 <td class="col-allow" x-text="m.allow"></td>
-                                <td class="col-avg"   x-text="m.avg"></td>
+                                <td class="col-avg" x-text="m.avg"></td>
                             </tr>
                         </template>
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
 
+            </div>
         </div>
-    </div>
 
     </div><!-- /calc -->
 
@@ -648,21 +1352,26 @@
                     <div class="timer-big" :class="timerClass(tm)"
                          x-text="fmtTimer(elapsedSec(tm))"></div>
 
-                    <!-- Wall-clock start / last pause -->
-                    <div class="clock-row" x-show="tm.startClock">
-                        <span>▶ <b x-text="tm.startClock"></b></span>
-                        <span x-show="tm.pauseClock">⏸ <b x-text="tm.pauseClock"></b></span>
-                    </div>
-
-                    <!-- Progress bar -->
-                    <div class="progress-track">
-                        <div class="pb-fill" :class="timerClass(tm)"
-                             :style="`width: ${Math.min(105, progressPct(tm))}%`"></div>
-                        <div class="pb-best" :style="`left: ${bestPct(tm)}%`"></div>
+                    <!-- Progress bar with clock anchors -->
+                    <div class="pb-wrapper">
+                        <div class="pb-clock-above" x-show="tm.startClock">▶ <span x-text="tm.startClock"></span></div>
+                        <div class="progress-track">
+                            <div class="pb-fill" :class="timerClass(tm)"
+                                 :style="`width: ${Math.min(105, progressPct(tm))}%`"></div>
+                            <div class="pb-best" :style="`left: ${bestPct(tm)}%`"></div>
+                        </div>
+                        <div class="pb-clocks">
+                            <span class="pb-clock-end"
+                                  x-show="tm.pauseClock"
+                                  :style="`left: ${Math.min(98, Math.max(2, progressPct(tm)))}%`">
+                                ⏸ <span x-text="tm.pauseClock"></span>
+                            </span>
+                        </div>
                     </div>
                     <div class="pb-labels">
                         <span>Best: <span x-text="fmtSec(getBestSec(tm))"></span></span>
-                        <span><span x-text="t('cfgAllowed')"></span>: <span x-text="fmtSec(getAllowSec(tm))"></span></span>
+                        <span><span x-text="t('cfgAllowed')"></span>: <span
+                                x-text="fmtSec(getAllowSec(tm))"></span></span>
                     </div>
 
                     <!-- Controls: large start/pause toggle + small reset -->
@@ -687,10 +1396,14 @@
                                     @click="markMs(tm, ms)">
                                 <span class="ms-dist"
                                       x-text="ms.fin ? ms.dist+'m ✓' : (ms.dist/1000)+'km'"></span>
-                                <span class="ms-allow" x-text="fmtSec(ms.allowSec)"></span>
+                                <span class="ms-times">
+                                    <span class="ms-best" x-text="fmtSec(ms.bestSec)"></span>
+                                    <span class="ms-sep">/</span>
+                                    <span class="ms-allow" x-text="fmtSec(ms.allowSec)"></span>
+                                </span>
                                 <span class="ms-delta"
                                       x-show="tm.marks[ms.dist] !== undefined"
-                                      x-text="msDelta(tm, ms)"></span>
+                                      x-text="fmtTimer(tm.marks[ms.dist])"></span>
                             </button>
                         </template>
                     </div>
@@ -703,13 +1416,15 @@
     <footer class="page-footer">
         <p><a href="tools.html">🎩 Dressur-Rechner</a></p>
         <p>&copy; 2026 Thorsten Hillmer</p>
-        <p><a href="https://github.com/thhillmi/GelaendeZeitenRechner" target="_blank" rel="noopener">github.com/thhillmi/GelaendeZeitenRechner</a></p>
+        <p><a href="https://github.com/thhillmi/GelaendeZeitenRechner" target="_blank" rel="noopener">github.com/thhillmi/GelaendeZeitenRechner</a>
+        </p>
     </footer>
 </div>
 
 <div class="calc-bar" x-show="tab==='calc'">
     <button class="calc-btn" @click="calc()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"
+             stroke-linecap="round" stroke-linejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
         </svg>
         <span x-text="done ? t('recalc') : t('calc')"></span>
@@ -717,332 +1432,386 @@
 </div>
 
 <script>
-function app() {
-    return {
-        lang: 'de',
-        tab: 'calc',
-        i18n: {
-            de: {
-                eyebrow:    '🏇 Kutschsport',
-                title:      'Gel&auml;nde<em>Zeiten</em><br>Rechner',
-                caption:    'Strecken eingeben',
-                trackA:     'Aufw\u00e4rmstrecke',
-                trackB:     'Hindernisstrecke',
-                length:     'L\u00e4nge (m)',
-                allowed:    'Erlaubt (min:sec)',
-                calc:       'Berechnen',
-                recalc:     'Neu berechnen',
-                dist:       'Distanz',
-                colAllow:   'Erlaubt',
-                avg:        'Mittel',
-                methodStd:  'Zeiten',
-                methodSpeed:'Geschwindigkeit',
-                speed:      'Geschw. (km/h)',
-                timeDiff:   'Zeitfenster (min:sec)',
-                tipBest:    'Die Bestzeit \u2013 die schnellste erlaubte Zeit f\u00fcr diese Strecke.',
-                tipAllowed: 'Die erlaubte Zeit \u2013 wird sie \u00fcberschritten, gibt es Strafpunkte.',
-                tipSpeed:   'Vorgeschriebene Durchschnittsgeschwindigkeit f\u00fcr diese Strecke.',
-                tipDiff:    'Zeitunterschied zwischen Best- und erlaubter Zeit (z.\u202fB. 02:00).',
+    function app() {
+        return {
+            lang: 'de',
+            tab: 'calc',
+            i18n: {
+                de: {
+                    eyebrow: '🏇 Kutschsport',
+                    title: 'Marathon<em>Zeiten</em><br>Rechner',
+                    caption: 'Strecken eingeben',
+                    trackA: 'Aufw\u00e4rmstrecke',
+                    trackB: 'Hindernisstrecke',
+                    length: 'L\u00e4nge (m)',
+                    allowed: 'Erlaubt (min:sec)',
+                    calc: 'Berechnen',
+                    recalc: 'Neu berechnen',
+                    dist: 'Distanz',
+                    colAllow: 'Erlaubt',
+                    avg: 'Mittel',
+                    methodStd: 'Zeiten',
+                    methodSpeed: 'Geschwindigkeit',
+                    speed: 'Geschw. (km/h)',
+                    timeDiff: 'Zeitfenster (min:sec)',
+                    tipBest: 'Die Bestzeit \u2013 die schnellste erlaubte Zeit f\u00fcr diese Strecke.',
+                    tipAllowed: 'Die erlaubte Zeit \u2013 wird sie \u00fcberschritten, gibt es Strafpunkte.',
+                    tipSpeed: 'Vorgeschriebene Durchschnittsgeschwindigkeit f\u00fcr diese Strecke.',
+                    tipDiff: 'Zeitunterschied zwischen Best- und erlaubter Zeit (z.\u202fB. 02:00).',
 
-                tabCalc:      'Rechner',
-                tabTimer:     'Timer',
-                timerCaption: 'Phasen-Timer',
-                cfgLength:    'L\u00e4nge (m)',
-                cfgAllowed:   'Erlaubt',
-                cfgSpeed:     'km/h',
-                cfgDiff:      'Zeitfenster',
-                start:        'Start',
-                pause:        'Pause',
-                resume:       'Weiter',
-                reset:        'Reset',
-                milestones:   'km-Marker',
+                    tabCalc: 'Rechner',
+                    tabTimer: 'Timer',
+                    timerCaption: 'Phasen-Timer',
+                    cfgLength: 'L\u00e4nge (m)',
+                    cfgAllowed: 'Erlaubt',
+                    cfgSpeed: 'km/h',
+                    cfgDiff: 'Zeitfenster',
+                    start: 'Start',
+                    pause: 'Pause',
+                    resume: 'Weiter',
+                    reset: 'Reset',
+                    milestones: 'km-Marker',
+                },
+                en: {
+                    eyebrow: '🏇 Carriage Sport',
+                    title: 'Marathon<br><em>Time</em> Calculator',
+                    caption: 'Enter Tracks',
+                    trackA: 'Warm-up Track',
+                    trackB: 'Obstacle Track',
+                    length: 'Length (m)',
+                    allowed: 'Allowed (min:sec)',
+                    calc: 'Calculate',
+                    recalc: 'Recalculate',
+                    dist: 'Distance',
+                    colAllow: 'Allowed',
+                    avg: 'Average',
+                    methodStd: 'Times',
+                    methodSpeed: 'Speed',
+                    speed: 'Speed (km/h)',
+                    timeDiff: 'Time window (min:sec)',
+                    tipBest: 'The best time \u2013 the fastest allowed time for this track.',
+                    tipAllowed: 'The allowed time \u2013 exceeding it incurs time penalties.',
+                    tipSpeed: 'The prescribed average speed for this track.',
+                    tipDiff: 'The time difference between best and allowed time (e.\u202fg. 02:00).',
+
+                    tabCalc: 'Calculator',
+                    tabTimer: 'Timer',
+                    timerCaption: 'Phase Timer',
+                    cfgLength: 'Length (m)',
+                    cfgAllowed: 'Allowed',
+                    cfgSpeed: 'km/h',
+                    cfgDiff: 'Time window',
+                    start: 'Start',
+                    pause: 'Pause',
+                    resume: 'Resume',
+                    reset: 'Reset',
+                    milestones: 'km Markers',
+                }
             },
-            en: {
-                eyebrow:    '🏇 Carriage Sport',
-                title:      'Marathon<br><em>Time</em> Calculator',
-                caption:    'Enter Tracks',
-                trackA:     'Warm-up Track',
-                trackB:     'Obstacle Track',
-                length:     'Length (m)',
-                allowed:    'Allowed (min:sec)',
-                calc:       'Calculate',
-                recalc:     'Recalculate',
-                dist:       'Distance',
-                colAllow:   'Allowed',
-                avg:        'Average',
-                methodStd:  'Times',
-                methodSpeed:'Speed',
-                speed:      'Speed (km/h)',
-                timeDiff:   'Time window (min:sec)',
-                tipBest:    'The best time \u2013 the fastest allowed time for this track.',
-                tipAllowed: 'The allowed time \u2013 exceeding it incurs time penalties.',
-                tipSpeed:   'The prescribed average speed for this track.',
-                tipDiff:    'The time difference between best and allowed time (e.\u202fg. 02:00).',
+            t(key) {
+                return this.i18n[this.lang][key];
+            },
 
-                tabCalc:      'Calculator',
-                tabTimer:     'Timer',
-                timerCaption: 'Phase Timer',
-                cfgLength:    'Length (m)',
-                cfgAllowed:   'Allowed',
-                cfgSpeed:     'km/h',
-                cfgDiff:      'Time window',
-                start:        'Start',
-                pause:        'Pause',
-                resume:       'Resume',
-                reset:        'Reset',
-                milestones:   'km Markers',
-            }
-        },
-        t(key) { return this.i18n[this.lang][key]; },
-
-        kbdVisible: false,
-        onFocusIn(e)  { if (e.target.tagName === 'INPUT') this.kbdVisible = true; },
-        onFocusOut(e) {
-            setTimeout(() => {
-                if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
-                    this.kbdVisible = false;
+            kbdVisible: false,
+            onFocusIn(e) {
+                if (e.target.tagName === 'INPUT') this.kbdVisible = true;
+            },
+            onFocusOut(e) {
+                setTimeout(() => {
+                    if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
+                        this.kbdVisible = false;
+                    }
+                }, 100);
+            },
+            timeClean(v) {
+                let s = String(v).replace(/[^0-9:]/g, '');
+                const ci = s.indexOf(':');
+                if (ci !== -1) s = s.slice(0, ci + 1) + s.slice(ci + 1).replace(/:/g, '');
+                return s.slice(0, 5);
+            },
+            timeKey(e) {
+                if (e.ctrlKey || e.metaKey) return;
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                    return;
                 }
-            }, 100);
-        },
-        timeClean(v) {
-            let s = String(v).replace(/[^0-9:]/g, '');
-            const ci = s.indexOf(':');
-            if (ci !== -1) s = s.slice(0, ci + 1) + s.slice(ci + 1).replace(/:/g, '');
-            return s.slice(0, 5);
-        },
-        timeKey(e) {
-            if (e.ctrlKey || e.metaKey) return;
-            if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); return; }
-            const nav = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
-            if (nav.includes(e.key)) return;
-            if (/^\d$/.test(e.key)) return;
-            if (e.key === ':' && !e.target.value.includes(':')) return;
-            e.preventDefault();
-        },
+                const nav = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+                if (nav.includes(e.key)) return;
+                if (/^\d$/.test(e.key)) return;
+                if (e.key === ':' && !e.target.value.includes(':')) return;
+                e.preventDefault();
+            },
 
-        method: 'standard',
-        A: { len: 4500, best: '12:00', allow: '14:00', speed: 15, diff: '02:00' },
-        B: { len: 4200, best: '13:00', allow: '15:00', speed: 15, diff: '02:00' },
-        e: {}, done: false, run: 0, rA: [], rB: [],
+            method: 'standard',
+            A: {len: 4500, best: '12:00', allow: '14:00', speed: 15, diff: '02:00'},
+            B: {len: 4200, best: '13:00', allow: '15:00', speed: 15, diff: '02:00'},
+            e: {}, done: false, run: 0, rA: [], rB: [],
 
-        calc() {
-            if (!this.validate()) return;
-            this.rA = this.milestones(this.A);
-            this.rB = this.milestones(this.B);
-            this.run += 1;
-            this.done = true;
-            this.$nextTick(() => { this.$refs.results.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
-        },
+            calc() {
+                if (!this.validate()) return;
+                this.rA = this.milestones(this.A);
+                this.rB = this.milestones(this.B);
+                this.run += 1;
+                this.done = true;
+                this.$nextTick(() => {
+                    this.$refs.results.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                });
+            },
 
-        validate() {
-            this.e = {};
-            const isTime = v => /^\d{1,2}:\d{2}$/.test(v);
-            const isPos  = v => +v > 0;
-            if (!isPos(this.A.len))   this.e.Al = true;
-            if (!isPos(this.B.len))   this.e.Bl = true;
-            if (this.method === 'standard') {
-                if (!isTime(this.A.best))  this.e.Ab = true;
-                if (!isTime(this.A.allow)) this.e.Aa = true;
-                if (!isTime(this.B.best))  this.e.Bb = true;
-                if (!isTime(this.B.allow)) this.e.Ba = true;
-            } else {
-                if (!isPos(this.A.speed))  this.e.As = true;
-                if (!isTime(this.A.diff))  this.e.Ad = true;
-                if (!isPos(this.B.speed))  this.e.Bs = true;
-                if (!isTime(this.B.diff))  this.e.Bd = true;
-            }
-            return Object.keys(this.e).length === 0;
-        },
+            validate() {
+                this.e = {};
+                const isTime = v => /^\d{1,2}:\d{2}$/.test(v);
+                const isPos = v => +v > 0;
+                if (!isPos(this.A.len)) this.e.Al = true;
+                if (!isPos(this.B.len)) this.e.Bl = true;
+                if (this.method === 'standard') {
+                    if (!isTime(this.A.best)) this.e.Ab = true;
+                    if (!isTime(this.A.allow)) this.e.Aa = true;
+                    if (!isTime(this.B.best)) this.e.Bb = true;
+                    if (!isTime(this.B.allow)) this.e.Ba = true;
+                } else {
+                    if (!isPos(this.A.speed)) this.e.As = true;
+                    if (!isTime(this.A.diff)) this.e.Ad = true;
+                    if (!isPos(this.B.speed)) this.e.Bs = true;
+                    if (!isTime(this.B.diff)) this.e.Bd = true;
+                }
+                return Object.keys(this.e).length === 0;
+            },
 
-        milestones(tr) {
-            const len = +tr.len;
-            let bSec, aSec;
-            if (this.method === 'speed') {
-                // Best = distance ÷ speed; Allowed = Best + time difference
-                bSec = len * 3.6 / +tr.speed;
-                aSec = bSec + this.s(tr.diff);
-            } else {
-                bSec = this.s(tr.best);
-                aSec = this.s(tr.allow);
-            }
-            const mSec = (bSec + aSec) / 2;
-            const rows = [], steps = Math.floor(len/1000), rem = len%1000;
-            for (let i = 1; i <= steps; i++) rows.push(this.row(i*1000, bSec, aSec, mSec, len, i===steps && rem===0));
-            if (rem > 0) rows.push(this.row(len, bSec, aSec, mSec, len, true));
-            return rows;
-        },
+            milestones(tr) {
+                const len = +tr.len;
+                let bSec, aSec;
+                if (this.method === 'speed') {
+                    // Best = distance ÷ speed; Allowed = Best + time difference
+                    bSec = len * 3.6 / +tr.speed;
+                    aSec = bSec + this.s(tr.diff);
+                } else {
+                    bSec = this.s(tr.best);
+                    aSec = this.s(tr.allow);
+                }
+                const mSec = (bSec + aSec) / 2;
+                const rows = [], steps = Math.floor(len / 1000), rem = len % 1000;
+                for (let i = 1; i <= steps; i++) rows.push(this.row(i * 1000, bSec, aSec, mSec, len, i === steps && rem === 0));
+                if (rem > 0) rows.push(this.row(len, bSec, aSec, mSec, len, true));
+                return rows;
+            },
 
-        row(d, bSec, aSec, mSec, len, fin) {
-            return { dist: d, best: this.f(bSec/len*d), allow: this.f(aSec/len*d), avg: this.f(mSec/len*d), fin };
-        },
+            row(d, bSec, aSec, mSec, len, fin) {
+                return {
+                    dist: d,
+                    best: this.f(bSec / len * d),
+                    allow: this.f(aSec / len * d),
+                    avg: this.f(mSec / len * d),
+                    fin
+                };
+            },
 
-        s(ts) { const [m,sec] = ts.split(':').map(Number); return m*60+sec; },
-        f(v)  { const m=Math.floor(v/60), s=Math.round(v%60); return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); },
+            s(ts) {
+                const [m, sec] = ts.split(':').map(Number);
+                return m * 60 + sec;
+            },
+            f(v) {
+                const m = Math.floor(v / 60), s = Math.round(v % 60);
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            },
 
-        // ── MARATHON TIMER ────────────────────────────────────────────
-        timers: [
-            { id:'a', color:'green', startMs:null, pausedMs:0, running:false, paused:false, startClock:'', pauseClock:'', marks:{} },
-            { id:'b', color:'red',   startMs:null, pausedMs:0, running:false, paused:false, startClock:'', pauseClock:'', marks:{} },
-        ],
-        tick: 0,
-        _ticker: null,
+            // ── MARATHON TIMER ────────────────────────────────────────────
+            timers: [
+                {
+                    id: 'a',
+                    color: 'green',
+                    startMs: null,
+                    pausedMs: 0,
+                    running: false,
+                    paused: false,
+                    startClock: '',
+                    pauseClock: '',
+                    marks: {}
+                },
+                {
+                    id: 'b',
+                    color: 'red',
+                    startMs: null,
+                    pausedMs: 0,
+                    running: false,
+                    paused: false,
+                    startClock: '',
+                    pauseClock: '',
+                    marks: {}
+                },
+            ],
+            tick: 0,
+            _ticker: null,
 
-        phData(tm) { return tm.id === 'a' ? this.A : this.B; },
+            phData(tm) {
+                return tm.id === 'a' ? this.A : this.B;
+            },
 
-        parseMmSs(v) {
-            const str = String(v || '');
-            if (!str.includes(':')) return 0;
-            const [m, s] = str.split(':').map(Number);
-            return (m || 0) * 60 + (s || 0);
-        },
+            parseMmSs(v) {
+                const str = String(v || '');
+                if (!str.includes(':')) return 0;
+                const [m, s] = str.split(':').map(Number);
+                return (m || 0) * 60 + (s || 0);
+            },
 
-        getBestSec(tm) {
-            const d = this.phData(tm);
-            return this.method === 'speed'
-                ? +d.len * 3.6 / +d.speed
-                : this.parseMmSs(d.best);
-        },
+            getBestSec(tm) {
+                const d = this.phData(tm);
+                return this.method === 'speed'
+                    ? +d.len * 3.6 / +d.speed
+                    : this.parseMmSs(d.best);
+            },
 
-        getAllowSec(tm) {
-            const d = this.phData(tm);
-            return this.method === 'speed'
-                ? this.getBestSec(tm) + this.parseMmSs(d.diff)
-                : this.parseMmSs(d.allow);
-        },
+            getAllowSec(tm) {
+                const d = this.phData(tm);
+                return this.method === 'speed'
+                    ? this.getBestSec(tm) + this.parseMmSs(d.diff)
+                    : this.parseMmSs(d.allow);
+            },
 
-        getMilestones(tm) {
-            const d    = this.phData(tm);
-            const len  = +d.len;
-            const bSec = this.getBestSec(tm);
-            const aSec = this.getAllowSec(tm);
-            if (!len || !aSec) return [];
-            const rows  = [];
-            const steps = Math.floor(len / 1000);
-            const rem   = len % 1000;
-            for (let i = 1; i <= steps; i++) {
-                const dist = i * 1000;
-                rows.push({ dist, bestSec: bSec * dist / len, allowSec: aSec * dist / len, fin: i === steps && rem === 0 });
-            }
-            if (rem > 0) rows.push({ dist: len, bestSec: bSec, allowSec: aSec, fin: true });
-            return rows;
-        },
+            getMilestones(tm) {
+                const d = this.phData(tm);
+                const len = +d.len;
+                const bSec = this.getBestSec(tm);
+                const aSec = this.getAllowSec(tm);
+                if (!len || !aSec) return [];
+                const rows = [];
+                const steps = Math.floor(len / 1000);
+                const rem = len % 1000;
+                for (let i = 1; i <= steps; i++) {
+                    const dist = i * 1000;
+                    rows.push({
+                        dist,
+                        bestSec: bSec * dist / len,
+                        allowSec: aSec * dist / len,
+                        fin: i === steps && rem === 0
+                    });
+                }
+                if (rem > 0) rows.push({dist: len, bestSec: bSec, allowSec: aSec, fin: true});
+                return rows;
+            },
 
-        timerClass(tm) {
-            const el   = this.elapsedSec(tm);
-            const aSec = this.getAllowSec(tm);
-            const bSec = this.getBestSec(tm);
-            if (tm.pausedMs === 0 && !tm.running) return '';
-            if (el >= aSec)                return 'over';
-            if (tm.running && el >= bSec)  return 'warn';
-            if (tm.running)                return 'running';
-            return 'done-ok';
-        },
+            timerClass(tm) {
+                const el = this.elapsedSec(tm);
+                const aSec = this.getAllowSec(tm);
+                const bSec = this.getBestSec(tm);
+                if (tm.pausedMs === 0 && !tm.running) return '';
+                if (el >= aSec) return 'over';
+                if (tm.running && el >= bSec) return 'warn';
+                if (tm.running) return 'running';
+                return 'done-ok';
+            },
 
-        progressPct(tm) {
-            const aSec = this.getAllowSec(tm);
-            return aSec > 0 ? this.elapsedSec(tm) / aSec * 100 : 0;
-        },
+            progressPct(tm) {
+                const aSec = this.getAllowSec(tm);
+                return aSec > 0 ? this.elapsedSec(tm) / aSec * 100 : 0;
+            },
 
-        bestPct(tm) {
-            const bSec = this.getBestSec(tm);
-            const aSec = this.getAllowSec(tm);
-            return aSec > 0 ? Math.min(99, bSec / aSec * 100) : 0;
-        },
+            bestPct(tm) {
+                const bSec = this.getBestSec(tm);
+                const aSec = this.getAllowSec(tm);
+                return aSec > 0 ? Math.min(99, bSec / aSec * 100) : 0;
+            },
 
-        msBtnClass(tm, ms) {
-            const el     = this.elapsedSec(tm);
-            const marked = tm.marks[ms.dist] !== undefined;
-            if (marked) {
-                return (tm.marks[ms.dist] - ms.allowSec) <= 0 ? 'ms-ok' : 'ms-late';
-            }
-            if (el >= ms.allowSec) return 'ms-over';
-            if (el >= ms.bestSec)  return 'ms-warn';
-            return '';
-        },
+            msBtnClass(tm, ms) {
+                const el = this.elapsedSec(tm);
+                const marked = tm.marks[ms.dist] !== undefined;
+                if (marked) {
+                    return (tm.marks[ms.dist] - ms.allowSec) <= 0 ? 'ms-ok' : 'ms-late';
+                }
+                if (el >= ms.allowSec) return 'ms-over';
+                if (el >= ms.bestSec) return 'ms-warn';
+                return '';
+            },
 
-        markMs(tm, ms) {
-            tm.marks = { ...tm.marks, [ms.dist]: this.elapsedSec(tm) };
-        },
+            markMs(tm, ms) {
+                tm.marks = {...tm.marks, [ms.dist]: this.elapsedSec(tm)};
+            },
 
-        msDelta(tm, ms) {
-            const mark = tm.marks[ms.dist];
-            if (mark === undefined) return '';
-            const delta = mark - ms.allowSec;
-            const sign  = delta < 0 ? '-' : '+';
-            return sign + this.fmtSec(Math.abs(delta));
-        },
+            msDelta(tm, ms) {
+                const mark = tm.marks[ms.dist];
+                if (mark === undefined) return '';
+                const delta = mark - ms.allowSec;
+                const sign = delta < 0 ? '-' : '+';
+                return sign + this.fmtSec(Math.abs(delta));
+            },
 
-        togglePhase(tm) {
-            if (tm.running) {
-                tm.pausedMs  += Date.now() - tm.startMs;
-                tm.startMs    = null;
-                tm.running    = false;
-                tm.paused     = true;
-                tm.pauseClock = this._clockNow();
+            togglePhase(tm) {
+                if (tm.running) {
+                    tm.pausedMs += Date.now() - tm.startMs;
+                    tm.startMs = null;
+                    tm.running = false;
+                    tm.paused = true;
+                    tm.pauseClock = this._clockNow();
+                    if (!this.timers.some(t => t.running)) this._stopTicker();
+                } else {
+                    if (!tm.paused && tm.pausedMs === 0) {
+                        tm.marks = {};
+                        tm.startClock = this._clockNow();
+                        tm.pauseClock = '';
+                    }
+                    tm.startMs = Date.now();
+                    tm.running = true;
+                    tm.paused = false;
+                    this._startTicker();
+                }
+            },
+
+            resetPhase(tm) {
+                tm.startMs = null;
+                tm.pausedMs = 0;
+                tm.running = false;
+                tm.paused = false;
+                tm.startClock = '';
+                tm.pauseClock = '';
+                tm.marks = {};
                 if (!this.timers.some(t => t.running)) this._stopTicker();
-            } else {
-                if (!tm.paused && tm.pausedMs === 0) {
-                    tm.marks      = {};
-                    tm.startClock = this._clockNow();
-                    tm.pauseClock = '';
+            },
+
+            elapsedSec(tm) {
+                if (tm.running) {
+                    const now = this.tick > 0 ? this.tick : Date.now();
+                    return Math.max(0, (tm.pausedMs + (now - tm.startMs)) / 1000);
                 }
-                tm.startMs = Date.now();
-                tm.running = true;
-                tm.paused  = false;
-                this._startTicker();
-            }
-        },
+                return tm.pausedMs / 1000;
+            },
 
-        resetPhase(tm) {
-            tm.startMs    = null;
-            tm.pausedMs   = 0;
-            tm.running    = false;
-            tm.paused     = false;
-            tm.startClock = '';
-            tm.pauseClock = '';
-            tm.marks      = {};
-            if (!this.timers.some(t => t.running)) this._stopTicker();
-        },
+            _clockNow() {
+                return new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            },
 
-        elapsedSec(tm) {
-            if (tm.running) {
-                const now = this.tick > 0 ? this.tick : Date.now();
-                return Math.max(0, (tm.pausedMs + (now - tm.startMs)) / 1000);
-            }
-            return tm.pausedMs / 1000;
-        },
+            _startTicker() {
+                if (!this._ticker) {
+                    this.tick = Date.now();
+                    this._ticker = setInterval(() => {
+                        this.tick = Date.now();
+                    }, 100);
+                }
+            },
 
-        _clockNow() {
-            return new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        },
+            _stopTicker() {
+                if (this._ticker) {
+                    clearInterval(this._ticker);
+                    this._ticker = null;
+                }
+            },
 
-        _startTicker() {
-            if (!this._ticker) {
-                this.tick = Date.now();
-                this._ticker = setInterval(() => { this.tick = Date.now(); }, 100);
-            }
-        },
+            fmtTimer(sec) {
+                const s = Math.max(0, sec);
+                const m = Math.floor(s / 60);
+                const ss = Math.floor(s % 60);
+                const t = Math.floor((s % 1) * 10);
+                return `${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${t}`;
+            },
 
-        _stopTicker() {
-            if (this._ticker) { clearInterval(this._ticker); this._ticker = null; }
-        },
-
-        fmtTimer(sec) {
-            const s  = Math.max(0, sec);
-            const m  = Math.floor(s / 60);
-            const ss = Math.floor(s % 60);
-            const t  = Math.floor((s % 1) * 10);
-            return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}.${t}`;
-        },
-
-        fmtSec(sec) {
-            const s  = Math.max(0, sec);
-            const m  = Math.floor(s / 60);
-            const ss = Math.round(s % 60);
-            return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-        },
-    };
-}
+            fmtSec(sec) {
+                const s = Math.max(0, sec);
+                const m = Math.floor(s / 60);
+                const ss = Math.round(s % 60);
+                return `${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+            },
+        };
+    }
 </script>
 </body>
 </html>
