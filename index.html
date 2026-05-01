@@ -684,7 +684,6 @@
         }
 
         .ps-val b {
-            color: var(--text);
             font-weight: 800;
         }
 
@@ -865,8 +864,28 @@
             top: -3px;
             width: 3px;
             height: calc(100% + 6px);
-            background: rgba(255, 255, 255, 0.45);
+            background: var(--green);
             border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        .pb-avg {
+            position: absolute;
+            top: -3px;
+            width: 3px;
+            height: calc(100% + 6px);
+            background: var(--yellow);
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        .pb-ms-tick {
+            position: absolute;
+            top: 1px;
+            width: 2px;
+            height: calc(100% - 2px);
+            background: rgba(255,255,255,0.28);
+            border-radius: 1px;
             transform: translateX(-50%);
         }
 
@@ -999,6 +1018,12 @@
         .ms-btn .ms-sep {
             font-size: 10px;
             opacity: .4;
+        }
+
+        .ms-btn .ms-avg {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--yellow);
         }
 
         .ms-btn .ms-allow {
@@ -1331,11 +1356,14 @@
                     <span class="ps-chip" x-text="t(method==='standard' ? 'methodStd' : 'methodSpeed')"></span>
                     <span class="ps-val"><b x-text="phData(tm).len"></b> m</span>
                     <span class="ps-sep">·</span>
-                    <span class="ps-val" x-show="method==='standard'">
+                    <span class="ps-val" x-show="method==='standard'" style="color:var(--green)">
                         Best <b x-text="phData(tm).best"></b>
                     </span>
+                    <span class="ps-val" x-show="method==='standard'" style="color:var(--yellow)">
+                        Ø <b x-text="fmtSec(getAvgSec(tm))"></b>
+                    </span>
                     <span class="ps-val" x-show="method==='standard'" style="color:var(--red)">
-                        <b x-text="phData(tm).allow"></b>
+                        ⚑ Max <b x-text="phData(tm).allow"></b>
                     </span>
                     <span class="ps-val" x-show="method==='speed'">
                         <b x-text="phData(tm).speed"></b> km/h
@@ -1358,7 +1386,12 @@
                         <div class="progress-track">
                             <div class="pb-fill" :class="timerClass(tm)"
                                  :style="`width: ${Math.min(105, progressPct(tm))}%`"></div>
+                            <!-- Grey best-time ticks for each km milestone -->
+                            <template x-for="ms in getMilestones(tm).filter(m => !m.fin)" :key="ms.dist">
+                                <div class="pb-ms-tick" :style="`left: ${getAllowSec(tm) > 0 ? Math.min(99, ms.bestSec / getAllowSec(tm) * 100) : 0}%`"></div>
+                            </template>
                             <div class="pb-best" :style="`left: ${bestPct(tm)}%`"></div>
+                            <div class="pb-avg"  :style="`left: ${avgPct(tm)}%`"></div>
                         </div>
                         <div class="pb-clocks">
                             <span class="pb-clock-end"
@@ -1367,11 +1400,6 @@
                                 ⏸ <span x-text="tm.pauseClock"></span>
                             </span>
                         </div>
-                    </div>
-                    <div class="pb-labels">
-                        <span>Best: <span x-text="fmtSec(getBestSec(tm))"></span></span>
-                        <span><span x-text="t('cfgAllowed')"></span>: <span
-                                x-text="fmtSec(getAllowSec(tm))"></span></span>
                     </div>
 
                     <!-- Controls: large start/pause toggle + small reset -->
@@ -1397,7 +1425,7 @@
                                 <span class="ms-dist"
                                       x-text="ms.fin ? ms.dist+'m ✓' : (ms.dist/1000)+'km'"></span>
                                 <span class="ms-times">
-                                    <span class="ms-best" x-text="fmtSec(ms.bestSec)"></span>
+                                    <span class="ms-best"  x-text="fmtSec(ms.bestSec)"></span>
                                     <span class="ms-sep">/</span>
                                     <span class="ms-allow" x-text="fmtSec(ms.allowSec)"></span>
                                 </span>
@@ -1662,6 +1690,10 @@
                     : this.parseMmSs(d.best);
             },
 
+            getAvgSec(tm) {
+                return (this.getBestSec(tm) + this.getAllowSec(tm)) / 2;
+            },
+
             getAllowSec(tm) {
                 const d = this.phData(tm);
                 return this.method === 'speed'
@@ -1670,24 +1702,20 @@
             },
 
             getMilestones(tm) {
-                const d = this.phData(tm);
-                const len = +d.len;
+                const d    = this.phData(tm);
+                const len  = +d.len;
                 const bSec = this.getBestSec(tm);
                 const aSec = this.getAllowSec(tm);
+                const avSec = this.getAvgSec(tm);
                 if (!len || !aSec) return [];
-                const rows = [];
+                const rows  = [];
                 const steps = Math.floor(len / 1000);
-                const rem = len % 1000;
+                const rem   = len % 1000;
                 for (let i = 1; i <= steps; i++) {
                     const dist = i * 1000;
-                    rows.push({
-                        dist,
-                        bestSec: bSec * dist / len,
-                        allowSec: aSec * dist / len,
-                        fin: i === steps && rem === 0
-                    });
+                    rows.push({ dist, bestSec: bSec * dist / len, avgSec: avSec * dist / len, allowSec: aSec * dist / len, fin: i === steps && rem === 0 });
                 }
-                if (rem > 0) rows.push({dist: len, bestSec: bSec, allowSec: aSec, fin: true});
+                if (rem > 0) rows.push({ dist: len, bestSec: bSec, avgSec: avSec, allowSec: aSec, fin: true });
                 return rows;
             },
 
@@ -1711,6 +1739,12 @@
                 const bSec = this.getBestSec(tm);
                 const aSec = this.getAllowSec(tm);
                 return aSec > 0 ? Math.min(99, bSec / aSec * 100) : 0;
+            },
+
+            avgPct(tm) {
+                const avSec = this.getAvgSec(tm);
+                const aSec  = this.getAllowSec(tm);
+                return aSec > 0 ? Math.min(99, avSec / aSec * 100) : 0;
             },
 
             msBtnClass(tm, ms) {
