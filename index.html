@@ -777,25 +777,25 @@
         /* Timer + distance side by side */
         .timer-row {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
             margin: 4px 0 4px;
         }
         .timer-row .timer-big { margin: 0; }
         .dist-box {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-direction: row;
+            align-items: baseline;
             justify-content: center;
-            min-width: 64px;
-            position: absolute;
-            right: 0;
+            gap: 4px;
+            min-height: 20px;
+            margin-bottom: 3px;
         }
         .dist-val {
-            font-size: 29px;
-            font-weight: 900;
-            letter-spacing: -1px;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
             font-variant-numeric: tabular-nums;
             line-height: 1;
             color: var(--faint);
@@ -803,18 +803,16 @@
         }
         .dist-val.has-gps { color: var(--blue); }
         .dist-unit {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             color: var(--muted);
-            margin-top: 1px;
         }
         .dist-src {
-            font-size: 9px;
+            font-size: 10px;
             color: var(--faint);
-            margin-top: 1px;
-            letter-spacing: .5px;
+            letter-spacing: .3px;
         }
 
         .timer-big.running {
@@ -1453,15 +1451,15 @@
 
                     <!-- Big timer + distance -->
                     <div class="timer-row">
-                        <div class="timer-big" :class="timerClass(tm)"
-                             x-text="fmtTimer(elapsedSec(tm))"></div>
                         <div class="dist-box">
+                            <div class="dist-src" x-text="tm.gpsOk ? '📡 GPS' : '—'"></div>
                             <div class="dist-val"
                                  :class="tm.gpsOk ? 'has-gps' : ''"
                                  x-text="fmtDist(tm)"></div>
-                            <div class="dist-unit">m</div>
-                            <div class="dist-src" x-text="tm.gpsOk ? '📡 GPS' : '—'"></div>
+                            <div class="dist-unit" x-show="tm.gpsOk">m</div>
                         </div>
+                        <div class="timer-big" :class="timerClass(tm)"
+                             x-text="fmtTimer(elapsedSec(tm))"></div>
                     </div>
 
                     <!-- Progress bar with clock anchors -->
