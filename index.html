@@ -768,6 +768,49 @@
             line-height: 1;
         }
 
+        /* Timer + distance side by side */
+        .timer-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 4px 0 4px;
+        }
+        .timer-row .timer-big { margin: 0; }
+        .dist-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 64px;
+            position: absolute;
+            right: 0;
+        }
+        .dist-val {
+            font-size: 29px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            color: var(--faint);
+            transition: color .25s;
+        }
+        .dist-val.has-gps { color: var(--blue); }
+        .dist-unit {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 1px;
+        }
+        .dist-src {
+            font-size: 9px;
+            color: var(--faint);
+            margin-top: 1px;
+            letter-spacing: .5px;
+        }
+
         .timer-big.running {
             color: var(--green);
         }
@@ -1376,9 +1419,18 @@
                 <!-- Timer body -->
                 <div class="phase-body">
 
-                    <!-- Big timer -->
-                    <div class="timer-big" :class="timerClass(tm)"
-                         x-text="fmtTimer(elapsedSec(tm))"></div>
+                    <!-- Big timer + distance -->
+                    <div class="timer-row">
+                        <div class="timer-big" :class="timerClass(tm)"
+                             x-text="fmtTimer(elapsedSec(tm))"></div>
+                        <div class="dist-box">
+                            <div class="dist-val"
+                                 :class="tm.gpsOk ? 'has-gps' : ''"
+                                 x-text="fmtDist(tm)"></div>
+                            <div class="dist-unit">m</div>
+                            <div class="dist-src" x-text="tm.gpsOk ? '📡 GPS' : '—'"></div>
+                        </div>
+                    </div>
 
                     <!-- Progress bar with clock anchors -->
                     <div class="pb-wrapper">
@@ -1501,7 +1553,7 @@
                     milestones: 'km-Marker',
                 },
                 en: {
-                    eyebrow: '🏇 Carriage Sport',
+                    eyebrow: '🏇 Driving Sport',
                     title: 'Marathon<br><em>Time</em> Calculator',
                     caption: 'Enter Tracks',
                     trackA: 'Warm-up Track',
@@ -1647,26 +1699,18 @@
             // ── MARATHON TIMER ────────────────────────────────────────────
             timers: [
                 {
-                    id: 'a',
-                    color: 'green',
-                    wallStartMs: null,
-                    frozenSec: 0,
-                    running: false,
-                    paused: false,
-                    startClock: '',
-                    pauseClock: '',
-                    marks: {}
+                    id: 'a', color: 'green',
+                    wallStartMs: null, frozenSec: 0,
+                    running: false, paused: false,
+                    startClock: '', pauseClock: '', marks: {},
+                    gpsDist: 0, gpsOk: false, _gpsWatch: null, _lastPos: null
                 },
                 {
-                    id: 'b',
-                    color: 'red',
-                    wallStartMs: null,
-                    frozenSec: 0,
-                    running: false,
-                    paused: false,
-                    startClock: '',
-                    pauseClock: '',
-                    marks: {}
+                    id: 'b', color: 'red',
+                    wallStartMs: null, frozenSec: 0,
+                    running: false, paused: false,
+                    startClock: '', pauseClock: '', marks: {},
+                    gpsDist: 0, gpsOk: false, _gpsWatch: null, _lastPos: null
                 },
             ],
             tick: 0,
@@ -1778,6 +1822,7 @@
                     tm.running = false;
                     tm.paused = true;
                     tm.pauseClock = this._clockNow();
+                    this._stopGps(tm);
                     if (!this.timers.some(t => t.running)) this._stopTicker();
                 } else {
                     if (!tm.paused && !tm.wallStartMs) {
@@ -1785,6 +1830,9 @@
                         tm.wallStartMs = Date.now();
                         tm.frozenSec = 0;
                         tm.marks = {};
+                        tm.gpsDist = 0;
+                        tm.gpsOk = false;
+                        tm._lastPos = null;
                         tm.startClock = this._clockNow();
                         tm.pauseClock = '';
                     }
@@ -1792,10 +1840,12 @@
                     tm.running = true;
                     tm.paused = false;
                     this._startTicker();
+                    this._startGps(tm);
                 }
             },
 
             resetPhase(tm) {
+                this._stopGps(tm);
                 tm.wallStartMs = null;
                 tm.frozenSec = 0;
                 tm.running = false;
@@ -1803,6 +1853,10 @@
                 tm.startClock = '';
                 tm.pauseClock = '';
                 tm.marks = {};
+                tm.gpsDist = 0;
+                tm.gpsOk = false;
+                tm._lastPos = null;
+                tm._beeped = {};
                 if (!this.timers.some(t => t.running)) this._stopTicker();
             },
 
@@ -1823,6 +1877,7 @@
                     this.tick = Date.now();
                     this._ticker = setInterval(() => {
                         this.tick = Date.now();
+                        this.timers.forEach(tm => { if (tm.running) this._checkBeeps(tm); });
                     }, 100);
                 }
             },
@@ -1832,6 +1887,79 @@
                     clearInterval(this._ticker);
                     this._ticker = null;
                 }
+            },
+
+            _beep(freq = 880, duration = 0.25, gap = 0.12) {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const playTone = (startAt) => {
+                        const osc  = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.55, startAt);
+                        gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
+                        osc.start(startAt);
+                        osc.stop(startAt + duration);
+                    };
+                    playTone(ctx.currentTime);
+                    playTone(ctx.currentTime + duration + gap);
+                    // close context after both tones finish
+                    setTimeout(() => ctx.close(), (duration * 2 + gap + 0.1) * 1000);
+                } catch (_) {}
+            },
+
+            _checkBeeps(tm) {
+                const el = this.elapsedSec(tm);
+                const milestones = this.getMilestones(tm);
+                if (!tm._beeped) tm._beeped = {};
+                for (const ms of milestones) {
+                    if (!tm._beeped[ms.dist] && el >= ms.bestSec) {
+                        tm._beeped[ms.dist] = true;
+                        this._beep();
+                    }
+                }
+            },
+
+            _haversineM(lat1, lon1, lat2, lon2) {
+                const R = 6371000, r = Math.PI / 180;
+                const dLat = (lat2 - lat1) * r, dLon = (lon2 - lon1) * r;
+                const a = Math.sin(dLat/2)**2 + Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLon/2)**2;
+                return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            },
+
+            _startGps(tm) {
+                if (!navigator.geolocation) return;
+                if (tm._gpsWatch) return;
+                tm._gpsWatch = navigator.geolocation.watchPosition(
+                    pos => {
+                        const { latitude: lat, longitude: lon, accuracy } = pos.coords;
+                        if (accuracy > 50) return; // ignore poor fixes
+                        if (tm._lastPos) {
+                            const d = this._haversineM(tm._lastPos.lat, tm._lastPos.lon, lat, lon);
+                            if (d > 0.5) { // filter GPS noise < 0.5 m
+                                tm.gpsDist += d;
+                                tm.gpsOk = true;
+                            }
+                        }
+                        tm._lastPos = { lat, lon };
+                    },
+                    () => { tm.gpsOk = false; },
+                    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+                );
+            },
+
+            _stopGps(tm) {
+                if (tm._gpsWatch !== null) {
+                    navigator.geolocation && navigator.geolocation.clearWatch(tm._gpsWatch);
+                    tm._gpsWatch = null;
+                }
+            },
+
+            fmtDist(tm) {
+                if (tm.gpsOk && tm.gpsDist > 0) return Math.round(tm.gpsDist);
+                return '—';
             },
 
             fmtTimer(sec) {
