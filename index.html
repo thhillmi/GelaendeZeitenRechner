@@ -1695,9 +1695,9 @@
                 const len = +tr.len;
                 let bSec, aSec;
                 if (this.method === 'speed') {
-                    // Best = distance ÷ speed; Allowed = Best + time difference
-                    bSec = len * 3.6 / +tr.speed;
-                    aSec = bSec + this.s(tr.diff);
+                    // Allowed = distance ÷ speed; Best = Allowed − time window
+                    aSec = len * 3.6 / +tr.speed;
+                    bSec = aSec - this.s(tr.diff);
                 } else {
                     bSec = this.s(tr.best);
                     aSec = this.s(tr.allow);
@@ -1763,7 +1763,7 @@
             getBestSec(tm) {
                 const d = this.phData(tm);
                 return this.method === 'speed'
-                    ? +d.len * 3.6 / +d.speed
+                    ? this.getAllowSec(tm) - this.parseMmSs(d.diff)
                     : this.parseMmSs(d.best);
             },
 
@@ -1774,7 +1774,7 @@
             getAllowSec(tm) {
                 const d = this.phData(tm);
                 return this.method === 'speed'
-                    ? this.getBestSec(tm) + this.parseMmSs(d.diff)
+                    ? +d.len * 3.6 / +d.speed
                     : this.parseMmSs(d.allow);
             },
 
