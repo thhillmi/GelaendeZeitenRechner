@@ -1715,6 +1715,7 @@
             ],
             tick: 0,
             _ticker: null,
+            _audioCtx: null,
 
             phData(tm) {
                 return tm.id === 'a' ? this.A : this.B;
@@ -1839,6 +1840,7 @@
                     // Resume: wallStartMs unchanged — elapsed will auto-jump to real wall time
                     tm.running = true;
                     tm.paused = false;
+                    this._unlockAudio();
                     this._startTicker();
                     this._startGps(tm);
                 }
@@ -1889,9 +1891,21 @@
                 }
             },
 
+            _unlockAudio() {
+                try {
+                    if (!this._audioCtx) {
+                        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (this._audioCtx.state === 'suspended') {
+                        this._audioCtx.resume();
+                    }
+                } catch (_) {}
+            },
+
             _beep(freq = 880, duration = 0.25, gap = 0.12) {
                 try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const ctx = this._audioCtx;
+                    if (!ctx || ctx.state === 'suspended') return;
                     const playTone = (startAt) => {
                         const osc  = ctx.createOscillator();
                         const gain = ctx.createGain();
@@ -1905,8 +1919,6 @@
                     };
                     playTone(ctx.currentTime);
                     playTone(ctx.currentTime + duration + gap);
-                    // close context after both tones finish
-                    setTimeout(() => ctx.close(), (duration * 2 + gap + 0.1) * 1000);
                 } catch (_) {}
             },
 
