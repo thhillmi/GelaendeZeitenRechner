@@ -346,7 +346,10 @@
 <!-- ── Header ── -->
 <div class="app-header">
     <div class="header-row">
-        <a href="index.html" class="back-link">← Marathon</a>
+        <div style="display:flex;align-items:center;gap:6px">
+            <a href="index.html" class="back-link">← Marathon</a>
+            <a href="help.html" class="back-link" title="Hilfe / Handbuch">?</a>
+        </div>
         <span class="app-title">🏇 Fahrsport Tools</span>
         <button class="lang-btn" @click="lang = lang==='de' ? 'en' : 'de'" x-text="lang==='de' ? 'EN' : 'DE'"></button>
     </div>

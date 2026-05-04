@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Hilfe · Marathon Zeiten Rechner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07100a;
+            --surface: rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.09);
+            --border-hi: rgba(255,255,255,0.17);
+            --green: #22c55e;
+            --green-dim: rgba(34,197,94,0.12);
+            --green-ring: rgba(34,197,94,0.28);
+            --red: #f87171;
+            --red-dim: rgba(248,113,113,0.10);
+            --blue: #60a5fa;
+            --yellow: #fbbf24;
+            --text: #f1f5f9;
+            --muted: rgba(241,245,249,0.46);
+            --faint: rgba(241,245,249,0.24);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --r: 14px;
+            --r-sm: 10px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            -webkit-text-size-adjust: 100%;
+            overflow-x: hidden;
+        }
+
+        /* ── Header ── */
+        .app-header {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(7,16,10,0.95);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border-bottom: 1px solid var(--border);
+            padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+        }
+        .header-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .app-title  { font-size: 13px; font-weight: 800; letter-spacing: .5px; color: var(--green); }
+        .back-link {
+            font-size: 11px; font-weight: 600; color: var(--muted);
+            text-decoration: none; padding: 5px 11px;
+            border: 1px solid var(--border); border-radius: 99px;
+            transition: color .15s, border-color .15s; white-space: nowrap;
+        }
+        .back-link:hover { color: var(--green); border-color: var(--green-ring); }
+
+        /* ── Main ── */
+        .main {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 28px 16px calc(max(40px, env(safe-area-inset-bottom)) + 24px);
+        }
+
+        /* ── TOC ── */
+        .toc {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--r); padding: 16px 20px; margin-bottom: 36px;
+        }
+        .toc-title {
+            font-size: 9px; font-weight: 700; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--faint); margin-bottom: 10px;
+        }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 5px; }
+        .toc a { font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; transition: color .15s; }
+        .toc a:hover { color: var(--green); }
+
+        /* ── Section ── */
+        .doc-section { margin-bottom: 52px; }
+        .section-num {
+            font-size: 9px; font-weight: 700; letter-spacing: 2.5px;
+            text-transform: uppercase; color: var(--green); margin-bottom: 4px;
+        }
+        .section-title { font-size: 22px; font-weight: 900; letter-spacing: -.5px; margin-bottom: 8px; }
+        .section-sub { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 22px; }
+
+        /* ── Sub-section ── */
+        .subsection { margin-bottom: 28px; }
+        .sub-title  { font-size: 15px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 6px; }
+        .sub-body   { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 12px; }
+
+        /* ── Mockup frame ── */
+        .mockup {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-hi);
+            border-radius: var(--r); padding: 16px;
+            margin: 12px 0 16px; position: relative;
+        }
+        .mockup-label {
+            font-size: 9px; font-weight: 700; letter-spacing: 1.8px;
+            text-transform: uppercase; color: var(--faint); margin-bottom: 12px;
+        }
+
+        /* ── Callout bubbles ── */
+        .cn {
+            position: absolute;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px;
+            background: var(--yellow); color: #000;
+            border-radius: 50%; font-size: 10px; font-weight: 800;
+            pointer-events: none; z-index: 10;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 2px rgba(7,16,10,0.9);
+        }
+
+        /* ── Callout list ── */
+        .cl { list-style: none; margin: 0; padding: 0; }
+        .cl li {
+            display: flex; align-items: flex-start; gap: 10px;
+            margin-bottom: 8px; font-size: 12px; line-height: 1.55; color: var(--muted);
+        }
+        .cl li .cnum {
+            flex-shrink: 0;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px;
+            background: var(--yellow); color: #000;
+            border-radius: 50%; font-size: 10px; font-weight: 800; margin-top: 1px;
+        }
+        .cl li strong { color: var(--text); }
+
+        /* ══════════════════════════════
+           MINI-UI BUILDING BLOCKS
+           ══════════════════════════════ */
+
+        /* Pill button */
+        .m-pill {
+            display: inline-flex; align-items: center;
+            font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+            background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.20); border-radius: 99px;
+            padding: 5px 12px;
+        }
+        .m-pill.green { background: var(--green); color: #000; border-color: transparent; }
+        .m-pill.dim   { background: rgba(255,255,255,0.06); color: var(--muted); border-color: var(--border); }
+
+        /* Segmented control */
+        .m-seg {
+            display: inline-flex; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border); border-radius: 99px; padding: 2px; gap: 1px;
+        }
+        .m-seg-btn {
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+            padding: 5px 14px; border-radius: 99px;
+            background: transparent; color: var(--muted);
+        }
+        .m-seg-btn.active { background: var(--green); color: #000; }
+
+        /* Card */
+        .m-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 8px; }
+        .m-card.green { border-top: 3px solid var(--green); }
+        .m-card.red   { border-top: 3px solid var(--red); }
+        .m-card.blue  { border-top: 3px solid var(--blue); }
+        .m-card-head {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px; font-size: 11px; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        .m-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .m-card.green .m-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .m-card.red   .m-dot { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+        .m-card.blue  .m-dot { background: var(--blue);  box-shadow: 0 0 6px var(--blue); }
+        .m-card-body { padding: 12px 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* Form field */
+        .m-field { display: flex; flex-direction: column; flex: 1; min-width: 80px; }
+        .m-field label {
+            font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 3px;
+        }
+        .m-inp {
+            font-size: 13px; font-weight: 700; text-align: center; color: var(--text);
+            background: rgba(255,255,255,0.055); border: 1px solid var(--border-hi);
+            border-radius: 8px; padding: 7px 6px;
+        }
+
+        /* Buttons */
+        .m-btn {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700;
+        }
+        .m-btn.green  { background: var(--green); color: #000; }
+        .m-btn.yellow { background: var(--yellow); color: #000; }
+        .m-btn.dim    { background: rgba(255,255,255,0.09); color: var(--muted); padding: 10px 14px; font-size: 12px; }
+        .m-btn.red    { background: var(--red); color: #fff; }
+
+        /* Result table */
+        .m-rt { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .m-rt th {
+            padding: 5px 8px; font-size: 8px; font-weight: 700; letter-spacing: 1.2px;
+            text-transform: uppercase; color: var(--muted);
+            border-bottom: 1px solid var(--border); text-align: center;
+        }
+        .m-rt td {
+            padding: 7px 8px; text-align: center; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .m-rt tr.final td { font-weight: 800; font-size: 13px; }
+        .m-rt tr.hl-green { background: rgba(34,197,94,0.10); }
+        .c-green { color: var(--green); }
+        .c-red   { color: var(--red); }
+        .c-blue  { color: var(--blue); }
+        .c-muted { color: var(--muted) !important; font-size: 11px !important; }
+
+        /* Timer big */
+        .m-timer {
+            font-size: 44px; font-weight: 900; letter-spacing: -2px;
+            font-variant-numeric: tabular-nums; text-align: center; line-height: 1;
+        }
+        .m-timer.green  { color: var(--green); }
+        .m-timer.yellow { color: var(--yellow); }
+        .m-timer.red    { color: var(--red); animation: pulse 1s infinite; }
+        .m-timer.blue   { color: var(--blue); }
+        .m-timer.dim    { color: var(--faint); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+
+        /* Progress bar */
+        .m-pb-track {
+            position: relative; height: 10px;
+            background: rgba(255,255,255,0.08); border-radius: 99px;
+            margin: 10px 0; overflow: visible;
+        }
+        .m-pb-fill {
+            position: absolute; left: 0; top: 0; height: 100%; border-radius: 99px;
+        }
+        .m-pb-fill.green  { background: var(--green); }
+        .m-pb-fill.yellow { background: var(--yellow); }
+        .m-pb-fill.red    { background: var(--red); }
+        .m-pb-marker {
+            position: absolute; top: -3px; width: 3px; height: 16px;
+            border-radius: 2px; transform: translateX(-50%);
+        }
+        .m-pb-marker.green  { background: var(--green); }
+        .m-pb-marker.yellow { background: var(--yellow); }
+        .m-pb-marker.grey   { background: rgba(255,255,255,0.30); width: 2px; height: 8px; top: 1px; }
+
+        /* km-Marker grid */
+        .m-ms-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .m-ms-btn {
+            padding: 7px 3px; text-align: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border); border-radius: 8px; color: var(--muted);
+        }
+        .m-ms-btn .km    { font-size: 9px; font-weight: 800; display: block; }
+        .m-ms-btn .times { font-size: 8px; font-weight: 700; display: block; margin-top: 2px; font-variant-numeric: tabular-nums; color: var(--faint); }
+        .m-ms-btn .hit   { font-size: 8px; font-weight: 700; margin-top: 2px; display: block; font-variant-numeric: tabular-nums; }
+        .m-ms-btn.ok   { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.35); color: var(--green); }
+        .m-ms-btn.late { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.40); color: var(--red); }
+        .m-ms-btn.warn { background: rgba(251,191,36,0.10); border-color: rgba(251,191,36,0.35); color: var(--yellow); }
+        .m-ms-btn.over { background: rgba(248,113,113,0.16); border-color: rgba(248,113,113,0.45); color: var(--red); }
+
+        /* Phase summary strip */
+        .m-ps {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
+            padding: 7px 14px; font-size: 11px; color: var(--muted);
+            border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums;
+        }
+        .m-ps-chip {
+            font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+            background: rgba(255,255,255,0.08); border: 1px solid var(--border-hi);
+            border-radius: 99px; padding: 2px 7px; color: var(--text); flex-shrink: 0;
+        }
+
+        /* GPS dist box */
+        .m-dist-val  { font-size: 24px; font-weight: 900; letter-spacing: -1px; font-variant-numeric: tabular-nums; color: var(--blue); line-height: 1; }
+        .m-dist-unit { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+        .m-dist-src  { font-size: 8px; color: var(--faint); }
+
+        /* Stat boxes */
+        .m-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .m-stat-box  { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; }
+        .m-stat-label { font-size: 7px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+        .m-stat-value { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+        /* Dressage table */
+        .m-dressur { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .m-dressur th { font-size: 8px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); padding: 0 6px 7px; text-align: left; }
+        .m-dressur td { padding: 5px 6px; vertical-align: middle; border-top: 1px solid var(--border); }
+
+        /* Hero mockup */
+        .m-hero {
+            height: 88px; border-radius: 12px;
+            background: linear-gradient(135deg, #0d2015 0%, #1a4028 100%);
+            display: flex; align-items: flex-end; padding: 12px 14px;
+            position: relative; overflow: hidden; margin-bottom: 8px;
+        }
+        .m-hero-eyebrow { font-size: 8px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 3px; }
+        .m-hero-title   { font-size: 18px; font-weight: 900; line-height: 1.1; }
+        .m-hero-title em { font-style: normal; background: linear-gradient(135deg, var(--green), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        /* Floating buttons area */
+        .m-float-area { position: relative; height: 34px; }
+        .m-float-btn {
+            position: absolute;
+            font-size: 11px; font-weight: 700; letter-spacing: .5px;
+            color: rgba(255,255,255,0.80); background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.20); border-radius: 99px;
+            padding: 5px 12px; text-decoration: none;
+        }
+        .m-float-btn.left  { left: 0; }
+        .m-float-btn.right { right: 0; }
+        .m-float-btn.done  { background: var(--green); color: #000; border-color: transparent; }
+
+        /* Tab strip */
+        .m-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+        .m-tab  {
+            flex: 1; font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+            color: var(--muted); padding: 8px 6px; text-align: center;
+            border-bottom: 2px solid transparent;
+        }
+        .m-tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+        /* Info boxes */
+        .tip-box {
+            background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.22);
+            border-radius: var(--r); padding: 14px 16px; margin: 12px 0;
+        }
+        .warn-box {
+            background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.22);
+            border-radius: var(--r); padding: 14px 16px; margin: 12px 0;
+        }
+        .info-box {
+            background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.22);
+            border-radius: var(--r); padding: 14px 16px; margin: 12px 0;
+        }
+        .tip-box  .box-title { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green);  margin-bottom: 6px; }
+        .warn-box .box-title { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--yellow); margin-bottom: 6px; }
+        .info-box .box-title { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--blue);   margin-bottom: 6px; }
+        .tip-box p, .warn-box p, .info-box p { font-size: 12px; color: var(--muted); line-height: 1.65; }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+        }
+        .badge.green  { background: rgba(34,197,94,0.15);  color: var(--green);  border: 1px solid rgba(34,197,94,0.30); }
+        .badge.red    { background: rgba(248,113,113,0.15); color: var(--red);    border: 1px solid rgba(248,113,113,0.30); }
+        .badge.yellow { background: rgba(251,191,36,0.15);  color: var(--yellow); border: 1px solid rgba(251,191,36,0.30); }
+        .badge.blue   { background: rgba(96,165,250,0.15);  color: var(--blue);   border: 1px solid rgba(96,165,250,0.30); }
+        .badge.grey   { background: rgba(255,255,255,0.08); color: var(--muted);  border: 1px solid var(--border); }
+
+        /* Layout helpers */
+        .row { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 0; }
+        .hr  { height: 1px; background: linear-gradient(90deg,transparent,var(--border-hi),transparent); margin: 36px 0; }
+
+        /* Step list */
+        .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+        .step  { display: flex; gap: 10px; align-items: flex-start; }
+        .step-num {
+            flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px;
+            background: var(--green); color: #000;
+            border-radius: 50%; font-size: 11px; font-weight: 800; margin-top: 2px;
+        }
+        .step-text { font-size: 13px; color: var(--muted); line-height: 1.6; padding-top: 1px; }
+
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="app-header">
+    <div class="header-row">
+        <a href="index.html" class="back-link">← App</a>
+        <span class="app-title">📖 Benutzerhandbuch</span>
+        <a href="tools.html" class="back-link">Dressur →</a>
+    </div>
+</div>
+
+<div class="main">
+
+    <!-- ── TOC ── -->
+    <div class="toc">
+        <div class="toc-title">Inhalt</div>
+        <ol>
+            <li><a href="#overview">Überblick</a></li>
+            <li><a href="#global">Globale Elemente</a></li>
+            <li><a href="#calc">Rechner-Tab</a></li>
+            <li><a href="#timer">Timer-Tab</a></li>
+            <li><a href="#dressur">Dressur-Rechner</a></li>
+            <li><a href="#tips">Tipps &amp; FAQ</a></li>
+        </ol>
+    </div>
+
+    <!-- ═══════════════════════════════
+         01 · OVERVIEW
+         ═══════════════════════════════ -->
+    <div class="doc-section" id="overview">
+        <div class="section-num">01</div>
+        <h2 class="section-title">Überblick</h2>
+        <p class="section-sub">
+            Der <strong>Marathon Zeiten Rechner</strong> ist eine mobile Web-App für den Kutschsport (Carriage Driving / Geländefahren).
+            Sie hilft beim Berechnen und Live-Messen von Zeiten für Marathon-Phasen und beim Auswerten von Dressurergebnissen.
+        </p>
+        <div class="row">
+            <div class="col">
+                <div class="m-card green" style="margin-bottom:0">
+                    <div class="m-card-head"><div class="m-dot"></div> Hauptseite (index.html)</div>
+                    <div style="padding:10px 14px 13px; display:flex; flex-direction:column; gap:6px">
+                        <div style="font-size:12px;color:var(--muted)"><span style="color:var(--green);font-weight:700">⬛</span> <strong>Rechner-Tab</strong> — Streckenparameter eingeben &amp; km-Zeiten berechnen</div>
+                        <div style="font-size:12px;color:var(--muted)"><span style="color:var(--blue);font-weight:700">⬛</span> <strong>Timer-Tab</strong> — Live-Zeitmessung, GPS-Distanz, km-Marker</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="m-card blue" style="margin-bottom:0">
+                    <div class="m-card-head"><div class="m-dot"></div> Tools-Seite (tools.html)</div>
+                    <div style="padding:10px 14px 13px">
+                        <div style="font-size:12px;color:var(--muted)"><span style="color:var(--yellow);font-weight:700">⬛</span> <strong>Dressur-Rechner</strong> — Noten eingeben, Strafpunkte berechnen</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- ═══════════════════════════════
+         02 · GLOBAL
+         ═══════════════════════════════ -->
+    <div class="doc-section" id="global">
+        <div class="section-num">02</div>
+        <h2 class="section-title">Globale Elemente</h2>
+        <p class="section-sub">Diese Elemente erscheinen auf jeder Seite und sind immer zugänglich.</p>
+
+        <!-- Hero -->
+        <div class="subsection">
+            <div class="sub-title">Hero-Bereich &amp; schwebende Buttons (Hauptseite)</div>
+            <div class="mockup" style="padding-bottom: 34px">
+                <div class="mockup-label">Screenshot-Mockup · oberer Bildschirmbereich (index.html)</div>
+                <div class="m-hero">
+                    <div>
+                        <div class="m-hero-eyebrow">🏇 Kutschsport</div>
+                        <div class="m-hero-title">Marathon<em>Zeiten</em><br>Rechner</div>
+                    </div>
+                </div>
+                <div class="m-float-area">
+                    <div class="m-float-btn left">?</div>
+                    <div class="m-float-btn right">DE</div>
+                </div>
+                <span class="cn" style="top:72%;left:4%">1</span>
+                <span class="cn" style="top:72%;right:-2px">2</span>
+                <span class="cn" style="top:42%;left:50%">3</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>❓ Hilfe-Button</strong> (oben links, fest) — Öffnet dieses Handbuch. Bleibt sichtbar auch wenn die Tastatur eingeblendet ist.</div></li>
+                <li><span class="cnum">2</span><div><strong>DE / EN Sprach-Schalter</strong> (oben rechts, fest) — Wechselt sofort alle Beschriftungen und Tooltips zwischen Deutsch und Englisch.</div></li>
+                <li><span class="cnum">3</span><div><strong>Hero-Bild</strong> — Hintergrundbild mit Titel der App. Rein dekorativ.</div></li>
+            </ul>
+        </div>
+
+        <!-- Keyboard dismiss -->
+        <div class="subsection">
+            <div class="sub-title">✓ Fertig-Button (nur mobil)</div>
+            <div class="mockup">
+                <div class="mockup-label">Ersetzt den Sprach-Schalter sobald ein Eingabefeld fokussiert ist</div>
+                <div class="m-float-area">
+                    <div class="m-float-btn done">✓ Fertig</div>
+                </div>
+            </div>
+            <p class="sub-body">
+                Auf Smartphones erscheint oben rechts ein grüner <strong>✓ Fertig</strong>-Button, sobald eine Eingabe aktiv ist und die virtuelle Tastatur sichtbar wird.
+                Ein Tipp schließt die Tastatur, ohne das Eingabefeld zu wechseln.
+            </p>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="subsection">
+            <div class="sub-title">Tab-Leiste (Hauptseite)</div>
+            <div class="mockup" style="padding-bottom: 14px">
+                <div class="mockup-label">Direkt unter dem Hero-Bereich</div>
+                <div class="m-tabs">
+                    <div class="m-tab active">Rechner</div>
+                    <div class="m-tab">Timer</div>
+                </div>
+                <span class="cn" style="top:52%;left:20%">4</span>
+                <span class="cn" style="top:52%;left:63%">5</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">4</span><div><strong>Rechner-Tab</strong> — Eingabe der Streckenparameter und Berechnung der km-Zeiten. Startpunkt für die Vorbereitung zuhause.</div></li>
+                <li><span class="cnum">5</span><div><strong>Timer-Tab</strong> — Live-Zeitmessung während der Fahrt. Übernimmt automatisch alle Werte aus dem Rechner-Tab.</div></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- ═══════════════════════════════
+         03 · CALCULATOR
+         ═══════════════════════════════ -->
+    <div class="doc-section" id="calc">
+        <div class="section-num">03</div>
+        <h2 class="section-title">Rechner-Tab</h2>
+        <p class="section-sub">
+            Hier werden die Streckendaten aus der Ausschreibung eingegeben.
+            Nach dem Berechnen erscheinen Zeittabellen pro km — und der Timer-Tab übernimmt alle Werte automatisch.
+        </p>
+
+        <!-- Method toggle -->
+        <div class="subsection">
+            <div class="sub-title">Berechnungsmethode</div>
+            <div class="mockup" style="padding-bottom: 26px">
+                <div class="mockup-label">Segmented Control · oben im Rechner-Tab</div>
+                <div class="m-seg" style="width:100%">
+                    <div class="m-seg-btn active" style="flex:1;text-align:center">Zeiten</div>
+                    <div class="m-seg-btn" style="flex:1;text-align:center">Geschwindigkeit</div>
+                </div>
+                <span class="cn" style="top:64%;left:22%">1</span>
+                <span class="cn" style="top:64%;left:72%">2</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>Zeiten-Modus</strong> — Direkteingabe von Best- und Erlaubt-Zeit im Format <code>MM:SS</code>. Für Ausschreibungen die explizit Zeiten nennen (z.B. „Best: 12:00, Erlaubt: 14:00").</div></li>
+                <li><span class="cnum">2</span><div><strong>Geschwindigkeits-Modus</strong> — Eingabe der Durchschnittsgeschwindigkeit in km/h und des Zeitfensters (Δ zwischen Best und Erlaubt). Für Ausschreibungen mit Geschwindigkeitsangaben.</div></li>
+            </ul>
+        </div>
+
+        <!-- Track cards -->
+        <div class="subsection">
+            <div class="sub-title">Strecken-Karten</div>
+            <div class="mockup" style="padding-bottom: 18px">
+                <div class="mockup-label">Grüne Karte = Aufwärmstrecke · Rote Karte = Hindernisstrecke · Zeiten-Modus</div>
+                <div class="m-card green" style="position:relative; margin-bottom:0">
+                    <div class="m-card-head"><div class="m-dot"></div> Aufwärmstrecke</div>
+                    <div class="m-card-body">
+                        <div class="m-field" style="flex:1.2">
+                            <label>Länge (m)</label>
+                            <div class="m-inp">2000</div>
+                        </div>
+                        <div class="m-field">
+                            <label>Best (min:sec) ⓘ</label>
+                            <div class="m-inp">12:00</div>
+                        </div>
+                        <div class="m-field">
+                            <label>Erlaubt (min:sec) ⓘ</label>
+                            <div class="m-inp">14:00</div>
+                        </div>
+                    </div>
+                    <span class="cn" style="top:82%;left:12%">1</span>
+                    <span class="cn" style="top:82%;left:46%">2</span>
+                    <span class="cn" style="top:82%;left:80%">3</span>
+                </div>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>Länge (m)</strong> — Streckenlänge in Metern, z.B. <code>2000</code> für 2 km. Nur Zahlen eingeben, keine Einheit.</div></li>
+                <li><span class="cnum">2</span><div><strong>Best (min:sec)</strong> — Die schnellste erlaubte Zeit im Format <code>MM:SS</code>. Wird sie unterschritten, gibt es Strafpunkte. <span class="badge green">Grün</span> in den Ergebnissen. Das <strong>ⓘ</strong>-Icon zeigt einen erklärenden Tooltip.</div></li>
+                <li><span class="cnum">3</span><div><strong>Erlaubt (min:sec)</strong> — Die maximale erlaubte Zeit. Bei Überschreitung gibt es Zeitstrafen. <span class="badge red">Rot</span> in den Ergebnissen.</div></li>
+            </ul>
+            <div class="tip-box">
+                <div class="box-title">💡 Geschwindigkeits-Modus</div>
+                <p>Im Geschwindigkeits-Modus erscheinen stattdessen <strong>Geschw. (km/h)</strong> und <strong>Zeitfenster (min:sec)</strong> (Δ zwischen Best- und Erlaubt-Zeit, z.B. <code>02:00</code>). Die App berechnet daraus Best- und Erlaubt-Zeiten automatisch.</p>
+            </div>
+        </div>
+
+        <!-- Calculate button -->
+        <div class="subsection">
+            <div class="sub-title">Berechnen-Button</div>
+            <div class="mockup">
+                <div class="mockup-label">Fixiert am unteren Bildschirmrand · nur im Rechner-Tab sichtbar</div>
+                <div class="m-btn green">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Berechnen
+                </div>
+            </div>
+            <p class="sub-body">
+                Der grüne Button startet die Berechnung für beide Strecken gleichzeitig.
+                Nach der Berechnung lautet die Beschriftung <strong>Neu berechnen</strong>.
+                Sind Pflichtfelder leer oder ungültig, werden sie rot markiert und kurz animiert (Schütteleffekt).
+            </p>
+        </div>
+
+        <!-- Result tables -->
+        <div class="subsection">
+            <div class="sub-title">Ergebnis-Tabellen</div>
+            <div class="mockup">
+                <div class="mockup-label">Erscheinen nach dem Berechnen unterhalb der Eingabekarten</div>
+                <div class="m-card green" style="margin-bottom:0">
+                    <div class="m-card-head"><div class="m-dot"></div> Aufwärmstrecke</div>
+                    <table class="m-rt">
+                        <thead>
+                            <tr>
+                                <th>Distanz</th>
+                                <th style="color:var(--green)">Best</th>
+                                <th style="color:var(--red)">Erlaubt</th>
+                                <th style="color:var(--blue)">Mittel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="c-muted">1000 m</td>
+                                <td class="c-green">06:00</td>
+                                <td class="c-red">07:00</td>
+                                <td class="c-blue">06:30</td>
+                            </tr>
+                            <tr class="final hl-green">
+                                <td class="c-muted">2000 m</td>
+                                <td class="c-green">12:00</td>
+                                <td class="c-red">14:00</td>
+                                <td class="c-blue">13:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ul class="cl" style="margin-top:10px">
+                <li><span class="cnum" style="background:var(--muted);color:#000;font-size:9px">km</span><div><strong>Distanz-Spalte</strong> — Pro km ein Eintrag, plus die Gesamtdistanz (fett, farbig hinterlegt).</div></li>
+                <li><span class="cnum" style="background:var(--green)">B</span><div><strong style="color:var(--green)">Best</strong> — Kumulierte Bestzeit bis zu diesem Punkt. <span class="badge green">Grün</span>. Das ist das früheste erlaubte Ankunftsfenster.</div></li>
+                <li><span class="cnum" style="background:var(--red);color:#fff">E</span><div><strong style="color:var(--red)">Erlaubt</strong> — Kumulierte erlaubte Zeit bis zu diesem Punkt. <span class="badge red">Rot</span>. Bei Überschreitung drohen Strafpunkte.</div></li>
+                <li><span class="cnum" style="background:var(--blue);color:#000">Ø</span><div><strong style="color:var(--blue)">Mittel</strong> — Durchschnitt aus Best- und Erlaubt-Zeit. <span class="badge blue">Blau</span>. Guter Zielwert für gleichmäßiges Fahren ohne Stress.</div></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- ═══════════════════════════════
+         04 · TIMER
+         ═══════════════════════════════ -->
+    <div class="doc-section" id="timer">
+        <div class="section-num">04</div>
+        <h2 class="section-title">Timer-Tab</h2>
+        <p class="section-sub">
+            Je eine Timer-Karte für die Aufwärmstrecke (grün) und die Hindernisstrecke (rot).
+            Die Werte aus dem Rechner-Tab werden automatisch übernommen — zuerst dort berechnen!
+        </p>
+
+        <!-- Phase summary strip -->
+        <div class="subsection">
+            <div class="sub-title">Zusammenfassung-Leiste</div>
+            <div class="mockup" style="padding-bottom: 12px">
+                <div class="mockup-label">Unter dem Kartentitel · zeigt die Werte aus dem Rechner-Tab</div>
+                <div class="m-card green" style="margin-bottom:0">
+                    <div class="m-card-head"><div class="m-dot"></div> Aufwärmstrecke</div>
+                    <div class="m-ps">
+                        <span class="m-ps-chip">Zeiten</span>
+                        <span style="font-size:11px;font-weight:600">2000 m</span>
+                        <span style="color:var(--faint)">·</span>
+                        <span style="font-size:11px;font-weight:600;color:var(--green)">Best <b>12:00</b></span>
+                        <span style="font-size:11px;font-weight:600;color:var(--yellow)">Ø <b>13:00</b></span>
+                        <span style="font-size:11px;font-weight:600;color:var(--red)">⚑ Max <b>14:00</b></span>
+                    </div>
+                </div>
+                <span class="cn" style="top:68%;left:7%">1</span>
+                <span class="cn" style="top:68%;left:24%">2</span>
+                <span class="cn" style="top:68%;left:46%">3</span>
+                <span class="cn" style="top:68%;left:65%">4</span>
+                <span class="cn" style="top:68%;left:87%">5</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>Methoden-Chip</strong> — Zeigt an, ob Zeiten- oder Geschwindigkeits-Modus verwendet wurde.</div></li>
+                <li><span class="cnum">2</span><div><strong>Streckenlänge</strong> in Metern.</div></li>
+                <li><span class="cnum">3</span><div><strong style="color:var(--green)">Best</strong> — Gesamtbestzeit der Strecke. <span class="badge green">Grün</span>.</div></li>
+                <li><span class="cnum">4</span><div><strong style="color:var(--yellow)">Ø Mittelzeit</strong> — Durchschnitt aus Best- und Erlaubt-Zeit. <span class="badge yellow">Gelb</span>. Orientierungspunkt für gleichmäßige Fahrt.</div></li>
+                <li><span class="cnum">5</span><div><strong style="color:var(--red)">⚑ Max</strong> — Maximale erlaubte Zeit. Bei Überschreitung gibt es Zeitstrafen. <span class="badge red">Rot</span>.</div></li>
+            </ul>
+        </div>
+
+        <!-- Timer + GPS -->
+        <div class="subsection">
+            <div class="sub-title">Timer-Anzeige &amp; GPS-Distanz</div>
+            <div class="mockup" style="padding-bottom: 10px">
+                <div class="mockup-label">Großes Zifferblatt · Zustand: läuft (grün)</div>
+                <div style="display:flex;align-items:center;justify-content:center;position:relative;padding:10px 0">
+                    <div class="m-timer green">08:43</div>
+                    <div style="position:absolute;right:0;min-width:58px;text-align:center">
+                        <div class="m-dist-val">1247</div>
+                        <div class="m-dist-unit">m</div>
+                        <div class="m-dist-src">📡 GPS</div>
+                    </div>
+                </div>
+                <span class="cn" style="top:54%;left:42%">1</span>
+                <span class="cn" style="top:54%;right:2px">2</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div>
+                    <strong>Großer Timer</strong> — Verstrichene Zeit in <code>MM:SS</code>. Farbzustände:
+                    <br><span class="badge grey">Grau = inaktiv</span>
+                    <span class="badge green">Grün = läuft</span>
+                    <span class="badge yellow">Gelb = Warnzone (→ Erlaubt nähert sich)</span>
+                    <span class="badge red">Rot = Zeit überschritten (pulsierend)</span>
+                    <span class="badge blue">Blau = gestoppt/fertig</span>
+                </div></li>
+                <li><span class="cnum">2</span><div>
+                    <strong>GPS-Distanz</strong> — Zurückgelegte Strecke in Metern, nur wenn GPS verfügbar ist. <span class="badge blue">Blau</span> bei aktivem Signal, <code>—</code> ohne Signal.
+                    Wird nur bei laufendem Timer aktualisiert (Akku schonen).
+                </div></li>
+            </ul>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="subsection">
+            <div class="sub-title">Fortschrittsbalken</div>
+            <div class="mockup" style="padding-bottom: 14px">
+                <div class="mockup-label">Unter dem Zifferblatt · Elemente von links nach rechts</div>
+                <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:4px">▶ 09:15</div>
+                <div class="m-pb-track">
+                    <div class="m-pb-fill green" style="width:58%"></div>
+                    <div class="m-pb-marker grey" style="left:40%"></div>
+                    <div class="m-pb-marker grey" style="left:57%"></div>
+                    <div class="m-pb-marker green" style="left:82%"></div>
+                    <div class="m-pb-marker yellow" style="left:91%"></div>
+                </div>
+                <div style="position:relative;height:20px;font-size:11px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums">
+                    <span style="position:absolute;left:55%;transform:translateX(-50%);white-space:nowrap">⏸ 10:22</span>
+                </div>
+                <span class="cn" style="top:10%;left:5%">1</span>
+                <span class="cn" style="top:40%;left:37%">2</span>
+                <span class="cn" style="top:40%;left:54%">3</span>
+                <span class="cn" style="top:30%;left:82%">4</span>
+                <span class="cn" style="top:30%;right:5px">5</span>
+                <span class="cn" style="top:78%;left:52%">6</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>▶ Startzeit</strong> (über dem Balken, blau) — Wanduhrzeit des letzten Starts.</div></li>
+                <li><span class="cnum">2</span><div><strong>Graue km-Ticks</strong> — Kleine Striche zeigen die <em>Bestzeiten der einzelnen km-Marker</em> relativ zur Gesamterlaubtzeit. Hilft beim Abschätzen des Fortschritts.</div></li>
+                <li><span class="cnum">3</span><div><strong>Balken-Füllung</strong> — Wächst von links (0%) bis rechts (100% = erlaubte Zeit). Farbe wechselt synchron zum großen Timer. <span class="badge grey">→</span><span class="badge green">→</span><span class="badge yellow">→</span><span class="badge red">→</span><span class="badge blue"></span></div></li>
+                <li><span class="cnum">4</span><div><strong style="color:var(--green)">Grüner Marker</strong> — Position der Gesamtbestzeit. Ziel: den Zielpunkt vor diesem Marker erreichen.</div></li>
+                <li><span class="cnum">5</span><div><strong style="color:var(--yellow)">Gelber Marker</strong> — Position der Mittelzeit (Ø).</div></li>
+                <li><span class="cnum">6</span><div><strong>⏸ Pausenzeit</strong> (unter dem Balken, blau) — Wanduhrzeit des letzten Pause-Taps, positioniert am aktuellen Fortschrittpunkt.</div></li>
+            </ul>
+        </div>
+
+        <!-- Controls -->
+        <div class="subsection">
+            <div class="sub-title">Start / Pause / Reset</div>
+            <div class="mockup" style="padding-bottom: 14px">
+                <div class="mockup-label">Vor dem Start</div>
+                <div style="display:flex;gap:8px;margin-bottom:10px">
+                    <div class="m-btn green" style="flex:1">Start</div>
+                </div>
+                <div class="mockup-label" style="margin-top:2px">Während der Fahrt · Reset erscheint nach erstem Start</div>
+                <div style="display:flex;gap:8px">
+                    <div class="m-btn yellow" style="flex:1">Pause</div>
+                    <div class="m-btn dim" style="white-space:nowrap">Reset</div>
+                </div>
+                <span class="cn" style="top:38%;left:40%">1</span>
+                <span class="cn" style="top:80%;left:38%">2</span>
+                <span class="cn" style="top:80%;right:4px">3</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>Start</strong> <span class="badge green">grün</span> — Startet den Timer. Speichert die aktuelle Wanduhrzeit als Startpunkt. Löst auch das Audio-Unlock aus (wichtig für iOS).</div></li>
+                <li><span class="cnum">2</span><div><strong>Pause / Weiter</strong> <span class="badge yellow">gelb</span> — Pausiert bzw. setzt fort. Die Zeit <em>während der Pause wird mitgezählt</em> — beim Fortsetzen springt der Timer zur echten vergangenen Zeit. So ist die Messung immer korrekt.</div></li>
+                <li><span class="cnum">3</span><div><strong>Reset</strong> <span class="badge grey">grau</span> — Setzt Timer und alle km-Marker-Einträge zurück. Erscheint erst nach dem ersten Start. <em>Kein Bestätigungsdialog</em>, also aufpassen!</div></li>
+            </ul>
+            <div class="tip-box">
+                <div class="box-title">🔔 Akustisches Signal</div>
+                <p>Sobald die verstrichene Zeit die Bestzeit eines km-Markers erreicht, ertönt ein doppelter Ton (880 Hz, 0,25 s). Das Signal hilft, den Bildschirm weniger oft zu checken. <strong>iOS:</strong> Erst nach dem ersten Tap auf Start aktiviert (Safari-Einschränkung).</p>
+            </div>
+        </div>
+
+        <!-- km-Markers -->
+        <div class="subsection">
+            <div class="sub-title">km-Marker</div>
+            <div class="mockup" style="padding-bottom: 14px">
+                <div class="mockup-label">Grid unter der Steuerleiste · fünf mögliche Zustände</div>
+                <div class="m-ms-grid">
+                    <div class="m-ms-btn">
+                        <span class="km">1 km</span>
+                        <span class="times">06:00/07:00</span>
+                    </div>
+                    <div class="m-ms-btn ok">
+                        <span class="km">2 km</span>
+                        <span class="times">12:00/14:00</span>
+                        <span class="hit">11:52</span>
+                    </div>
+                    <div class="m-ms-btn warn">
+                        <span class="km">3 km</span>
+                        <span class="times">18:00/21:00</span>
+                    </div>
+                    <div class="m-ms-btn over">
+                        <span class="km">4 km</span>
+                        <span class="times">24:00/28:00</span>
+                    </div>
+                    <div class="m-ms-btn late">
+                        <span class="km">5 km ✓</span>
+                        <span class="times">30:00/35:00</span>
+                        <span class="hit">35:22</span>
+                    </div>
+                </div>
+                <span class="cn" style="top:50%;left:10%">1</span>
+                <span class="cn" style="top:50%;left:33%">2</span>
+                <span class="cn" style="top:50%;left:56%">3</span>
+                <span class="cn" style="top:50%;left:79%">4</span>
+                <span class="cn" style="top:82%;left:10%">5</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>Inaktiv</strong> — Noch nicht erreicht, kein Zeitdruck. Zeigt <strong>Bestzeit / Erlaubtzeit</strong> als Orientierung.</div></li>
+                <li><span class="cnum">2</span><div><strong style="color:var(--green)">OK (grün)</strong> — Marker wurde getippt, als die Zeit noch unter der Erlaubt-Zeit lag. Die Zeit unten ist der Timestamp beim Antippen.</div></li>
+                <li><span class="cnum">3</span><div><strong style="color:var(--yellow)">Warnzone (gelb)</strong> — Noch nicht getippt, aber 80–100 % der Erlaubt-Zeit sind abgelaufen. Bald zu spät!</div></li>
+                <li><span class="cnum">4</span><div><strong style="color:var(--red)">Überschritten (rot)</strong> — Noch nicht getippt, aber Erlaubt-Zeit bereits abgelaufen. Strafpunkte drohen.</div></li>
+                <li><span class="cnum">5</span><div><strong style="color:var(--red)">Spät getippt (rot)</strong> — Marker wurde angetippt, aber nach Ablauf der Erlaubt-Zeit. Das <strong>✓</strong>-Symbol kennzeichnet den <em>letzten km-Marker</em> (Zielmarker) — Antippen stoppt den Timer automatisch.</div></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- ═══════════════════════════════
+         05 · DRESSAGE
+         ═══════════════════════════════ -->
+    <div class="doc-section" id="dressur">
+        <div class="section-num">05</div>
+        <h2 class="section-title">Dressur-Rechner</h2>
+        <p class="section-sub">
+            Erreichbar über den Link <em>🎩 Dressur-Rechner</em> am Ende der Hauptseite.
+            Berechnet Strafpunkte aus Dressurnoten (Skala 0–10) nach der FEI-Formel.
+        </p>
+
+        <!-- Movements table -->
+        <div class="subsection">
+            <div class="sub-title">Lektionen-Tabelle</div>
+            <div class="mockup" style="padding-bottom: 16px">
+                <div class="mockup-label">Hauptbereich · alle Dressur-Lektionen mit Note &amp; Koeffizient</div>
+                <div class="m-card green" style="margin-bottom:0">
+                    <div class="m-card-head"><div class="m-dot"></div> Lektionen</div>
+                    <div style="padding:10px 12px">
+                        <table class="m-dressur">
+                            <thead>
+                                <tr>
+                                    <th>Lektion</th>
+                                    <th style="text-align:center;width:85px">Koeff.</th>
+                                    <th style="text-align:center;width:68px">Note</th>
+                                    <th style="width:28px"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Anhalten, Grüßen</td>
+                                    <td style="text-align:center">
+                                        <div class="m-seg" style="display:inline-flex">
+                                            <div class="m-seg-btn" style="padding:3px 10px">1×</div>
+                                            <div class="m-seg-btn active" style="padding:3px 10px">2×</div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:center"><div class="m-inp" style="padding:5px">8</div></td>
+                                    <td style="text-align:center;color:var(--red);font-size:13px">🗑</td>
+                                </tr>
+                                <tr>
+                                    <td>Arbeitstrab</td>
+                                    <td style="text-align:center">
+                                        <div class="m-seg" style="display:inline-flex">
+                                            <div class="m-seg-btn active" style="padding:3px 10px">1×</div>
+                                            <div class="m-seg-btn" style="padding:3px 10px">2×</div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:center"><div class="m-inp" style="padding:5px">7</div></td>
+                                    <td style="text-align:center;color:var(--red);font-size:13px">🗑</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="border-top:1px dashed var(--border);margin-top:8px;padding-top:8px;font-size:12px;color:var(--green);font-weight:700;text-align:center">+ Lektion hinzufügen</div>
+                    </div>
+                </div>
+                <span class="cn" style="top:55%;left:18%">1</span>
+                <span class="cn" style="top:55%;left:57%">2</span>
+                <span class="cn" style="top:55%;left:81%">3</span>
+                <span class="cn" style="top:55%;right:2px">4</span>
+                <span class="cn" style="top:92%;left:50%">5</span>
+            </div>
+            <ul class="cl">
+                <li><span class="cnum">1</span><div><strong>Lektionsname</strong> — Freitextfeld (z.B. „Anhalten, Grüßen"). Kann frei bearbeitet werden.</div></li>
+                <li><span class="cnum">2</span><div><strong>Koeffizient 1× / 2×</strong> — Gewichtung. <code>2×</code> = Lektion zählt doppelt (typisch für Halts und Gesamteindruck nach FEI-Regelwerk).</div></li>
+                <li><span class="cnum">3</span><div><strong>Note</strong> — Richternote von 0–10, Schritt 0,5. Eingabe über Zahlentastatur. Leer lassen = Note nicht gewertet.</div></li>
+                <li><span class="cnum">4</span><div><strong>🗑 Löschen</strong> — Entfernt diese Lektion aus der Liste.</div></li>
+                <li><span class="cnum">5</span><div><strong>+ Lektion hinzufügen</strong> — Fügt eine neue leere Zeile ein.</div></li>
+            </ul>
+        </div>
+
+        <!-- Result -->
+        <div class="subsection">
+            <div class="sub-title">Ergebnis-Zusammenfassung</div>
+            <div class="mockup">
+                <div class="mockup-label">Unterhalb der Lektionsliste · aktualisiert sich in Echtzeit</div>
+                <div class="m-stat-grid">
+                    <div class="m-stat-box"><div class="m-stat-label">Erreicht</div><div class="m-stat-value c-blue">84.0</div></div>
+                    <div class="m-stat-box"><div class="m-stat-label">Maximum</div><div class="m-stat-value">140</div></div>
+                    <div class="m-stat-box"><div class="m-stat-label">%</div><div class="m-stat-value c-green">60.0%</div></div>
+                    <div class="m-stat-box"><div class="m-stat-label">Strafpunkte</div><div class="m-stat-value c-red">22.40</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                    <span style="font-size:11px;color:var(--muted);font-weight:600">Umrechnungsfaktor</span>
+                    <div class="m-inp" style="width:72px;font-size:13px">0.4</div>
+                    <span style="font-size:11px;color:var(--muted)">(Standard FEI: 0.4)</span>
+                </div>
+                <p style="font-size:10px;color:var(--faint);margin-top:8px;line-height:1.5">Formel: Strafpunkte = (Maximum − Erreicht) × Faktor</p>
+            </div>
+            <ul class="cl" style="margin-top:10px">
+                <li><span class="cnum" style="background:var(--blue);color:#000">E</span><div><strong style="color:var(--blue)">Erreicht</strong> — Summe aller (Note × Koeffizient).</div></li>
+                <li><span class="cnum" style="background:var(--muted);color:#000">M</span><div><strong>Maximum</strong> — Theoretisch erreichbare Höchstpunktzahl (10 × Σ Koeffizienten).</div></li>
+                <li><span class="cnum" style="background:var(--green)">%</span><div><strong style="color:var(--green)">Prozent</strong> — Erreicht / Maximum × 100.</div></li>
+                <li><span class="cnum" style="background:var(--red);color:#fff">S</span><div><strong style="color:var(--red)">Strafpunkte</strong> — <code>(Maximum − Erreicht) × Faktor</code>. Das ist der Wert der in die Gesamtwertung eingeht.</div></li>
+                <li><span class="cnum" style="background:var(--faint);color:#000">F</span><div><strong>Umrechnungsfaktor</strong> — FEI-Standard: <code>0.4</code>. Anpassbar falls ein anderes Regelwerk abweicht.</div></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- ═══════════════════════════════
+         06 · TIPS
+         ═══════════════════════════════ -->
+    <div class="doc-section" id="tips">
+        <div class="section-num">06</div>
+        <h2 class="section-title">Tipps &amp; FAQ</h2>
+
+        <div class="subsection">
+            <div class="sub-title">📡 GPS-Distanz</div>
+            <div class="tip-box">
+                <div class="box-title">Berechtigung erforderlich</div>
+                <p>Beim ersten Start fragt das Gerät nach der Standortberechtigung. GPS wird nur bei laufendem Timer aktiv (Akkuschonung). Fixes mit mehr als 50 m Ungenauigkeit werden ignoriert, Bewegungen unter 0,5 m ebenfalls (Rauschfilter). GPS-Distanz wird bei Reset auf 0 zurückgesetzt.</p>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="sub-title">🔔 Audio-Signal (iOS)</div>
+            <div class="warn-box">
+                <div class="box-title">⚠️ iOS-Einschränkung</div>
+                <p>Apple Safari erlaubt Audio-Wiedergabe nur nach einer direkten Benutzeraktion. Daher wird der Audio-Kontext beim <strong>ersten Tap auf Start</strong> initialisiert. Danach funktionieren alle Signaltöne zuverlässig — auch wenn der Bildschirm sich zwischenzeitlich ausschaltet (sofern Safari im Vordergrund bleibt).</p>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="sub-title">📱 Als App installieren (PWA)</div>
+            <p class="sub-body">Die App kann als Progressive Web App (PWA) installiert werden und funktioniert danach auch offline.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:8px">
+                <div class="m-card" style="margin-bottom:0;border-top:2px solid var(--blue)">
+                    <div class="m-card-head" style="font-size:10px"><div class="m-dot" style="background:var(--blue)"></div> iOS Safari</div>
+                    <div style="padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6">
+                        Teilen-Symbol <strong>⬆</strong> → <em>Zum Home-Bildschirm</em>
+                    </div>
+                </div>
+                <div class="m-card green" style="margin-bottom:0">
+                    <div class="m-card-head" style="font-size:10px"><div class="m-dot"></div> Android Chrome</div>
+                    <div style="padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6">
+                        Menü <strong>⋮</strong> → <em>Zum Startbildschirm</em>
+                    </div>
+                </div>
+                <div class="m-card" style="margin-bottom:0;border-top:2px solid var(--muted)">
+                    <div class="m-card-head" style="font-size:10px"><div class="m-dot" style="background:var(--muted)"></div> Windows / Mac</div>
+                    <div style="padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6">
+                        Chrome/Edge: Installations-Symbol in der Adressleiste
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="sub-title">💡 Empfohlener Workflow</div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-text"><strong style="color:var(--text)">Vorbereitung (zuhause):</strong> Rechner-Tab öffnen, Streckendaten aus der Ausschreibung eingeben, Berechnen tippen. App als PWA installieren für Offline-Nutzung.</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-text"><strong style="color:var(--text)">Am Wettkampf (vor dem Start):</strong> Timer-Tab öffnen. Einmal auf Start tippen um Audio zu aktivieren, dann direkt Reset — GPS-Signal prüfen (📡 erscheint wenn Signal vorhanden).</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-text"><strong style="color:var(--text)">Beim Startkommando:</strong> Start tippen. Timer läuft. Auf Signaltöne achten.</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-text"><strong style="color:var(--text)">Während der Fahrt:</strong> Jeden km-Marker am exakten Durchfahrtspunkt antippen. Letzten Marker (✓) antippen stoppt den Timer automatisch.</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">5</div>
+                    <div class="step-text"><strong style="color:var(--text)">Nachbereitung:</strong> km-Zeiten analysieren. Dressur-Rechner für Notenauswertung nutzen.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <div class="sub-title">🔒 Sichtbarkeit (GitHub Pages)</div>
+            <div class="info-box">
+                <div class="box-title">Öffentlicher Zugang</div>
+                <p>Die App wird über GitHub Pages unter <code>https://thhillmi.github.io/GelaendeZeitenRechner/</code> bereitgestellt. GitHub Pages erfordert bei freien Konten ein öffentliches Repository. Das bedeutet: Alle Benutzer können die App-URL aufrufen, auch ohne GitHub-Konto.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align:center;font-size:11px;color:var(--faint);line-height:2;padding-bottom:8px;border-top:1px solid var(--border);padding-top:24px;margin-top:20px">
+        <p>Marathon Zeiten Rechner · © 2026 Thorsten Hillmer</p>
+        <p>
+            <a href="https://github.com/thhillmi/GelaendeZeitenRechner" target="_blank" rel="noopener"
+               style="color:var(--faint);text-decoration:none;border-bottom:1px solid rgba(241,245,249,0.15)">
+                github.com/thhillmi/GelaendeZeitenRechner
+            </a>
+        </p>
+    </footer>
+
+</div><!-- /.main -->
+</body>
+</html>

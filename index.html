@@ -1117,6 +1117,31 @@
             opacity: .45;
         }
 
+        /* Help button (top-left, always visible) */
+        .help-btn {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            left: 16px;
+            z-index: 200;
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.80);
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.20);
+            border-radius: 99px;
+            padding: 5px 11px;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background .2s, color .2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .help-btn:hover {
+            background: rgba(255,255,255,0.22);
+            color: #fff;
+        }
+
         /* Keyboard dismiss button (swaps with lang-btn when input focused) */
         .kbd-done {
             position: fixed;
@@ -1142,6 +1167,7 @@
 <button class="kbd-done" x-show="kbdVisible" x-cloak @click="document.activeElement.blur()">✓ Fertig</button>
 <button class="lang-btn" x-show="!kbdVisible" @click="lang = lang === 'de' ? 'en' : 'de'"
         x-text="lang === 'de' ? 'EN' : 'DE'"></button>
+<a href="help.html" class="help-btn" title="Hilfe / Handbuch">?</a>
 
 <div class="hero">
     <img src="Designer.png" alt="Gelaendefahren">
