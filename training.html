@@ -114,6 +114,8 @@
 
         .poll-table-wrapper {
             overflow-x: auto;
+            overflow-y: auto;
+            max-height: 80vh;
             -webkit-overflow-scrolling: touch;
             position: relative;
         }
@@ -132,6 +134,16 @@
             font-size: 0.8rem;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: #f1f5f9;
+            z-index: 4;
+        }
+
+        /* Thead name-col: sticky in BEIDE Richtungen (links+oben) */
+        .poll-table thead th.name-col {
+            z-index: 5;
+            background: #f1f5f9;
         }
 
         .poll-table th.month-header {
@@ -144,6 +156,11 @@
             border-bottom: none;
         }
 
+        /* Erste thead-Zeile (Monate): top: 0 */
+        .thead-month th { top: 0; }
+        /* Zweite thead-Zeile (Datums): top = Höhe der ersten Zeile */
+        .thead-dates th { top: 32px; }
+
         .poll-table th, .poll-table td {
             padding: 8px 10px;
             text-align: center;
@@ -155,9 +172,9 @@
             text-align: left;
             position: sticky;
             left: 0;
-            background: inherit;
+            background: white;
             min-width: 180px;
-            z-index: 2;
+            z-index: 3;
         }
 
         /* Team header */
@@ -170,21 +187,49 @@
             border-top: 2px solid var(--primary-light);
         }
 
-        .team-header td.name-col { background: #eef2f7 !important; }
+        .team-header td.name-col {
+            background: #eef2f7 !important;
+            position: sticky;
+            left: 0;
+            z-index: 3;
+        }
+
+        .team-actions {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .team-header:hover .team-actions { opacity: 1; }
+
+        .team-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 1px 5px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .team-btn:hover { background: var(--primary-light); color: white; border-color: var(--primary-light); }
+        .team-btn-danger:hover { background: #e74c3c; border-color: #e74c3c; }
 
         /* Game rows */
         .game-row td { font-size: 0.8rem; padding: 5px 10px; }
         .game-row td.name-col { padding-left: 18px; font-weight: 600; font-size: 0.78rem; }
 
         .home-row td { background: #f0faf4 !important; }
-        .home-row td.name-col { background: #f0faf4 !important; color: #1e8449; }
+        .home-row td.name-col { background: #f0faf4 !important; color: #1e8449; z-index: 3; }
         .away-row td { background: #fef5f4 !important; }
-        .away-row td.name-col { background: #fef5f4 !important; color: #922b21; }
+        .away-row td.name-col { background: #fef5f4 !important; color: #922b21; z-index: 3; }
 
         /* Player rows */
-        .player-row td { background: var(--card-bg); }
+        .player-row td { background: white; }
         .player-row:hover td { background: #f8fafc; }
-        .player-row td.name-col { padding-left: 20px; font-weight: 500; }
+        .player-row td.name-col { padding-left: 20px; font-weight: 500; background: white; }
+        .player-row:hover td.name-col { background: #f8fafc; }
 
         /* Separator */
         .separator-row td {
@@ -423,19 +468,23 @@
             .poll-card { border-radius: 8px; }
             .poll-table-wrapper {
                 overflow-x: auto;
+                overflow-y: auto;
+                max-height: 75vh;
                 -webkit-overflow-scrolling: touch;
-                scroll-snap-type: x proximity;
             }
 
-            /* Sticky Namensspalte schmaler */
+            /* Sticky Namensspalte schmaler + kräftiger Schatten */
             .poll-table th.name-col, .poll-table td.name-col {
                 min-width: 120px;
                 max-width: 140px;
                 font-size: 0.75rem;
                 padding: 6px 8px;
-                /* Schatten als visuelle Trennung */
-                box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+                box-shadow: 3px 0 6px rgba(0,0,0,0.12);
             }
+
+            /* Sticky thead auf Mobile: kleinere top-Werte */
+            .thead-month th { top: 0; }
+            .thead-dates th { top: 28px; }
 
             /* Datums-Spalten kompakter */
             .poll-table thead th {
@@ -475,6 +524,10 @@
 
             /* Edit-Button immer sichtbar auf Mobile (kein Hover) */
             .edit-btn { opacity: 0.6 !important; font-size: 0.7rem; }
+
+            /* Team-Aktionen immer sichtbar auf Mobile */
+            .team-actions { opacity: 0.7 !important; }
+            .team-btn { font-size: 0.65rem; }
 
             /* Summary */
             .summary-card { padding: 12px; }
@@ -545,6 +598,11 @@
             <div class="poll-table-wrapper">
                 <table class="poll-table" id="poll-table"></table>
             </div>
+        </div>
+
+        <div style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="toggleNewPlayerRow()">➕ Neuer Spieler</button>
+            <button class="btn btn-primary" onclick="addTeam()">➕ Neue Mannschaft</button>
         </div>
 
         <noscript>
@@ -641,6 +699,7 @@ let startDate = getStartOfCurrentWeek();
 let votes = {};
 let activeEditRow = null;
 let dragSource = null; // for drag & drop
+let showNewPlayerRow = false;
 
 function getStartOfCurrentWeek() {
     const today = new Date();
@@ -756,11 +815,11 @@ function render() {
     const numCols = dates.length;
 
     let html = '<thead>';
-    html += '<tr><th class="name-col"></th>';
+    html += '<tr class="thead-month"><th class="name-col"></th>';
     monthGroups.forEach(g => {
         html += `<th class="month-header" colspan="${g.count}">${MONTH_NAMES[g.month]} ${g.year}</th>`;
     });
-    html += '</tr><tr><th class="name-col">Name</th>';
+    html += '</tr><tr class="thead-dates"><th class="name-col">Name</th>';
     dates.forEach(d => {
         const cls = isToday(d) ? ' class="today-col"' : '';
         html += `<th${cls}>${formatDateHeader(d)}</th>`;
@@ -770,7 +829,7 @@ function render() {
     // Teams
     teams.forEach((team, teamIdx) => {
         const teamKey = team.name;
-        html += `<tr class="team-header" data-team-idx="${teamIdx}"><td class="name-col" colspan="${numCols + 1}">${team.name}</td></tr>`;
+        html += `<tr class="team-header" data-team-idx="${teamIdx}"><td class="name-col">${team.name}<span class="team-actions"><button class="team-btn" onclick="renameTeam(${teamIdx})" title="Umbenennen">✎</button><button class="team-btn team-btn-danger" onclick="deleteTeam(${teamIdx})" title="Löschen">🗑</button></span></td><td colspan="${numCols}"></td></tr>`;
         html += renderGameRow(`${teamKey}|Heim`, '🏠', 'Heimspiel', 'home-row', dates);
         html += renderGameRow(`${teamKey}|Ausw`, '🚗', 'Auswärts', 'away-row', dates);
         team.players.forEach((p, pIdx) => {
@@ -826,7 +885,8 @@ function renderInputRow(dates) {
     let teamOptions = '<option value="-1">– Ohne Mannschaft –</option>';
     teams.forEach((t, i) => { teamOptions += `<option value="${i}">${t.name}</option>`; });
 
-    let html = `<tr class="input-row" id="input-row">`;
+    const hidden = showNewPlayerRow ? '' : ' style="display:none;"';
+    let html = `<tr class="input-row" id="input-row"${hidden}>`;
     html += `<td class="name-col">
         <input type="text" id="inline-name" placeholder="Neuer Name..." class="inline-input" style="margin-bottom:4px;">
         <select id="inline-team" class="inline-select">${teamOptions}</select>
@@ -836,8 +896,9 @@ function renderInputRow(dates) {
         html += `<td class="${cls}"><span class="vote vote-toggle vote-undecided" data-state="undecided" data-date="${dateKey(d)}" onclick="toggleVote(this)">–</span></td>`;
     });
     html += '</tr>';
-    html += `<tr><td colspan="${dates.length + 1}" style="padding:8px 10px; border:none;">
-        <button class="btn btn-primary" onclick="saveNewEntry()">💾 Neuen Spieler speichern</button>
+    html += `<tr id="input-actions-row"${hidden}><td colspan="${dates.length + 1}" style="padding:8px 10px; border:none;">
+        <button class="btn btn-primary" onclick="saveNewEntry()">💾 Speichern</button>
+        <button class="btn btn-cancel" onclick="toggleNewPlayerRow()" style="margin-left:6px;">Abbrechen</button>
         <span id="save-feedback" style="margin-left:10px; font-size:0.82rem; color:var(--accent); display:none;">✔ Gespeichert!</span>
     </td></tr>`;
     return html;
@@ -1092,6 +1153,73 @@ function toggleVote(el) {
     el.textContent = voteSymbol(newState);
 }
 
+// === TEAM MANAGEMENT ===
+function toggleNewPlayerRow() {
+    showNewPlayerRow = !showNewPlayerRow;
+    render();
+    if (showNewPlayerRow) {
+        const input = document.getElementById('inline-name');
+        if (input) input.focus();
+    }
+}
+
+function addTeam() {
+    const name = prompt('Name der neuen Mannschaft:');
+    if (!name || !name.trim()) return;
+    teams.push({ name: name.trim(), players: [] });
+    saveAll();
+    render();
+}
+
+function renameTeam(teamIdx) {
+    const oldName = teams[teamIdx].name;
+    const newName = prompt('Mannschaft umbenennen:', oldName);
+    if (!newName || !newName.trim() || newName.trim() === oldName) return;
+
+    // Votes mit altem Teamnamen (Heim/Auswärts) umbenennen
+    const oldHeim = `${oldName}|Heim`;
+    const oldAusw = `${oldName}|Ausw`;
+    const newHeim = `${newName.trim()}|Heim`;
+    const newAusw = `${newName.trim()}|Ausw`;
+    Object.keys(votes).forEach(k => {
+        if (k.startsWith(oldHeim + '|')) {
+            votes[k.replace(oldHeim, newHeim)] = votes[k];
+            delete votes[k];
+        } else if (k.startsWith(oldAusw + '|')) {
+            votes[k.replace(oldAusw, newAusw)] = votes[k];
+            delete votes[k];
+        }
+    });
+
+    teams[teamIdx].name = newName.trim();
+    saveAll();
+    render();
+}
+
+function deleteTeam(teamIdx) {
+    const team = teams[teamIdx];
+    const msg = team.players.length > 0
+        ? `"${team.name}" hat noch ${team.players.length} Spieler. Diese werden in "Ohne Mannschaft" verschoben.\n\nTrotzdem löschen?`
+        : `"${team.name}" wirklich löschen?`;
+    if (!confirm(msg)) return;
+
+    // Spieler in Specials verschieben
+    team.players.forEach(p => {
+        specials.push({ name: p.name });
+    });
+
+    // Heim/Auswärts-Votes entfernen
+    const prefix1 = `${team.name}|Heim|`;
+    const prefix2 = `${team.name}|Ausw|`;
+    Object.keys(votes).forEach(k => {
+        if (k.startsWith(prefix1) || k.startsWith(prefix2)) delete votes[k];
+    });
+
+    teams.splice(teamIdx, 1);
+    saveAll();
+    render();
+}
+
 async function saveNewEntry() {
     const nameInput = document.getElementById('inline-name');
     const teamSelect = document.getElementById('inline-team');
@@ -1117,9 +1245,7 @@ async function saveNewEntry() {
 
     await saveAll();
 
-    const feedback = document.getElementById('save-feedback');
-    feedback.style.display = 'inline';
-    setTimeout(() => { feedback.style.display = 'none'; }, 2500);
+    showNewPlayerRow = false;
     render();
 }
 
