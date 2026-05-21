@@ -143,7 +143,7 @@
         /* Thead name-col: sticky in BEIDE Richtungen (links+oben) */
         .poll-table thead th.name-col {
             z-index: 5;
-            background: #f1f5f9;
+            background: #e8eef5;
         }
 
         .poll-table th.month-header {
@@ -172,9 +172,11 @@
             text-align: left;
             position: sticky;
             left: 0;
-            background: white;
+            background: #f8fafe;
             min-width: 180px;
             z-index: 3;
+            border-right: 2px solid #d6e4f0;
+            box-shadow: 3px 0 6px rgba(0,0,0,0.08);
         }
 
         /* Team header */
@@ -188,7 +190,7 @@
         }
 
         .team-header td.name-col {
-            background: #eef2f7 !important;
+            background: #e8eef5 !important;
             position: sticky;
             left: 0;
             z-index: 3;
@@ -221,15 +223,15 @@
         .game-row td.name-col { padding-left: 18px; font-weight: 600; font-size: 0.78rem; }
 
         .home-row td { background: #f0faf4 !important; }
-        .home-row td.name-col { background: #f0faf4 !important; color: #1e8449; z-index: 3; }
+        .home-row td.name-col { background: #edf8f2 !important; color: #1e8449; z-index: 3; }
         .away-row td { background: #fef5f4 !important; }
-        .away-row td.name-col { background: #fef5f4 !important; color: #922b21; z-index: 3; }
+        .away-row td.name-col { background: #fdf3f2 !important; color: #922b21; z-index: 3; }
 
         /* Player rows */
         .player-row td { background: white; }
         .player-row:hover td { background: #f8fafc; }
-        .player-row td.name-col { padding-left: 20px; font-weight: 500; background: white; }
-        .player-row:hover td.name-col { background: #f8fafc; }
+        .player-row td.name-col { padding-left: 20px; font-weight: 500; background: #f8fafe; }
+        .player-row:hover td.name-col { background: #eef4fb; }
 
         /* Separator */
         .separator-row td {
@@ -307,7 +309,7 @@
             padding: 12px 10px;
             border-top: 2px solid var(--border);
         }
-        .summary-row td.name-col { background: #f1f5f9 !important; }
+        .summary-row td.name-col { background: #eaeff4 !important; }
 
         .sum-badge {
             display: inline-flex;
@@ -473,14 +475,23 @@
                 -webkit-overflow-scrolling: touch;
             }
 
-            /* Sticky Namensspalte schmaler + kräftiger Schatten */
+            /* Sticky Namensspalte: breiter + farblich abgesetzt */
             .poll-table th.name-col, .poll-table td.name-col {
-                min-width: 120px;
-                max-width: 140px;
+                min-width: 150px;
+                max-width: 180px;
                 font-size: 0.75rem;
                 padding: 6px 8px;
-                box-shadow: 3px 0 6px rgba(0,0,0,0.12);
+                background: #f8fafe !important;
+                box-shadow: 3px 0 6px rgba(0,0,0,0.15);
+                border-right: 2px solid #d6e4f0;
             }
+
+            .player-row td.name-col { background: #f8fafe !important; }
+            .player-row:hover td.name-col { background: #eef4fb !important; }
+            .home-row td.name-col { background: #edf8f2 !important; }
+            .away-row td.name-col { background: #fdf3f2 !important; }
+            .team-header td.name-col { background: #e8eef5 !important; }
+            .summary-row td.name-col { background: #eaeff4 !important; }
 
             /* Sticky thead auf Mobile: kleinere top-Werte */
             .thead-month th { top: 0; }
@@ -547,8 +558,8 @@
             .header h1 { font-size: 1rem; }
 
             .poll-table th.name-col, .poll-table td.name-col {
-                min-width: 100px;
-                max-width: 110px;
+                min-width: 130px;
+                max-width: 150px;
                 font-size: 0.7rem;
             }
 
