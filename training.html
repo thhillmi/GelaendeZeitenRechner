@@ -108,7 +108,6 @@
             background: var(--card-bg);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            overflow: hidden;
             margin-bottom: 20px;
         }
 
@@ -122,11 +121,17 @@
 
         .poll-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 0.88rem;
         }
 
-        .poll-table thead { background: #f1f5f9; }
+        .poll-table thead {
+            background: #f1f5f9;
+            position: sticky;
+            top: 0;
+            z-index: 4;
+        }
 
         .poll-table thead th {
             padding: 10px 8px;
@@ -134,16 +139,15 @@
             font-size: 0.8rem;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
             background: #f1f5f9;
-            z-index: 4;
         }
 
-        /* Thead name-col: sticky in BEIDE Richtungen (links+oben) */
+        /* Thead name-col: sticky horizontal */
         .poll-table thead th.name-col {
             z-index: 5;
             background: #e8eef5;
+            position: sticky;
+            left: 0;
         }
 
         .poll-table th.month-header {
@@ -154,12 +158,9 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: none;
+            background: #f1f5f9;
         }
 
-        /* Erste thead-Zeile (Monate): top: 0 */
-        .thead-month th { top: 0; }
-        /* Zweite thead-Zeile (Datums): top = Höhe der ersten Zeile */
-        .thead-dates th { top: 32px; }
 
         .poll-table th, .poll-table td {
             padding: 8px 10px;
@@ -493,9 +494,6 @@
             .team-header td.name-col { background: #e8eef5 !important; }
             .summary-row td.name-col { background: #eaeff4 !important; }
 
-            /* Sticky thead auf Mobile: kleinere top-Werte */
-            .thead-month th { top: 0; }
-            .thead-dates th { top: 28px; }
 
             /* Datums-Spalten kompakter */
             .poll-table thead th {
