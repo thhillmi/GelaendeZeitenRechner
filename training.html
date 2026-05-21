@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTC Walsdorf – Trainingsplan</title>
+    <style>
+        :root {
+            --primary: #1a5276;
+            --primary-light: #2980b9;
+            --accent: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border: #e0e0e0;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 12px;
+            --radius-sm: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header h1 { font-size: 1.6rem; font-weight: 700; }
+        .header p { opacity: 0.85; font-size: 0.9rem; }
+
+        /* Date Navigation */
+        .date-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-nav button {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .date-nav button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .date-nav .current-range {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding: 10px 16px;
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+
+        /* Poll Table */
+        .poll-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .poll-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        .poll-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .poll-table thead { background: #f1f5f9; }
+
+        .poll-table thead th {
+            padding: 10px 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .poll-table th.month-header {
+            padding: 10px 8px 2px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: none;
+        }
+
+        .poll-table th, .poll-table td {
+            padding: 8px 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .poll-table th.name-col, .poll-table td.name-col {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background: inherit;
+            min-width: 180px;
+            z-index: 2;
+        }
+
+        /* Team header */
+        .team-header td {
+            background: #eef2f7 !important;
+            font-weight: 700;
+            font-size: 0.84rem;
+            color: var(--primary);
+            padding: 12px 10px;
+            border-top: 2px solid var(--primary-light);
+        }
+
+        .team-header td.name-col { background: #eef2f7 !important; }
+
+        /* Game rows */
+        .game-row td { font-size: 0.8rem; padding: 5px 10px; }
+        .game-row td.name-col { padding-left: 18px; font-weight: 600; font-size: 0.78rem; }
+
+        .home-row td { background: #f0faf4 !important; }
+        .home-row td.name-col { background: #f0faf4 !important; color: #1e8449; }
+        .away-row td { background: #fef5f4 !important; }
+        .away-row td.name-col { background: #fef5f4 !important; color: #922b21; }
+
+        /* Player rows */
+        .player-row td { background: var(--card-bg); }
+        .player-row:hover td { background: #f8fafc; }
+        .player-row td.name-col { padding-left: 20px; font-weight: 500; }
+
+        /* Separator */
+        .separator-row td {
+            height: 3px;
+            padding: 0;
+            background: var(--primary-light) !important;
+            border: none;
+        }
+
+        /* Drag & Drop */
+        .drag-handle {
+            cursor: grab;
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-right: 6px;
+            opacity: 0.4;
+            user-select: none;
+        }
+
+        .player-row:hover .drag-handle { opacity: 1; }
+
+        .dragging {
+            opacity: 0.4;
+            background: #eef2f7 !important;
+        }
+
+        .dragging td { background: #eef2f7 !important; }
+
+        .drop-target {
+            outline: 2px dashed var(--primary-light);
+            outline-offset: -2px;
+            background: #eaf6ff !important;
+        }
+
+        .drop-target td { background: #eaf6ff !important; }
+
+        /* Team-Dropdown beim Hinzufügen */
+        .inline-select {
+            width: 100%;
+            padding: 6px 10px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            outline: none;
+            background: white;
+            cursor: pointer;
+        }
+
+        .inline-select:focus { border-color: var(--primary-light); }
+
+        /* Vote indicators */
+        .vote {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .vote-yes { background: #d4efdf; color: #27ae60; }
+        .vote-no { background: #fadbd8; color: #e74c3c; }
+        .vote-undecided { background: #f4f4f4; color: #bdc3c7; }
+
+        /* Today highlight */
+        .today-col { background: #eaf6ff !important; border-left: 2px solid var(--primary-light); border-right: 2px solid var(--primary-light); }
+        thead .today-col { background: #dceefb !important; }
+
+        /* Summary row */
+        .summary-row td {
+            background: #f1f5f9 !important;
+            font-weight: 700;
+            padding: 12px 10px;
+            border-top: 2px solid var(--border);
+        }
+        .summary-row td.name-col { background: #f1f5f9 !important; }
+
+        .sum-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: 700;
+            background: var(--primary);
+            color: white;
+        }
+        .sum-badge.low { background: #e74c3c; }
+        .sum-badge.medium { background: #f39c12; }
+        .sum-badge.high { background: #27ae60; }
+
+        /* Edit button */
+        .edit-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 1px 5px;
+            margin-left: 6px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            opacity: 0;
+        }
+
+        .player-row:hover .edit-btn,
+        .game-row:hover .edit-btn { opacity: 1; }
+
+        .edit-btn:hover {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+
+        /* Editing state */
+        .editing td { background: #fffde7 !important; }
+        .editing td.name-col { background: #fffde7 !important; }
+
+        .edit-actions { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
+
+        .edit-role-select {
+            padding: 3px 6px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.72rem;
+            background: white;
+            cursor: pointer;
+        }
+        .edit-role-select:focus { border-color: var(--primary-light); }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-delete:hover { background: #c0392b; }
+
+        .vote-toggle {
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            user-select: none;
+        }
+        .vote-toggle:hover { transform: scale(1.2); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .vote-toggle:active { transform: scale(0.95); }
+
+        /* Input row */
+        .input-row td { background: #f0f7ff !important; border-top: 2px dashed var(--primary-light); }
+        .input-row td.name-col { background: #f0f7ff !important; }
+
+        .inline-input {
+            width: 100%;
+            padding: 7px 10px;
+            border: 2px solid var(--primary-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            outline: none;
+            background: white;
+        }
+        .inline-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(41,128,185,0.15); }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .btn-sm { padding: 3px 10px; font-size: 0.75rem; }
+        .btn-cancel { background: #ecf0f1; color: var(--text); border: 1px solid var(--border); }
+        .btn-cancel:hover { background: #dfe6e9; }
+
+        .role-tag { font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+
+        /* Comments */
+        .form-group { display: flex; flex-direction: column; gap: 3px; }
+        .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .form-group input[type="text"] {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .form-group input[type="text"]:focus { border-color: var(--primary-light); }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+
+            .container { max-width: 100%; padding: 0; }
+
+            /* Header kompakter */
+            .header {
+                padding: 14px 16px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .header h1 { font-size: 1.1rem; }
+            .header p { font-size: 0.75rem; }
+
+            /* Navigation: Buttons nebeneinander, volle Breite */
+            .date-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 6px;
+            }
+            .date-nav button {
+                padding: 8px 12px;
+                font-size: 0.75rem;
+                min-width: 44px;
+                min-height: 44px; /* Touch-Target */
+            }
+            .current-range { font-size: 0.8rem; width: 100%; text-align: center; order: -1; }
+
+            /* Legende kompakter */
+            .legend { padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
+            .legend-title { display: none; }
+            .legend-item { font-size: 0.72rem; }
+
+            /* Tabelle: horizontales Scrollen mit Momentum */
+            .poll-card { border-radius: 8px; }
+            .poll-table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
+            }
+
+            /* Sticky Namensspalte schmaler */
+            .poll-table th.name-col, .poll-table td.name-col {
+                min-width: 120px;
+                max-width: 140px;
+                font-size: 0.75rem;
+                padding: 6px 8px;
+                /* Schatten als visuelle Trennung */
+                box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+            }
+
+            /* Datums-Spalten kompakter */
+            .poll-table thead th {
+                padding: 8px 4px;
+                font-size: 0.68rem;
+                min-width: 44px;
+            }
+
+            .poll-table th.month-header {
+                font-size: 0.7rem;
+                padding: 6px 4px 1px;
+            }
+
+            .poll-table td {
+                padding: 5px 4px;
+            }
+
+            /* Vote-Kreise: größer für Touch */
+            .vote {
+                width: 32px;
+                height: 32px;
+                font-size: 0.85rem;
+                min-width: 32px;
+            }
+
+            /* Team-Header kompakter */
+            .team-header td { padding: 8px 6px; font-size: 0.76rem; }
+
+            /* Spieler-Rows */
+            .player-row td.name-col { padding-left: 8px; font-size: 0.75rem; }
+
+            /* Game rows */
+            .game-row td.name-col { padding-left: 10px; font-size: 0.7rem; }
+
+            /* Drag-Handle auf Mobile immer sichtbar */
+            .drag-handle { opacity: 0.6; font-size: 0.85rem; margin-right: 3px; }
+
+            /* Edit-Button immer sichtbar auf Mobile (kein Hover) */
+            .edit-btn { opacity: 0.6 !important; font-size: 0.7rem; }
+
+            /* Summary */
+            .summary-card { padding: 12px; }
+            .summary-card h3 { font-size: 0.9rem; }
+            .summary-badge { font-size: 0.7rem; padding: 3px 8px; }
+
+            /* Neuer Spieler Formular */
+            .input-row td.name-col { min-width: 120px; }
+            .form-group input[type="text"] { padding: 6px 8px; font-size: 0.8rem; }
+            .inline-select { font-size: 0.75rem; padding: 6px 8px; }
+        }
+
+        /* Sehr kleine Geräte (< 480px) */
+        @media (max-width: 480px) {
+            body { padding: 4px; }
+
+            .header h1 { font-size: 1rem; }
+
+            .poll-table th.name-col, .poll-table td.name-col {
+                min-width: 100px;
+                max-width: 110px;
+                font-size: 0.7rem;
+            }
+
+            .vote {
+                width: 28px;
+                height: 28px;
+                font-size: 0.78rem;
+                min-width: 28px;
+            }
+
+            .poll-table thead th { font-size: 0.62rem; min-width: 38px; }
+
+            .date-nav button { padding: 6px 10px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>🏓 TTC Walsdorf – Trainingsplan</h1>
+                <p id="subtitle">Trainingstage: Dienstag, Donnerstag, Freitag</p>
+            </div>
+            <div class="date-nav">
+                <button onclick="navigate(-1)">◀ Zurück</button>
+                <span class="current-range" id="range-label"></span>
+                <button onclick="navigate(1)">Weiter ▶</button>
+                <button onclick="navigate(0)" style="margin-left: 8px;">Heute</button>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <span class="legend-title">Legende:</span>
+            <div class="legend-item"><span class="vote vote-yes" style="width:22px;height:22px;font-size:0.75rem;">✔</span> Dabei</div>
+            <div class="legend-item"><span class="vote vote-no" style="width:22px;height:22px;font-size:0.75rem;">✘</span> Nicht dabei</div>
+            <div class="legend-item"><span class="vote vote-undecided" style="width:22px;height:22px;font-size:0.75rem;">–</span> Offen</div>
+            <div class="legend-item">🏠 Heimspiel</div>
+            <div class="legend-item">🚗 Auswärts</div>
+            <div class="legend-item">🔑 Schlüssel</div>
+            <div class="legend-item">MF = Mannschaftsführer</div>
+        </div>
+
+        <!-- Poll Table (dynamically generated) -->
+        <div class="poll-card">
+            <div class="poll-table-wrapper">
+                <table class="poll-table" id="poll-table"></table>
+            </div>
+        </div>
+
+        <noscript>
+            <div style="padding:20px;text-align:center;background:#fee;border-radius:8px;margin:20px 0;">
+                <p style="font-size:1.1rem;font-weight:bold;">⚠️ JavaScript ist deaktiviert oder nicht verfügbar.</p>
+                <p>Diese Seite benötigt einen Browser mit JavaScript-Unterstützung.</p>
+                <p><strong>Tipp:</strong> Öffne die Datei in <em>Chrome</em> oder <em>Safari</em>, nicht aus der Dateien-App.</p>
+            </div>
+        </noscript>
+
+        <div id="js-error-msg" style="display:none; padding:20px; text-align:center; background:#fff3cd; border-radius:8px; margin:20px 0;">
+            <p style="font-size:1rem; font-weight:bold;">⚠️ Seite konnte nicht geladen werden.</p>
+            <p>Bitte öffne diese Datei direkt in <strong>Chrome</strong> oder <strong>Safari</strong>:</p>
+            <p style="font-size:0.85rem;">Auf die Datei <em>lange drücken</em> → <em>"Öffnen mit"</em> → Chrome/Safari wählen</p>
+        </div>
+
+        <!-- Comments -->
+
+        <div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.78rem;">
+            TTC Walsdorf · Trainingsplanung · Automatisch generiert
+        </div>
+    </div>
+
+<script>
+// === CONFIG ===
+const TRAINING_DAYS = [2, 4, 5]; // Di=2, Do=4, Fr=5
+const WEEKS_TO_SHOW = 4;
+const DAY_NAMES = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+// Default teams and players data
+const defaultTeams = [
+    {
+        name: '1. Mannschaft',
+        players: [
+            { name: 'Mike S', role: '' },
+            { name: 'Jens K', role: '' },
+            { name: 'Andreas T', role: '' },
+            { name: 'Matthias', role: '🔑 MF' },
+            { name: 'Kai B', role: '' },
+        ]
+    },
+    {
+        name: '2. Mannschaft',
+        players: [
+            { name: 'Andreas M', role: '🔑 MF' },
+            { name: 'Uwe K', role: '' },
+            { name: 'Ludwig K', role: '' },
+            { name: 'Andreas S', role: '' },
+            { name: 'Birgit B', role: '' },
+        ]
+    },
+    {
+        name: '3. Mannschaft',
+        players: [
+            { name: 'Achim M', role: '' },
+            { name: 'Joachim M', role: '' },
+            { name: 'Peter H', role: '🔑 MF' },
+            { name: 'Christian R', role: '' },
+        ]
+    },
+    {
+        name: '4. Mannschaft',
+        players: [
+            { name: 'Hans-Werner R', role: 'MF' },
+            { name: 'Volker B', role: '🔑' },
+            { name: 'Walter W', role: '' },
+            { name: 'Thomas N', role: '🔑' },
+            { name: 'Thorsten H', role: '' },
+            { name: 'Justin M', role: '' },
+            { name: 'Thomas P', role: '' },
+        ]
+    },
+    {
+        name: '5. Senioren 50',
+        players: []
+    },
+];
+
+const defaultSpecials = [
+    { name: 'Ina B.' },
+    { name: 'Stefan R' },
+    { name: 'STC Hutturm Crew (Heim)' },
+    { name: 'Systemtraining' },
+    { name: 'TT Jedermann' },
+    { name: 'Vorstandssitzung' },
+    { name: 'VR Cup' },
+];
+
+// === STATE ===
+let teams = JSON.parse(JSON.stringify(defaultTeams));
+let specials = JSON.parse(JSON.stringify(defaultSpecials));
+let startDate = getStartOfCurrentWeek();
+let votes = {};
+let activeEditRow = null;
+let dragSource = null; // for drag & drop
+
+function getStartOfCurrentWeek() {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(today);
+    monday.setDate(diff);
+    monday.setHours(0,0,0,0);
+    return monday;
+}
+
+function getTrainingDates(fromMonday, weeks) {
+    const dates = [];
+    for (let w = 0; w < weeks; w++) {
+        for (const dayOfWeek of TRAINING_DAYS) {
+            const d = new Date(fromMonday);
+            d.setDate(fromMonday.getDate() + w * 7 + (dayOfWeek - 1));
+            dates.push(d);
+        }
+    }
+    return dates;
+}
+
+function dateKey(d) { return d.toISOString().split('T')[0]; }
+
+function isToday(d) {
+    const today = new Date();
+    return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+}
+
+function formatDateHeader(d) { return `${DAY_NAMES[d.getDay()]} ${d.getDate()}.`; }
+
+// === PERSISTENCE (Server-API) ===
+const API_URL = 'api.php';
+
+async function loadFromServer() {
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Server nicht erreichbar');
+        const data = await res.json();
+        votes = data.votes || {};
+        if (data.teams && data.teams.length > 0) teams = data.teams;
+        if (data.specials && data.specials.length > 0) specials = data.specials;
+    } catch(e) {
+        console.warn('Server nicht erreichbar, nutze lokalen Cache/Defaults:', e.message || e);
+        try {
+            const savedVotes = localStorage.getItem('ttc-votes');
+            if (savedVotes) votes = JSON.parse(savedVotes);
+            const savedTeams = localStorage.getItem('ttc-teams');
+            if (savedTeams) { const t = JSON.parse(savedTeams); if (t.length > 0) teams = t; }
+            const savedSpecials = localStorage.getItem('ttc-specials');
+            if (savedSpecials) { const s = JSON.parse(savedSpecials); if (s.length > 0) specials = s; }
+        } catch(e2) {
+            console.warn('localStorage ebenfalls nicht verfügbar:', e2);
+        }
+        // teams/specials behalten ihre Default-Werte falls nichts geladen wurde
+    }
+}
+
+async function saveAll() {
+    try {
+        localStorage.setItem('ttc-votes', JSON.stringify(votes));
+        localStorage.setItem('ttc-teams', JSON.stringify(teams));
+        localStorage.setItem('ttc-specials', JSON.stringify(specials));
+    } catch(e) { console.warn('localStorage nicht verfügbar:', e); }
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ votes, teams, specials })
+        });
+    } catch(e) {
+        console.warn('Speichern auf Server fehlgeschlagen:', e);
+    }
+}
+
+function getVote(playerKey, date) {
+    return votes[`${playerKey}|${dateKey(date)}`] || 'undecided';
+}
+
+// === NAVIGATION ===
+function navigate(direction) {
+    if (direction === 0) startDate = getStartOfCurrentWeek();
+    else {
+        const newStart = new Date(startDate);
+        newStart.setDate(newStart.getDate() + direction * 7 * WEEKS_TO_SHOW);
+        startDate = newStart;
+    }
+    render();
+}
+
+// === RENDERING ===
+function render() {
+    const dates = getTrainingDates(startDate, WEEKS_TO_SHOW);
+    const table = document.getElementById('poll-table');
+
+    const first = dates[0];
+    const last = dates[dates.length - 1];
+    document.getElementById('range-label').textContent =
+        `${first.getDate()}. ${MONTH_NAMES[first.getMonth()]} – ${last.getDate()}. ${MONTH_NAMES[last.getMonth()]} ${last.getFullYear()}`;
+
+    const monthGroups = [];
+    let currentMonth = -1;
+    dates.forEach(d => {
+        if (d.getMonth() !== currentMonth) {
+            currentMonth = d.getMonth();
+            monthGroups.push({ month: currentMonth, year: d.getFullYear(), count: 1 });
+        } else {
+            monthGroups[monthGroups.length - 1].count++;
+        }
+    });
+
+    const numCols = dates.length;
+
+    let html = '<thead>';
+    html += '<tr><th class="name-col"></th>';
+    monthGroups.forEach(g => {
+        html += `<th class="month-header" colspan="${g.count}">${MONTH_NAMES[g.month]} ${g.year}</th>`;
+    });
+    html += '</tr><tr><th class="name-col">Name</th>';
+    dates.forEach(d => {
+        const cls = isToday(d) ? ' class="today-col"' : '';
+        html += `<th${cls}>${formatDateHeader(d)}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    // Teams
+    teams.forEach((team, teamIdx) => {
+        const teamKey = team.name;
+        html += `<tr class="team-header" data-team-idx="${teamIdx}"><td class="name-col" colspan="${numCols + 1}">${team.name}</td></tr>`;
+        html += renderGameRow(`${teamKey}|Heim`, '🏠', 'Heimspiel', 'home-row', dates);
+        html += renderGameRow(`${teamKey}|Ausw`, '🚗', 'Auswärts', 'away-row', dates);
+        team.players.forEach((p, pIdx) => {
+            html += renderPlayerRow(p.name, p.role, 'player-row', dates, teamIdx, pIdx);
+        });
+    });
+
+    // Separator + Specials
+    html += `<tr class="separator-row"><td colspan="${numCols + 1}"></td></tr>`;
+    specials.forEach((s, sIdx) => {
+        html += renderPlayerRow(s.name, '', 'player-row', dates, -1, sIdx);
+    });
+
+    // Input row
+    html += renderInputRow(dates);
+    // Summary
+    html += renderSummaryRow(dates);
+    html += '</tbody>';
+    table.innerHTML = html;
+
+    attachEditButtons();
+    attachDragDrop();
+}
+
+function renderGameRow(key, icon, label, cssClass, dates) {
+    let html = `<tr class="game-row ${cssClass}" data-key="${key}">`;
+    html += `<td class="name-col"><span style="margin-right:4px;">${icon}</span>${label}</td>`;
+    dates.forEach(d => {
+        const v = getVote(key, d);
+        const cls = isToday(d) ? ' today-col' : '';
+        html += `<td class="${cls}"><span class="vote vote-${v}" data-state="${v}" data-key="${key}" data-date="${dateKey(d)}">${voteSymbol(v)}</span></td>`;
+    });
+    html += '</tr>';
+    return html;
+}
+
+function renderPlayerRow(name, role, cssClass, dates, teamIdx, playerIdx) {
+    const roleHtml = role ? ` <span class="role-tag">${role}</span>` : '';
+    const draggable = true;
+    let html = `<tr class="${cssClass}" data-key="${name}" data-team-idx="${teamIdx}" data-player-idx="${playerIdx}" draggable="${draggable}">`;
+    html += `<td class="name-col" style="padding-left:20px;"><span class="drag-handle" title="Ziehen zum Verschieben">⠿</span> ${name}${roleHtml}</td>`;
+    dates.forEach(d => {
+        const v = getVote(name, d);
+        const cls = isToday(d) ? ' today-col' : '';
+        html += `<td class="${cls}"><span class="vote vote-${v}" data-state="${v}" data-key="${name}" data-date="${dateKey(d)}">${voteSymbol(v)}</span></td>`;
+    });
+    html += '</tr>';
+    return html;
+}
+
+function renderInputRow(dates) {
+    // Team-Dropdown bauen
+    let teamOptions = '<option value="-1">– Ohne Mannschaft –</option>';
+    teams.forEach((t, i) => { teamOptions += `<option value="${i}">${t.name}</option>`; });
+
+    let html = `<tr class="input-row" id="input-row">`;
+    html += `<td class="name-col">
+        <input type="text" id="inline-name" placeholder="Neuer Name..." class="inline-input" style="margin-bottom:4px;">
+        <select id="inline-team" class="inline-select">${teamOptions}</select>
+    </td>`;
+    dates.forEach(d => {
+        const cls = isToday(d) ? ' today-col' : '';
+        html += `<td class="${cls}"><span class="vote vote-toggle vote-undecided" data-state="undecided" data-date="${dateKey(d)}" onclick="toggleVote(this)">–</span></td>`;
+    });
+    html += '</tr>';
+    html += `<tr><td colspan="${dates.length + 1}" style="padding:8px 10px; border:none;">
+        <button class="btn btn-primary" onclick="saveNewEntry()">💾 Neuen Spieler speichern</button>
+        <span id="save-feedback" style="margin-left:10px; font-size:0.82rem; color:var(--accent); display:none;">✔ Gespeichert!</span>
+    </td></tr>`;
+    return html;
+}
+
+function renderSummaryRow(dates) {
+    let html = `<tr class="summary-row"><td class="name-col">✔ Zusagen</td>`;
+    dates.forEach(d => {
+        const count = countYesForDate(d);
+        const cls = isToday(d) ? ' today-col' : '';
+        const badgeCls = count >= 8 ? 'high' : count >= 4 ? 'medium' : 'low';
+        html += `<td class="${cls}"><span class="sum-badge ${badgeCls}">${count}</span></td>`;
+    });
+    html += '</tr>';
+    return html;
+}
+
+function countYesForDate(d) {
+    const dk = dateKey(d);
+    let count = 0;
+    for (const key in votes) {
+        if (key.endsWith(`|${dk}`) && votes[key] === 'yes') count++;
+    }
+    return count;
+}
+
+function voteSymbol(state) {
+    if (state === 'yes') return '✔';
+    if (state === 'no') return '✘';
+    return '–';
+}
+
+// === DRAG & DROP ===
+function attachDragDrop() {
+    const rows = document.querySelectorAll('tr[draggable="true"]');
+    rows.forEach(row => {
+        row.addEventListener('dragstart', onDragStart);
+        row.addEventListener('dragend', onDragEnd);
+    });
+
+    // Drop targets: team headers and player rows
+    const dropTargets = document.querySelectorAll('.team-header, .player-row, .separator-row');
+    dropTargets.forEach(el => {
+        el.addEventListener('dragover', onDragOver);
+        el.addEventListener('dragleave', onDragLeave);
+        el.addEventListener('drop', onDrop);
+    });
+}
+
+function onDragStart(e) {
+    dragSource = {
+        name: this.dataset.key,
+        teamIdx: parseInt(this.dataset.teamIdx),
+        playerIdx: parseInt(this.dataset.playerIdx)
+    };
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.key);
+}
+
+function onDragEnd(e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+    dragSource = null;
+}
+
+function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    this.classList.add('drop-target');
+}
+
+function onDragLeave(e) {
+    this.classList.remove('drop-target');
+}
+
+function onDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drop-target');
+    if (!dragSource) return;
+
+    const targetTeamIdx = parseInt(this.dataset.teamIdx);
+    const targetPlayerIdx = this.dataset.playerIdx !== undefined ? parseInt(this.dataset.playerIdx) : -1;
+
+    // Entferne Spieler aus alter Position
+    let movedPlayer = null;
+    if (dragSource.teamIdx >= 0) {
+        movedPlayer = teams[dragSource.teamIdx].players.splice(dragSource.playerIdx, 1)[0];
+    } else {
+        movedPlayer = specials.splice(dragSource.playerIdx, 1)[0];
+        movedPlayer = { name: movedPlayer.name, role: '' };
+    }
+    if (!movedPlayer) return;
+
+    // Separator-Row = zu "ohne Mannschaft" verschieben
+    if (this.classList.contains('separator-row') || targetTeamIdx === -1) {
+        // In specials einfügen
+        if (targetPlayerIdx >= 0 && targetTeamIdx === -1) {
+            specials.splice(targetPlayerIdx, 0, { name: movedPlayer.name });
+        } else {
+            specials.push({ name: movedPlayer.name });
+        }
+    } else if (targetTeamIdx >= 0) {
+        // In Team einfügen
+        if (this.classList.contains('team-header')) {
+            // Am Anfang des Teams
+            teams[targetTeamIdx].players.unshift(movedPlayer);
+        } else if (targetPlayerIdx >= 0) {
+            // Nach dem Ziel-Spieler
+            teams[targetTeamIdx].players.splice(targetPlayerIdx + 1, 0, movedPlayer);
+        } else {
+            teams[targetTeamIdx].players.push(movedPlayer);
+        }
+    }
+
+    saveAll();
+    render();
+}
+
+// === EDIT INTERACTIVITY ===
+function attachEditButtons() {
+    const rows = document.querySelectorAll('.player-row, .game-row');
+    rows.forEach(row => {
+        const nameCell = row.querySelector('.name-col');
+        if (!nameCell) return;
+        const btn = document.createElement('button');
+        btn.className = 'edit-btn';
+        btn.textContent = '✎';
+        btn.title = 'Bearbeiten';
+        btn.onclick = (e) => { e.stopPropagation(); startEdit(row); };
+        nameCell.appendChild(btn);
+    });
+}
+
+function startEdit(row) {
+    if (activeEditRow && activeEditRow !== row) cancelEdit(activeEditRow);
+    activeEditRow = row;
+    row.classList.add('editing');
+    row.draggable = false;
+
+    const voteCells = row.querySelectorAll('.vote');
+    voteCells.forEach(v => {
+        v.classList.add('vote-toggle');
+        v.onclick = function() { toggleVote(this); };
+    });
+
+    const nameCell = row.querySelector('.name-col');
+    const editBtn = nameCell.querySelector('.edit-btn');
+    if (editBtn) editBtn.style.display = 'none';
+
+    const isPlayerRow = row.classList.contains('player-row');
+    const teamIdx = parseInt(row.dataset.teamIdx);
+    const playerIdx = parseInt(row.dataset.playerIdx);
+
+    // Role selector for player rows
+    let roleHtml = '';
+    if (isPlayerRow && teamIdx >= 0) {
+        const currentRole = teams[teamIdx].players[playerIdx]?.role || '';
+        roleHtml = `
+            <select class="edit-role-select" id="edit-role-select">
+                <option value="" ${currentRole === '' ? 'selected' : ''}>Keine Rolle</option>
+                <option value="🔑" ${currentRole === '🔑' ? 'selected' : ''}>🔑 Schlüssel</option>
+                <option value="MF" ${currentRole === 'MF' ? 'selected' : ''}>MF</option>
+                <option value="🔑 MF" ${currentRole === '🔑 MF' ? 'selected' : ''}>🔑 MF (beides)</option>
+            </select>
+        `;
+    } else if (isPlayerRow && teamIdx === -1) {
+        // Specials don't have roles but can be deleted
+        roleHtml = '';
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'edit-actions';
+    actions.innerHTML = `
+        <button class="btn btn-primary btn-sm" onclick="saveEdit(this.closest('tr'))">💾 OK</button>
+        <button class="btn btn-cancel btn-sm" onclick="cancelEdit(this.closest('tr'))">Abbrechen</button>
+        ${roleHtml}
+        ${isPlayerRow ? '<button class="btn-delete" onclick="deletePlayer(this.closest(\'tr\'))">🗑️ Löschen</button>' : ''}
+    `;
+    nameCell.appendChild(actions);
+}
+
+function cancelEdit(row) {
+    row.classList.remove('editing');
+    row.querySelectorAll('.vote').forEach(v => { v.classList.remove('vote-toggle'); v.onclick = null; });
+    const actions = row.querySelector('.edit-actions');
+    if (actions) actions.remove();
+    const editBtn = row.querySelector('.edit-btn');
+    if (editBtn) editBtn.style.display = '';
+    activeEditRow = null;
+    render();
+}
+
+function saveEdit(row) {
+    const changedVotes = {};
+    row.querySelectorAll('.vote').forEach(v => {
+        const key = v.dataset.key;
+        const date = v.dataset.date;
+        const state = v.dataset.state;
+        if (key && date) {
+            votes[`${key}|${date}`] = state;
+            changedVotes[`${key}|${date}`] = state;
+        }
+    });
+
+    // Save role change if applicable
+    const roleSelect = row.querySelector('#edit-role-select');
+    if (roleSelect) {
+        const teamIdx = parseInt(row.dataset.teamIdx);
+        const playerIdx = parseInt(row.dataset.playerIdx);
+        if (teamIdx >= 0 && teams[teamIdx] && teams[teamIdx].players[playerIdx]) {
+            teams[teamIdx].players[playerIdx].role = roleSelect.value;
+        }
+    }
+
+    activeEditRow = null;
+    saveAll();
+    render();
+}
+
+function deletePlayer(row) {
+    const teamIdx = parseInt(row.dataset.teamIdx);
+    const playerIdx = parseInt(row.dataset.playerIdx);
+    const name = row.dataset.key;
+
+    if (!confirm(`"${name}" wirklich löschen?`)) return;
+
+    if (teamIdx >= 0 && teams[teamIdx]) {
+        teams[teamIdx].players.splice(playerIdx, 1);
+    } else if (teamIdx === -1) {
+        specials.splice(playerIdx, 1);
+    }
+
+    // Votes des Spielers optional entfernen
+    Object.keys(votes).forEach(k => {
+        if (k.startsWith(name + '|')) delete votes[k];
+    });
+
+    activeEditRow = null;
+    saveAll();
+    render();
+}
+
+function toggleVote(el) {
+    const state = el.dataset.state;
+    let newState;
+    if (state === 'undecided') newState = 'yes';
+    else if (state === 'yes') newState = 'no';
+    else newState = 'undecided';
+    el.dataset.state = newState;
+    el.className = el.className.replace(/vote-(undecided|yes|no)/g, `vote-${newState}`);
+    el.textContent = voteSymbol(newState);
+}
+
+async function saveNewEntry() {
+    const nameInput = document.getElementById('inline-name');
+    const teamSelect = document.getElementById('inline-team');
+    const name = nameInput.value.trim();
+    if (!name) { alert('Bitte gib einen Namen ein!'); return; }
+
+    const teamIdx = parseInt(teamSelect.value);
+
+    // Votes speichern
+    const inputToggles = document.querySelectorAll('#input-row .vote-toggle');
+    inputToggles.forEach(v => {
+        const date = v.dataset.date;
+        const state = v.dataset.state;
+        votes[`${name}|${date}`] = state;
+    });
+
+    // Spieler der richtigen Mannschaft zuordnen
+    if (teamIdx >= 0) {
+        teams[teamIdx].players.push({ name, role: '' });
+    } else {
+        specials.push({ name });
+    }
+
+    await saveAll();
+
+    const feedback = document.getElementById('save-feedback');
+    feedback.style.display = 'inline';
+    setTimeout(() => { feedback.style.display = 'none'; }, 2500);
+    render();
+}
+
+// === INIT ===
+async function init() {
+    try {
+        await loadFromServer();
+    } catch(e) {
+        console.warn('Init-Fehler:', e);
+    }
+    try {
+        render();
+    } catch(e) {
+        console.error('Render-Fehler:', e);
+        const msg = document.getElementById('js-error-msg');
+        if (msg) msg.style.display = 'block';
+    }
+}
+
+// Starte sofort UND nochmal bei DOMContentLoaded (für langsam ladende Dateien)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+</script>
+</body>
+</html>
