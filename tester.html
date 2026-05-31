@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>EquiPace · Tester werden</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tester.css">
+    <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script src="js/tester.js"></script>
+</head>
+<body x-data="tester()">
+<button class="lang-btn" @click="lang = lang==='de' ? 'en' : 'de'"
+        x-text="lang==='de' ? 'EN' : 'DE'"></button>
+
+<!-- ── Header ── -->
+<div class="app-header">
+    <span class="app-title">🐴 EquiPace</span>
+</div>
+
+<div class="main">
+
+    <!-- ── Hero ── -->
+    <div class="hero">
+        <div class="hero-icon">🧪</div>
+        <h1 class="hero-title" x-text="t('heroTitle')"></h1>
+        <p class="hero-sub" x-text="t('heroSub')"></p>
+    </div>
+
+    <!-- ── Steps ── -->
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title" x-text="t('step1Title')"></div>
+                <div class="step-desc" x-text="t('step1Desc')"></div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title" x-text="t('step2Title')"></div>
+                <div class="step-desc" x-text="t('step2Desc')"></div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title" x-text="t('step3Title')"></div>
+                <div class="step-desc" x-text="t('step3Desc')"></div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title" x-text="t('step4Title')"></div>
+                <div class="step-desc" x-text="t('step4Desc')"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CTA ── -->
+    <div class="cta-wrap">
+        <a class="cta-btn" href="https://play.google.com/apps/testing/com.thhillmer.equipace"
+           target="_blank" x-text="t('ctaBtn')"></a>
+    </div>
+
+    <!-- ── Important Info ── -->
+    <div class="info-box">
+        <div class="info-box-title" x-text="t('infoTitle')"></div>
+        <ul>
+            <li x-text="t('info1')"></li>
+            <li x-text="t('info2')"></li>
+            <li x-text="t('info3')"></li>
+            <li x-text="t('info4')"></li>
+        </ul>
+    </div>
+
+    <!-- ── Feedback ── -->
+    <div class="info-box">
+        <div class="info-box-title" x-text="t('feedbackTitle')"></div>
+        <ul>
+            <li x-text="t('feedback1')"></li>
+            <li x-text="t('feedback2')"></li>
+        </ul>
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="footer">
+        <p x-text="t('footerThanks')"></p>
+        <p style="margin-top:8px">
+            <a href="index.html" x-text="t('footerApp')"></a>
+        </p>
+    </div>
+
+</div>
+</body>
+</html>

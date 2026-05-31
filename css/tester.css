@@ -1,0 +1,173 @@
+:root {
+    --bg: #07100a;
+    --surface: rgba(255,255,255,0.05);
+    --border: rgba(255,255,255,0.09);
+    --border-hi: rgba(255,255,255,0.17);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --green-ring: rgba(34,197,94,0.28);
+    --red: #f87171;
+    --blue: #60a5fa;
+    --yellow: #fbbf24;
+    --text: #f1f5f9;
+    --muted: rgba(241,245,249,0.46);
+    --faint: rgba(241,245,249,0.24);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --r: 14px;
+    --r-sm: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+}
+
+/* ── Header ── */
+.app-header {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(7,16,10,0.95);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    border-bottom: 1px solid var(--border);
+    padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+    text-align: center;
+}
+.app-title {
+    font-size: 14px; font-weight: 800; letter-spacing: .5px; color: var(--green);
+}
+
+/* ── Main ── */
+.main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 16px calc(max(40px, env(safe-area-inset-bottom)) + 24px);
+}
+
+/* ── Hero ── */
+.hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.hero-icon {
+    font-size: 56px;
+    margin-bottom: 12px;
+}
+.hero-title {
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: 900;
+    letter-spacing: -.5px;
+    margin-bottom: 8px;
+}
+.hero-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* ── Steps ── */
+.steps {
+    display: flex; flex-direction: column; gap: 20px;
+    margin-bottom: 40px;
+}
+.step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    display: flex; gap: 16px; align-items: flex-start;
+}
+.step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--green-dim);
+    border: 1px solid var(--green-ring);
+    border-radius: 50%;
+    font-size: 14px; font-weight: 800; color: var(--green);
+}
+.step-content { flex: 1; }
+.step-title {
+    font-size: 14px; font-weight: 700; margin-bottom: 4px;
+}
+.step-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+}
+
+/* ── CTA Button ── */
+.cta-wrap {
+    text-align: center;
+    margin: 36px 0;
+}
+.cta-btn {
+    display: inline-block;
+    background: var(--green);
+    color: #000;
+    font-size: 15px; font-weight: 800;
+    padding: 14px 32px;
+    border-radius: 99px;
+    text-decoration: none;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 20px rgba(34,197,94,0.3);
+}
+.cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(34,197,94,0.45);
+}
+.cta-btn:active {
+    transform: translateY(0);
+}
+
+/* ── Info box ── */
+.info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+.info-box-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--yellow); margin-bottom: 10px;
+}
+.info-box ul {
+    list-style: none; padding: 0;
+}
+.info-box li {
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+    padding: 4px 0 4px 20px;
+    position: relative;
+}
+.info-box li::before {
+    content: '→';
+    position: absolute; left: 0; color: var(--green);
+}
+
+/* ── Footer ── */
+.footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+.footer p {
+    font-size: 12px; color: var(--faint); line-height: 1.6;
+}
+.footer a {
+    color: var(--green); text-decoration: none;
+}
+.footer a:hover { text-decoration: underline; }
+
+/* ── Language button ── */
+.lang-btn {
+    position: fixed; top: 12px; right: 14px; z-index: 300;
+    background: var(--surface); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 99px;
+    font-size: 11px; font-weight: 700; letter-spacing: .5px;
+    padding: 5px 12px; cursor: pointer;
+    transition: color .15s, border-color .15s;
+}
+.lang-btn:hover { color: var(--green); border-color: var(--green-ring); }
