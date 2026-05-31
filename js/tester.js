@@ -1,6 +1,6 @@
 function tester() {
     return {
-        lang: ('de').startsWith('de') ? 'en' : 'de',
+        lang: ('de').startsWith('de') ? 'de' : 'en',
 
         strings: {
             de: {
