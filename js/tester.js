@@ -11,7 +11,7 @@ function tester() {
                 step2Title: '„Tester werden" antippen',
                 step2Desc: 'Auf der Google Play Seite siehst du den Button „Tester werden". Tippe darauf, um dich als Tester anzumelden.',
                 step3Title: 'App installieren',
-                step3Desc: 'Nach der Anmeldung kannst du EquiPace kostenlos aus dem Play Store installieren. Der Preis-Button verschwindet.',
+                step3Desc: 'Nach der Anmeldung kannst du EquiPace kostenlos aus dem Play Store installieren. Der Buy-Button wird zwar angezeigt,aber wenn du drauf klicktst sollte eine Info kommen das dir nichts in Rechnung gestellt wird.',
                 step4Title: 'Testen & Feedback geben',
                 step4Desc: 'Nutze die App und melde uns Fehler oder Verbesserungsvorschläge. Dein Feedback ist Gold wert!',
                 ctaBtn: '🚀 Jetzt Tester werden',
