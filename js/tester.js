@@ -9,7 +9,7 @@ function tester() {
                 step1Title: 'Opt-in-Link öffnen',
                 step1Desc: 'Klicke auf den grünen Button unten. Du wirst zur Google Play Testseite weitergeleitet.',
                 step2Title: '„Tester werden" antippen',
-                step2Desc: 'Auf der Google Play Seite siehst du den Button „Tester werden". Tippe darauf, um dich als Tester anzumelden.',
+                step2Desc: 'Auf der Google Play Seite siehst du den Button „Tester werden". Tippe darauf, um dich als Tester anzumelden. Danach auf "download it on Google PLay"',
                 step3Title: 'App installieren',
                 step3Desc: 'Nach der Anmeldung kannst du EquiPace kostenlos aus dem Play Store installieren. Der Buy-Button wird zwar angezeigt,aber wenn du drauf klicktst sollte eine Info kommen das dir nichts in Rechnung gestellt wird.',
                 step4Title: 'Testen & Feedback geben',
